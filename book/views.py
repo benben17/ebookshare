@@ -45,12 +45,14 @@ def wechat():
                 if len(str_text) == 2 and checkemail(str_text[1]):
                     print(str_text[1])
                     user.email = str_text[1]
+                    db.session.add(user)
                     db.session.commit()
-                    wx_reply_xml(from_user, to_user, bind_email_msg.format(str_text[1]))
+                    return wx_reply_xml(from_user, to_user, bind_email_msg.format(str_text[1]))
             if checkemail(content):
                 user.email = content
+                db.session.add(user)
                 db.session.commit()
-                wx_reply_xml(from_user, to_user, bind_email_msg.format(content))
+                return wx_reply_xml(from_user, to_user, bind_email_msg.format(content))
         else:
             return wx_reply_xml(from_user, to_user, no_bind_email_msg)
 
