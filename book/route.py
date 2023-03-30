@@ -1,6 +1,6 @@
 # encoding:utf-8
 import hashlib
-from datetime import time
+import time
 from flask import request, make_response
 import xml.etree.ElementTree as ET
 
