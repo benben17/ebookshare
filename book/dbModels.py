@@ -21,7 +21,6 @@ class User(db.Model):
     download_times = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
-
     def is_authenticated(self):
         return False
 
