@@ -4,6 +4,7 @@ __pycache__/
 .idea
 *.DS_Store
 s3upload.py
+**/uploadS3.py
 # Vim temp/swap files
 *~
 *.orig
