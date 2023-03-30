@@ -1,9 +1,9 @@
 # encoding:utf-8
 import hashlib
 import time
+
 from flask import request, make_response
 import xml.etree.ElementTree as ET
-
 import config
 from book import app, WeChat
 
@@ -37,12 +37,12 @@ def wechat():
         from_user = root.find('FromUserName').text
         to_user = root.find('ToUserName').text
         content = root.find('Content').text
-
+        create_time = str(int(time.time()))
         reply_xml = f"""
         <xml>
             <ToUserName><![CDATA[{from_user}]]></ToUserName>
             <FromUserName><![CDATA[{to_user}]]></FromUserName>
-            <CreateTime>{str(int(time.time()))}</CreateTime>
+            <CreateTime>{create_time}</CreateTime>
             <MsgType><![CDATA[text]]></MsgType>
             <Content><![CDATA[{content}]]></Content>
         </xml>

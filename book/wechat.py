@@ -1,5 +1,7 @@
+import datetime
 import json
 import logging
+import time
 from pathlib import Path
 import requests
 import yaml
@@ -26,5 +28,4 @@ class WeChat:
             logging.error("获取token 失败！："+e)
 
 if __name__ == '__main__':
-    wechat = WeChat()
-    wechat.get_token()
+    print(str(int(time.time())))
