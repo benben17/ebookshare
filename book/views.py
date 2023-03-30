@@ -33,7 +33,7 @@ def wechat():
         logging.error(f'from_user:{from_user} to_user:{to_user}')
         # 查询用户
         from book.dbModels import User
-        user = User.query.filter_by(User.wx_openid == to_user).first()
+        user = User.query.filter_by(wx_openid=from_user).first()
         if user is None:
             user = User(wx_openid=to_user)
             db.session.add(user)
