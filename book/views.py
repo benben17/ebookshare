@@ -35,7 +35,7 @@ def wechat():
         from book.dbModels import User
         user = User.query.filter_by(wx_openid=from_user).first()
         if user is None:
-            user = User(wx_openid=to_user)
+            user = User(wx_openid=from_user)
             db.session.add(user)
             db.session.commit()
         if not user.email:
