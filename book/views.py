@@ -1,12 +1,10 @@
 # encoding:utf-8
 import hashlib
-import time
 import xml.etree.ElementTree as ET
-from werkzeug.utils import secure_filename
-import os
 import config
-from book import app,request
+from book import wx_reply_xml, request, no_bind_email_msg, checkemail, bind_email_msg
 from book.dbModels import *
+
 
 @app.route('/api/wechat', methods=['GET', 'POST'])
 def wechat():
@@ -26,37 +24,43 @@ def wechat():
             return ''
     else:
         # 处理消息请求
-
         xml_data = request.data
         root = ET.fromstring(xml_data)
-        if root.find('MsgType').text == 'text':
-            content = root.find('Content').text
-        else:
-            content = "欢迎关注我的公众号"
 
+        content = root.find('Content').text
         from_user = root.find('FromUserName').text
         to_user = root.find('ToUserName').text
-        create_time = str(int(time.time()))
+        # 查询用户
+        from book.dbModels import User
+        user = User.query.filter_by(User.wx_openid == to_user).first()
+        if user is None:
+            user = User(wx_openid=to_user)
+            db.session.add(user)
+            db.session.commit()
+        if not user.email:
+            return wx_reply_xml(from_user, to_user, no_bind_email_msg)
+
+        # 绑定邮箱
+        if content.lower().startswith("email"):
+            str_text = content.split("#")
+            if len(str_text) == 2 and checkemail(str_text[1]):
+                user.email = str_text[1]
+                db.session.commit()
+                wx_reply_xml(from_user, to_user, bind_email_msg.format(str_text[1]))
+        if checkemail(content):
+            user.email = content
+            db.session.commit()
+            wx_reply_xml(from_user, to_user, bind_email_msg.format(content))
+
         from book.dbModels import Books
-        books = Books.query.filter(Books.title.like(content)).all()
+        books = Books.query.filter(Books.title.like(f'%{content}%')).all()
         msg_content = f'一共搜索到{len(books)}本书\n'
-        if len(books) >0:
-            for book in books:
-                author =  book.author if book.author is not None else ""
-                msg_content += f'{book.title} 作者:{author}\n'
-        reply_xml = f"""
-        <xml>
-            <ToUserName><![CDATA[{from_user}]]></ToUserName>
-            <FromUserName><![CDATA[{to_user}]]></FromUserName>
-            <CreateTime>{create_time}</CreateTime>
-            <MsgType><![CDATA[text]]></MsgType>
-            <Content><![CDATA[{msg_content}]]></Content>
-        </xml>
-        """
-        return reply_xml
+        for book in books:
+            author = book.author if book.author is not None else ""
+            msg_content += f'《{book.title}》作者:{author} \n'
+        return wx_reply_xml(from_user, to_user, msg_content)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    from book.dbModels import User
-    user = User.query.filter(User.name == 'admin').first()
-    return user.name
+    return "hello"

@@ -11,10 +11,17 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    email = db.Column(db.String(120))
+    email = db.Column(db.String(120), unique=True)
     role = db.Column(db.String(120))
     srole = db.Column(db.Integer, default=0)
     hash_pass = db.Column(db.String(200))
+    kindle_email = db.Column(db.String(120))
+    wx_openid = db.Column(db.String(64))
+    upload_times = db.Column(db.Integer, default=0)
+    download_times = db.Column(db.Integer, default=0)
+    create_time = db.Column(db.DateTime, default=datetime.now())
+
+
     def is_authenticated(self):
         return False
 
@@ -30,6 +37,7 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % (self.name)
 
+
 class Books(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(250), unique=True)
@@ -42,13 +50,24 @@ class Books(db.Model):
     status = db.Column(db.Integer, nullable=True)
     create_time = db.Column(db.DateTime, default=datetime.now())
     isbn = db.Column(db.String(30))
-    bookext = relationship('Bookurl',  backref=backref('books'), uselist=False)
+    bookext = relationship('Bookurl', backref=backref('books'), uselist=False)
 
 
 class Bookurl(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, ForeignKey('books.id'))
-    book_download_url = db.Column(db.String(128))
+    book_download_url = db.Column(db.String(512))
+
+
+class Userlog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    book_name = db.Column(db.String(300))
+    operation_type = db.Column(db.String(24), default='download')
+    receive_email = db.Column(db.String(120))
+    download_time = db.Column(db.DateTime, default=datetime.now())
+    create_time = db.Column(db.DateTime, default=datetime.now())
+
 
 with app.app_context():
     db.create_all()

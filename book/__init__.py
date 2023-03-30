@@ -1,10 +1,8 @@
 # -*-coding: utf-8-*-
 import logging
 from threading import Thread
-
+from flask import request
 from flask import Flask
-from flask import request, make_response, flash, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message, Attachment
 from flask_principal import Principal, identity_loaded, RoleNeed, UserNeed
 from flask_login import LoginManager, current_user
