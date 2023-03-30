@@ -42,7 +42,8 @@ def wechat():
         msg_content = f'一共搜索到{len(books)}本书\n'
         if len(books) >0:
             for book in books:
-                msg_content += f'{book.title} 作者:{book.author}\n'
+                author =  book.author if book.author is not None else ""
+                msg_content += f'{book.title} 作者:{author}\n'
         reply_xml = f"""
         <xml>
             <ToUserName><![CDATA[{from_user}]]></ToUserName>
