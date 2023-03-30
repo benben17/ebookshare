@@ -8,12 +8,6 @@ import config
 from book import *
 from book.models import *
 
-
-@app.route('/')
-def hello_world():  # put application's code here
-    return config.APPID
-
-
 @app.route('/api/wechat', methods=['GET', 'POST'])
 def wechat():
     if request.method == 'GET':

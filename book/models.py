@@ -1,8 +1,12 @@
 # coding: utf-8
+import time
+
 from flask import Flask
 from flask_principal import Principal
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -36,10 +40,7 @@ class User(db.Model):
         return '<User %r>' % (self.name)
 
 
-# dbs = db.Table('dbs',
-#         db.Column('book_id', db.Integer, db.ForeignKey('books.id')),
-#         db.Column('book_url_id', db.Integer, db.ForeignKey('bookurl.id'))
-#     )
+
 class Books(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), unique=True)
@@ -52,16 +53,25 @@ class Books(db.Model):
     status = db.Column(db.Integer, nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now())
     isbn = db.Column(db.String(128))
-    # dbs = db.relationship('BookUrl', secondary=dbs, backref=db.backref('bookdownloadurl', lazy='dynamic'))
+    bookext = db.relationship('Bookurl',  backref=db.backref('books'),uselist=False)
 
 
-class BookUrl(db.Model):
+class Bookurl(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
     book_download_url = db.Column(db.String(128))
 
 
 with app.app_context():
     db.create_all()
+
     user=User.query.filter(User.name == 'admin').first()
-    print(user)
+    if user is None:
+        admin = User()
+        admin.id = int(time.time())
+        admin.name = 'admin'
+        admin.email = 'admin@admin.cn'
+        admin.hash_pass = generate_password_hash('admin')
+        admin.role = 'admin'
+        db.session.add(admin)
+        db.session.commit()

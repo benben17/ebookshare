@@ -1,4 +1,4 @@
-from book.route import *
+from book.views import *
 from book.models import *
 
 
