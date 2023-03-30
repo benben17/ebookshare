@@ -4,8 +4,8 @@ import re
 import time, os
 from pathlib import Path
 
-no_bind_email_msg = '''f你好，你还没有绑定邮箱,请发送email#邮箱地址进行绑定\n
-email#book@book.com\n'''
+no_bind_email_msg = '''你好，你还没有绑定邮箱,请发送[ email#邮箱地址 ] 进行绑定\n
+例如：email#book@book.com\n'''
 bind_email_msg = f'你好，你已经绑定绑定邮箱:{0}'
 
 def checkemail(email):

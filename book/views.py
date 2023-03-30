@@ -39,19 +39,19 @@ def wechat():
             db.session.add(user)
             db.session.commit()
         if not user.email:
-            return wx_reply_xml(from_user, to_user, no_bind_email_msg)
-
-        # 绑定邮箱
-        if content.lower().startswith("email"):
-            str_text = content.split("#")
-            if len(str_text) == 2 and checkemail(str_text[1]):
-                user.email = str_text[1]
+            # 绑定邮箱
+            if content.lower().startswith("email"):
+                str_text = content.split("#")
+                if len(str_text) == 2 and checkemail(str_text[1]):
+                    user.email = str_text[1]
+                    db.session.commit()
+                    wx_reply_xml(from_user, to_user, bind_email_msg.format(str_text[1]))
+            if checkemail(content):
+                user.email = content
                 db.session.commit()
-                wx_reply_xml(from_user, to_user, bind_email_msg.format(str_text[1]))
-        if checkemail(content):
-            user.email = content
-            db.session.commit()
-            wx_reply_xml(from_user, to_user, bind_email_msg.format(content))
+                wx_reply_xml(from_user, to_user, bind_email_msg.format(content))
+        else:
+            return wx_reply_xml(from_user, to_user, no_bind_email_msg)
 
         from book.dbModels import Books
         books = Books.query.filter(Books.title.like(f'%{content}%')).all()
