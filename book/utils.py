@@ -9,8 +9,11 @@ no_bind_email_msg = '''你好，你还没有绑定邮箱,请发送[ email#邮箱
 bind_email_msg = f'你好，你已经绑定绑定邮箱:{0}'
 
 def checkemail(email):
-    reg = "\w+[@][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)+"
-    return re.findall(reg, email)
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if re.findall(pattern, email):
+        return True
+    else:
+        return False
 
 
 def wx_reply_xml(from_user, to_user, msg_content):
