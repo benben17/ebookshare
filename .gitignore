@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 .idea
 *.DS_Store
-
+s3upload.py
 # Vim temp/swap files
 *~
 *.orig
