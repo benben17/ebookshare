@@ -1,5 +1,6 @@
+from book import app
+from book.dbModels import *
 from book.views import *
-from book.models import *
 
 
 

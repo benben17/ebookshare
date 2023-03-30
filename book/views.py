@@ -5,8 +5,8 @@ import xml.etree.ElementTree as ET
 from werkzeug.utils import secure_filename
 import os
 import config
-from book import *
-from book.models import *
+from book import app,request
+from book.dbModels import *
 
 @app.route('/api/wechat', methods=['GET', 'POST'])
 def wechat():
@@ -37,42 +37,25 @@ def wechat():
         from_user = root.find('FromUserName').text
         to_user = root.find('ToUserName').text
         create_time = str(int(time.time()))
+        from book.dbModels import Books
+        books = Books.query.filter(Books.title.like(content)).all()
+        msg_content = f'一共搜索到{len(books)}本书\n'
+        if len(books) >0:
+            for book in books:
+                msg_content += f'{book.title} 作者:{book.author}\n'
         reply_xml = f"""
         <xml>
             <ToUserName><![CDATA[{from_user}]]></ToUserName>
             <FromUserName><![CDATA[{to_user}]]></FromUserName>
             <CreateTime>{create_time}</CreateTime>
             <MsgType><![CDATA[text]]></MsgType>
-            <Content><![CDATA[{content}]]></Content>
+            <Content><![CDATA[{msg_content}]]></Content>
         </xml>
         """
         return reply_xml
 
 @app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
-
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    '''
+def home():
+    from book.dbModels import User
+    user = User.query.filter(User.name == 'admin').first()
+    return user.name

@@ -4,9 +4,10 @@ import uuid
 from pathlib import Path
 import boto3
 from ebooklib import epub
-from book.models import *
+from book.dbModels import *
 from book import *
-
+from ebooklib.utils import parse_html_string
+from book.utils import *
 
 class S3Uploader:
     def __init__(self):
@@ -55,129 +56,89 @@ class S3Uploader:
             logging.exception("Error uploading file to S3:{}".format(e))
             return None
 
-class getBookInfo:
-    def __init__(self, bookFile):
-        self.file = bookFile
-        self.bookType = ['epub', 'mobi', 'txt', 'pdf', 'azw3']
+def bookInfo(filepath):
 
-    def return_res(self, title=None,authors=None,publisher=None):
-        if title is None and authors is None and publisher is None :
-            return { "title": "", "authors": "", "publisher": ""}
-        else:
-            return {"title": title,"authors": authors,"publisher": publisher}
+    import subprocess
+    metadata = {
+        "title": None,
+        "author": "",
+        "language": "",
+        "publisher": "",
+        "filesize" : 0
+    }
+    try:
+        command = '/Applications/calibre.app/Contents/MacOS/ebook-meta'
+        # file_path = '/Users/benben/Documents/电子书/纸牌大厦++卢瑟经济学之21世纪金融危机.pdf'
 
-    def epubInfo(self):
-        # 打开epub文件
-        if not os.path.exists(self.file):
-            return None
-        # 获取作者信息
-        try:
-            # book = epub.read_epub(self.file)
-            book = epub.read_epub(self.file)
+        # Run command using subprocess
+        res = subprocess.run([command, filepath], capture_output=True, text=True)
+        # print(res.stdout.split('\n'))
+        for line in res.stdout.split('\n'):
+            line = line.strip()
+            if "Title" in line:
+                metadata['title'] = line.split(":")[1].strip()
+            elif "Author" in line:
+                metadata['author'] = line.split(":")[1].strip()
+            elif "Languages" in line:
+                file_ext = line.split(":")[1].strip()
+                metadata['language'] = file_ext
+            elif "Publisher" in line:
+                metadata['publisher'] = line.split(":")[1].strip()
 
-            try:
-                creator = book.get_metadata("DC",'creator')[0][0]
-            except Exception as e:
-                logging.error(e)
-            authors = creator if creator else None
+        if metadata['title'] is None:
+            metadata['title'] = get_file_name(filepath)
+        if "/" in metadata['title']:
+            metadata['title'] = metadata['title'].replace("/",'-')
+        metadata['filesize'] = os.path.getsize(filepath)
+        metadata['extension'] = get_file_suffix(filepath)
+        if metadata['extension'].lower() == 'pdf':
+            metadata['title'] = get_file_name(filepath)
 
-            if len(book.get_metadata("DC", "publisher")) > 0:
-                publisher = book.get_metadata("DC", "publisher")[0][0]
-            return self.return_res(book.title, authors, publisher)
-        except Exception as e:
-            logging.error(e)
-            return self.return_res("", "", "")
+        return metadata
+    except Exception as e:
+        print(e)
+        # logging.error(filepath+e)
+        return None
 
-    def txt_info(self):
-        fileType = str(Path(self.file).suffix)
-        title = os.path.basename(self.file).replace(fileType, "")
-        return self.return_res(title)
-
-    def mobi_info(self):
-        from calibre.ebooks import Metadata
-
-        # 打开Mobi电子书文件
-        with open('/Users/benben/Downloads/卢瑟经济学_MRandson.mobi', 'rb') as mobi_file:
-            # 解析Mobi文件的元数据
-            mobi_metadata = Metadata.from_book(mobi_file.read(), 'MOBI')
-
-            # 获取书名信息
-            book_title = mobi_metadata.title
-
-            # 获取作者信息
-            author = mobi_metadata.author
-
-            # 获取发布时间信息
-            date = mobi_metadata.timestamp
-
-            # 获取作者信息
-            author = mobi.author
-        return self.return_res(title , author,"")
-
-    def azw3_info(self):
-        import pykindle
-        # 打开azw3电子书文件
-        with open('path/to/your/azw3/file.azw3', 'rb') as azw3_file:
-            # 解析azw3文件的元数据
-            azw3 = pykindle.KindleBook(azw3_file.read())
-
-            # 获取书名信息
-            book_title = azw3.title
-
-            # 获取作者信息
-            author = azw3.author
-
-            # 获取出版社信息
-            publisher = azw3.publisher
-
-            # 打印信息
-            print(f"书名信息：{book_title}")
-            print(f"作者信息：{author}")
-            print(f"出版社信息：{publisher}")
-
-    def bookInfo(self):
-        if os.path.exists(self.file):
-            file_type = str(Path(self.file).suffix).lower()
-            if file_type in self.bookType:
-                if file_type == 'epub':
-                    return self.epubInfo()
-                elif file_type == 'txt':
-                    return self.txt_info()
-                elif file_type == 'mobi':
-                    return self.return_res()
-                elif file_type == 'azw3':
-                    return self.return_res()
-                else:
-                    return self.return_res()
-        else:
-            return self.return_res()
-
-
-def list_all_files(rootdir):
+def list_all_files(rootdir, max_depth=10, max_files=None):
     """
     列出文件夹下所有的目录与文件
     :param rootdir: 根路径
-    :return:
+    :param max_depth: 最大遍历深度，默认为10层
+    :param max_files: 最大遍历文件数量，默认为None，表示不限制
+    :return: 文件列表
     """
-    _files = []
-    list = os.listdir(rootdir)  # 列出文件夹下所有的目录与文件
-    for i in range(0, len(list)):
-        path = os.path.join(rootdir, list[i])
-        if os.path.isdir(path):
-            _files.extend(list_all_files(path))
+    files = []
+    stack = [(rootdir, 0)]  # 使用栈保存文件夹和遍历深度
+    while stack:
+        path, depth = stack.pop()
         if os.path.isfile(path):
-            _files.append(path)
-    return _files
+            files.append(path)
+        elif os.path.isdir(path):
+            if depth < max_depth:
+                for name in os.listdir(path):
+                    child_path = os.path.join(path, name)
+                    stack.append((child_path, depth + 1))
+                    if max_files and len(files) >= max_files:
+                        return files
+    return files
 
 if __name__ == '__main__':
-    # local_file = '/Users/benben/Documents/电子书/平凡的世界.mobi'
 
-    with app.app_context():
-        db.init_app(app)
-        for file in list_all_files('/Users/benben/Documents/电子书/'):
-            if str(Path(file).suffix) == '.mobi':
-                book_name = str(os.path.basename(file)).replace(".mobi", "").replace(" ","")
-                print(str(os.path.basename(file)).replace(".mobi", ""))
+    # authors = metadata.authors
+    # title = metadata.title
+    # isbn = metadata.isbn
+    # print(authors, title, isbn)
+    # with app.app_context():
+    #     db.init_app(app)
+    for file in list_all_files('/Users/benben/Downloads/P001核对完/'):
+        if get_file_name(file) == ".DS_Store":
+            continue
+        if allowed_ebook_ext(file):
+            print(bookInfo(file))
+        # print(file)
+    #             book_name = str(os.path.basename(file)).replace(".mobi", "").replace(" ","")
+    #             print(str(os.path.basename(file)).replace(".mobi", ""))
                 # if Books.query.filter(Books.title == book_name).first() is not None:
                 #     continue
                 # book = Books()
@@ -198,7 +159,15 @@ if __name__ == '__main__':
                 # db.session.commit()
         # print(book.bookext)
         # print(bookurl.book_download_url)
-        # res = Books.query.filter(Books.title == '平凡的世界').first()
-        # print(res)
+    # with app.app_context():
+    #     res = Books.query.filter(Books.title == '平凡的世界').first()
+    #     print(res)
+
+
+
+    # Print metadata
+
+
+
 
 
