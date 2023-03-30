@@ -1,5 +1,6 @@
 # encoding:utf-8
 import hashlib
+import logging
 import xml.etree.ElementTree as ET
 import config
 from book import wx_reply_xml, request, no_bind_email_msg, checkemail, bind_email_msg
@@ -26,10 +27,10 @@ def wechat():
         # 处理消息请求
         xml_data = request.data
         root = ET.fromstring(xml_data)
-
         content = root.find('Content').text
         from_user = root.find('FromUserName').text
         to_user = root.find('ToUserName').text
+        logging.error(f'from_user:{from_user} to_user:{to_user}')
         # 查询用户
         from book.dbModels import User
         user = User.query.filter_by(User.wx_openid == to_user).first()

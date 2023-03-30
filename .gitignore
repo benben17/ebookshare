@@ -43,7 +43,7 @@ mobi8/
 *.azw
 *.azw[34]
 *.pyc
-/book/uploadEbook.py
+s3upload.py
 
 # Folder to direct output to when testing command-line (will be ignored by git)
 testout/
