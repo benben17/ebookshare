@@ -1,9 +1,10 @@
 # encoding:utf-8
 import hashlib
 from datetime import time
-from urllib import request
+from flask import request, make_response
 import xml.etree.ElementTree as ET
-import config
+
+import requests
 from book import app, WeChat
 
 
@@ -12,7 +13,7 @@ def hello_world():  # put application's code here
     return config.APPID
 
 
-@app.route('wechat', methods=['GET', 'POST'])
+@app.route('/wechat', methods=['GET', 'POST'])
 def wechat():
     if request.method == 'GET':
         # 处理验证请求

@@ -4,17 +4,16 @@ from pathlib import Path
 import requests
 import yaml
 
+import config
+
+
 class WeChat:
     def __init__(self):
-        config = self.get_config('wechat')
-        self.APPID = config['APPID']
-        self.APPSECRET= config['APPSECRET']
 
-    def get_config(self, param):
-        BASE_DIR = Path(__file__).resolve().parent.parent
-        with open(str(BASE_DIR) + '/config.yaml', 'r') as file:
-            config = yaml.safe_load(file)
-            return config[param]
+        self.APPID = config.APPID
+        self.APPSECRET= config.APPSECRET
+
+
 
     def get_token(self):
         token_url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}'
