@@ -42,6 +42,7 @@ mobi8/
 *.prc
 *.azw
 *.azw[34]
+*.pyc
 
 # Folder to direct output to when testing command-line (will be ignored by git)
 testout/

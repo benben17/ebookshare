@@ -4,7 +4,7 @@ from datetime import time
 from flask import request, make_response
 import xml.etree.ElementTree as ET
 
-import requests
+import config
 from book import app, WeChat
 
 
@@ -13,11 +13,11 @@ def hello_world():  # put application's code here
     return config.APPID
 
 
-@app.route('/wechat', methods=['GET', 'POST'])
+@app.route('/api/wechat', methods=['GET', 'POST'])
 def wechat():
     if request.method == 'GET':
         # 处理验证请求
-        token = WeChat().get_token()
+        token = config.wechat_token
         echostr = request.args.get('echostr', '')
         signature = request.args.get('signature', '')
         timestamp = request.args.get('timestamp', '')
