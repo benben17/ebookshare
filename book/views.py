@@ -38,8 +38,9 @@ def wechat():
             user = User(wx_openid=from_user)
             db.session.add(user)
             db.session.commit()
-
-        logging.error(user.email+user.wx_openid)
+        user = User.query.filter(User.wx_openid == from_user).first()
+        logging.error(user.email)
+        logging.error(user.wx_openid)
         if not user.email :
             # 绑定邮箱
             if content.lower().startswith("email"):
