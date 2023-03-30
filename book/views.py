@@ -38,7 +38,9 @@ def wechat():
             user = User(wx_openid=from_user)
             db.session.add(user)
             db.session.commit()
-        if not user.email:
+
+        logging.error(user.email+user.wx_openid)
+        if not user.email :
             # 绑定邮箱
             if content.lower().startswith("email"):
                 str_text = content.split("#")
@@ -55,8 +57,9 @@ def wechat():
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg.format(content))
-        else:
+            # 无法绑定 返回
             return wx_reply_xml(from_user, to_user, no_bind_email_msg)
+
 
         from book.dbModels import Books
         books = Books.query.filter(Books.title.like(f'%{content}%')).all()
