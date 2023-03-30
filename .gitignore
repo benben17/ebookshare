@@ -4,7 +4,8 @@ __pycache__/
 .idea
 *.DS_Store
 s3upload.py
-**/uploadS3.py
+scripts/*
+scripts/
 # Vim temp/swap files
 *~
 *.orig
@@ -27,11 +28,6 @@ s3upload.py
 
 # PyBuilder
 target/
-
-# Files/folders used/produced when testing Kindleunpack
-HDImages/
-mobi7/
-mobi8/
 
 *.bak
 *.dat
