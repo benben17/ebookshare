@@ -42,13 +42,15 @@ def wechat():
             # 绑定邮箱
             if content.lower().startswith("email"):
                 str_text = content.split("#")
+                logging.error(str_text)
                 if len(str_text) == 2 and checkemail(str_text[1]):
-                    print(str_text[1])
+                    logging.error(str_text[1])
                     user.email = str_text[1]
                     db.session.add(user)
                     db.session.commit()
                     return wx_reply_xml(from_user, to_user, bind_email_msg.format(str_text[1]))
             if checkemail(content):
+                logging.error(content)
                 user.email = content
                 db.session.add(user)
                 db.session.commit()
