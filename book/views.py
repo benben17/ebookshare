@@ -76,7 +76,7 @@ def wechat():
                     book_name = send_info[0]
                     # logging.error("路径:"+book_file)
                     if os.path.exists(book_file):
-                        send_email(book_name, book_name, user.email, book_file)
+                        send_email(book_name, mail_body(book_name), user.email, book_file)
                         user_log = Userlog(user_id=user.id, book_name=book_name, receive_email=user.email,
                                            operation_type='download')
                         db.session.add(user_log)
