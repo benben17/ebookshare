@@ -39,7 +39,7 @@ def send_email(subject, body, receiver, attach=None):
         try:
             with open(attach, 'rb') as f:
                 fileType = get_file_suffix(attach)
-                msg.attach(subject+"."+fileType, 'application/octet-stream', f.read(),content_type=fileType)
+                msg.attach(subject+"."+fileType, 'application/octet-stream', f.read())
         except Exception as e:
             logging.error('open file failed.' + e)
 

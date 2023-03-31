@@ -55,5 +55,5 @@ def get_file_name(file):
 def get_file_suffix(file):
     if '.' in file:
         _, suffix = file.rsplit('.', 1)
-        return suffix.lower()
+        return str(suffix.lower())
 
