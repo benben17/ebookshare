@@ -17,7 +17,6 @@ reply_subscribe = f'''hi，又一位热爱读书的朋友！
 读书推荐
 而且通过这个公众号，电子书推送到Kindle上。
 <a href="{help_url}">☆点击查看帮助☆</a>
-
 '''
 def mail_body(bookname):
     donate_pic = 'http://mmbiz.qpic.cn/mmbiz/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1'

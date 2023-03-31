@@ -56,7 +56,7 @@ def wechat():
             user = User.query.filter(User.wx_openid == from_user).first()
 
         if content.lower() == "email":
-            return wx_reply_xml(from_user, to_user, f'你好，你已经解绑邮箱:{user.email}')
+            return wx_reply_xml(from_user, to_user, f'你好，你绑定邮箱:{user.email}')
 
         if content == '1001':
             user_email = user.email
