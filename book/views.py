@@ -37,7 +37,7 @@ def wechat():
             if root.find("Event") == 'subscribe':
                 return wx_reply_xml(from_user, to_user, reply_subscribe)
         if root.find('MsgType').text != 'text':
-            return wx_reply_xml(from_user, to_user, reply_help)
+            return wx_reply_xml(from_user, to_user, reply_help_msg)
         content = root.find('Content').text
         logging.error(f'from_user:{from_user} to_user:{to_user}')
         if content == '1002':
@@ -45,7 +45,7 @@ def wechat():
         # 查询用户
 
         if content.lower() in ['?', 'h', 'help', '帮助', '？']:
-            return wx_reply_xml(from_user, to_user, reply_help)
+            return wx_reply_xml(from_user, to_user, reply_help_msg)
 
         from book.dbModels import User
         user = User.query.filter(User.wx_openid == from_user).first()
@@ -84,17 +84,19 @@ def wechat():
                 send_info = book_info.split(":")
                 logging.error(send_info)
                 book_file = config.BOOK_FILE_DIR+send_info[1]
+                book_name = send_info[0]
                 # logging.error("路径:"+book_file)
                 if os.path.exists(book_file):
-                    send_email(send_info[0],mail_body(send_info), user.email, book_file)
-                    user_log = Userlog(user_id=user.id, book_name=send_info[0], receive_email=user.email,operation_type='download')
+
+                    send_email(book_name, book_name, user.email, book_file)
+                    user_log = Userlog(user_id=user.id, book_name=book_name, receive_email=user.email,operation_type='download')
                     db.session.add(user_log)
                     db.session.commit()
-                    return wx_reply_xml(from_user, to_user, f"{send_info[0]}已发送到邮箱{user.email}请查收！")
+                    return wx_reply_xml(from_user, to_user,wx_reply_mail_msg(book_name, user.email))
                 else:
-                    return wx_reply_xml(from_user, to_user, f"{send_info[0]} 不存在！")
+                    return wx_reply_xml(from_user, to_user, f"{book_name} 不存在！")
             else:
-                return wx_reply_xml(from_user, to_user, '请重新搜索，发送《书籍名称》即可！')
+                return wx_reply_xml(from_user, to_user, reply_help_msg)
 
         from book.dbModels import Books
         books = Books.query.filter(Books.title.like(f'%{content}%')).limit(10).all()
