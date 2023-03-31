@@ -1,6 +1,7 @@
 # encoding:utf-8
 import hashlib
 import logging
+import re
 import xml.etree.ElementTree as ET
 import config
 from book import wx_reply_xml, request, no_bind_email_msg, checkemail, reply_help, send_email, cache
@@ -65,7 +66,7 @@ def wechat():
             return wx_reply_xml(from_user, to_user, no_bind_email_msg)
 
         # 发送文件
-        if len(content) == 1 and int(content) < 10:
+        if re.match("[0-9]",content) and len(content) == 1 and int(content) < 10:
             book_info = cache.get(f'{from_user}_{content}')
             if book_info is not None:
                 send_info = book_info.split(":")
