@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 no_bind_email_msg = '''你好，你还没有绑定邮箱,请发送[ email#邮箱地址 ] 进行绑定\n
+\n
 例如：email#book@book.com\n'''
 
 reply_help = '''请输入文字信息！\n

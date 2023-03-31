@@ -14,13 +14,13 @@ CSRF_ENABLED = True
 # flask mail
 # Flask-Mail settings
 MAIL_ON_OFF = 'ON'
-MAIL_SERVER = 'smtp.gmail.com'
-MAIL_PORT = 465
-# MAIL_USE_TLS = True
+MAIL_SERVER = 'smtp@gmail.com'
+MAIL_PORT = 587
+# MAIL_USE_TLS = False
 MAIL_USE_SSL = True
-MAIL_USERNAME = 'librz.link@gmail.com'
-MAIL_PASSWORD = 'hyqycxwwiwcwiswi'
-MAIL_DEFAULT_SENDER = '"kindlebooks"<librz.link@gmail.com>'
+MAIL_USERNAME = 'cljqqyx@qq.com'
+MAIL_PASSWORD = 'xxx'
+MAIL_DEFAULT_SENDER = '"test"<cljqqyx@qq.com>'
 
 
 CACHE_TYPE = "simple"

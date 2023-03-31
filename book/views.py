@@ -67,7 +67,12 @@ def wechat():
         # 发送文件
         if len(content) == 1 and int(content) < 10:
             book_info = cache.get(f'{from_user}_{content}')
-            return wx_reply_xml(from_user, to_user, f"发送文件{book_info}")
+            if book_info is not None:
+                send_info = book_info.split("1")
+                send_email(send_info[0], send_info[0]+"已发送请查收附件！", user.email,config.BOOK_FILE_DIR+book_info[1])
+                return wx_reply_xml(from_user, to_user, f"{send_info[0]}已发送到邮箱{user.email}请查收！")
+            else:
+                return wx_reply_xml(from_user, to_user, '请重新搜索，发送《书籍名称》即可！')
 
         from book.dbModels import Books
         books = Books.query.filter(Books.title.like(f'%{content}%')).limit(10).all()
@@ -78,6 +83,7 @@ def wechat():
             author = book.author if book.author is not None else ""
             msg_content += f'{row_num} :《{book.title}》作者:{author} \n'
             find_books[f'{from_user}_{row_num}'] = f'{book.title}:{book.bookext.book_download_url}'
+            row_num += 1
         cache.set_many(find_books)
         return wx_reply_xml(from_user, to_user, msg_content)
 
