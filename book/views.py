@@ -30,12 +30,14 @@ def wechat():
         # 处理消息请求
         xml_data = request.data
         root = ET.fromstring(xml_data)
-        content = root.find('Content').text
+
         from_user = root.find('FromUserName').text
         to_user = root.find('ToUserName').text
         if root.find("MsgType").text == 'event':
             if root.find("Event") == 'subscribe':
                 return wx_reply_xml(from_user, to_user, reply_subscribe)
+
+        content = root.find('Content').text
         logging.error(f'from_user:{from_user} to_user:{to_user}')
         if content == '1002':
             return wx_reply_news(from_user, to_user)
