@@ -24,9 +24,10 @@ reply_subscribe = f'''hi，又一位热爱读书的朋友！
 def mail_body(bookname):
     donate_pic = 'http://mmbiz.qpic.cn/mmbiz/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1'
     return f'''
-    请查收附件！《{bookname}》
+    请查收附件！<br/>
+    《{bookname}》<br/>
     ----------------------------------------------------------------------------<br/>
-    <img src="https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchNXHehVsRb4QvN2GPrq6LUlL3ibIZmfUaCPL6dL827IaVxudiazcicvbqBlDGZSyUBHyzicUe4A0rZEBQ/0 /><br/>
+    <img src="https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchNXHehVsRb4QvN2GPrq6LUlL3ibIZmfUaCPL6dL827IaVxudiazcicvbqBlDGZSyUBHyzicUe4A0rZEBQ/0" /><br/>
     <img src="{donate_pic}" /><br/>
     ----------------------------------------------------------------------------<br/>
     欢迎你使用自助查询推送 kindle电子书 sendtokindles 微信号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
