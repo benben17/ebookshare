@@ -4,8 +4,7 @@ import time, os
 no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com\n'''
-
-help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&amp;mid=2649877534&amp;idx=1&amp;sn=ffd911121bd3e9e465acad01229aa862&amp;chksm=87c37e99b0b4f78f49cdbe1bab4d7c5cdd0e927098a4f595d10623402955e02baa262df85799&token=305511071&lang=zh_CN#rd'
+help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877534&idx=1&sn=ffd911121bd3e9e465acad01229aa862&chksm=87c37e99b0b4f78f49cdbe1bab4d7c5cdd0e927098a4f595d10623402955e02baa262df85799#rd'
 reply_help = f'''<a href="{help_url}"> 发送到kindle手册 </a>
 回复：图书名称
 回复：邮箱地址 绑定邮箱
@@ -62,17 +61,18 @@ url = 'http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=400901109&idx=1&sn=3
 def wx_reply_news(from_user,to_user):
     news_title = '发送到kindle手册'
     return f'''<xml>
-      <ToUserName><![CDATA[{from_user}]]></ToUserName>
-      <FromUserName><![CDATA[{to_user}]]></FromUserName>
-      <CreateTime>{create_time}</CreateTime>
-      <MsgType><![CDATA[news]]></MsgType>
-      <ArticleCount>1</ArticleCount>
-      <Articles>
-        <item>
-          <Title><![CDATA[{news_title}]]></Title>
-          <Description><![CDATA[{news_title}]]></Description>
-          <PicUrl><![CDATA[{pic_url}]]></PicUrl>
-          <Url><![CDATA[{url}]]></Url>
-        </item>
-      </Articles>
-    </xml>'''
+          <ToUserName><![CDATA[{from_user}]]></ToUserName>
+          <FromUserName><![CDATA[{to_user}]]></FromUserName>
+          <CreateTime>{create_time}</CreateTime>
+          <MsgType><![CDATA[news]]></MsgType>
+          <ArticleCount>1</ArticleCount>
+          <Articles>
+            <item>
+              <Title><![CDATA[{news_title}]]></Title>
+              <Description><![CDATA[{news_title}]]></Description>
+              <PicUrl><![CDATA[{pic_url}]]></PicUrl>
+              <Url><![CDATA[{url}]]></Url>
+            </item>
+          </Articles>
+        </xml>
+        '''
