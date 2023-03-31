@@ -3,7 +3,9 @@ import time, os
 
 no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
-例如：book@book.com\n'''
+例如：book@book.com
+查看帮助 请回复？'''
+
 help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877534&idx=1&sn=ffd911121bd3e9e465acad01229aa862&chksm=87c37e99b0b4f78f49cdbe1bab4d7c5cdd0e927098a4f595d10623402955e02baa262df85799#rd'
 reply_help_msg = f'''<a href="{help_url}"> 发送到kindle手册 </a>
 回复：图书名称
