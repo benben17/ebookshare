@@ -3,7 +3,7 @@ import hashlib
 import logging
 import xml.etree.ElementTree as ET
 import config
-from book import wx_reply_xml, request, no_bind_email_msg, checkemail, bind_email_msg
+from book import wx_reply_xml, request, no_bind_email_msg, checkemail, reply_help, send_email, cache
 from book.dbModels import *
 
 
@@ -32,16 +32,20 @@ def wechat():
         to_user = root.find('ToUserName').text
         logging.error(f'from_user:{from_user} to_user:{to_user}')
         # 查询用户
+        if root.find('MsgType').text != 'text':
+            return wx_reply_xml(from_user, to_user, reply_help)
+        if content.lower() in ['?', 'h', 'help', '帮助']:
+            return wx_reply_xml(from_user, to_user, reply_help)
+
         from book.dbModels import User
         user = User.query.filter(User.wx_openid == from_user).first()
         if user is None:
             user = User(wx_openid=from_user)
             db.session.add(user)
             db.session.commit()
-        user = User.query.filter(User.wx_openid == from_user).first()
-        logging.error(user.email)
-        logging.error(user.wx_openid)
-        if not user.email :
+            user = User.query.filter(User.wx_openid == from_user).first()
+
+        if not user.email:
             # 绑定邮箱
             if content.lower().startswith("email"):
                 str_text = content.split("#")
@@ -51,23 +55,30 @@ def wechat():
                     user.email = str_text[1]
                     db.session.add(user)
                     db.session.commit()
-                    return wx_reply_xml(from_user, to_user, bind_email_msg.format(str_text[1]))
+                    return wx_reply_xml(from_user, to_user, f'你好，你已经绑定绑定邮箱:{str_text[1]}')
             if checkemail(content):
                 logging.error(content)
                 user.email = content
                 db.session.add(user)
                 db.session.commit()
-                return wx_reply_xml(from_user, to_user, bind_email_msg.format(content))
-            # 无法绑定 返回
+                return wx_reply_xml(from_user, to_user, f'你好，你已经绑定绑定邮箱:{content}')
             return wx_reply_xml(from_user, to_user, no_bind_email_msg)
 
+        # 发送文件
+        if len(content) == 1 and int(content) < 10:
+            book_info = cache.get(f'{from_user}_{content}')
+            return wx_reply_xml(from_user, to_user, f"发送文件{book_info}")
 
         from book.dbModels import Books
-        books = Books.query.filter(Books.title.like(f'%{content}%')).all()
+        books = Books.query.filter(Books.title.like(f'%{content}%')).limit(10).all()
         msg_content = f'一共搜索到{len(books)}本书\n'
+        find_books = {}
+        row_num = 1
         for book in books:
             author = book.author if book.author is not None else ""
-            msg_content += f'《{book.title}》作者:{author} \n'
+            msg_content += f'{row_num} :《{book.title}》作者:{author} \n'
+            find_books[f'{from_user}_{row_num}'] = f'{book.title}:{book.bookext.book_download_url}'
+        cache.set_many(find_books)
         return wx_reply_xml(from_user, to_user, msg_content)
 
 

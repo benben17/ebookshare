@@ -3,6 +3,7 @@ import logging
 from threading import Thread
 from flask import request
 from flask import Flask
+from flask_caching import Cache
 from flask_mail import Mail, Message, Attachment
 from flask_principal import Principal, identity_loaded, RoleNeed, UserNeed
 from flask_login import LoginManager, current_user
@@ -37,7 +38,7 @@ def send_email(subject, body, receiver, attach=None):
     if attach is not None:
         try:
             with open(attach, 'rb') as f:
-                msg.attach(f.name, 'application/octet-stream', f.read())
+                msg.attach(subject, 'application/octet-stream', f.read())
         except Exception as e:
             logging.error('open file failed.' + e)
 
@@ -45,3 +46,5 @@ def send_email(subject, body, receiver, attach=None):
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return u'发送成功'
+
+cache = Cache(app)

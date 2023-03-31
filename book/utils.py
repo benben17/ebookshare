@@ -4,9 +4,15 @@ import re
 import time, os
 from pathlib import Path
 
+
 no_bind_email_msg = '''你好，你还没有绑定邮箱,请发送[ email#邮箱地址 ] 进行绑定\n
 例如：email#book@book.com\n'''
-bind_email_msg = f'你好，你已经绑定绑定邮箱:{0}'
+
+reply_help = '''请输入文字信息！\n
+回复 ? help h H 帮助信息\n
+回复email绑定邮箱\n
+回复你想搜索的书籍名字进行搜索\n
+回复图书编号可直接发送到邮箱'''
 
 def checkemail(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
@@ -59,3 +65,4 @@ def get_file_suffix(file):
     if '.' in file:
         _, suffix = file.rsplit('.', 1)
         return suffix.lower()
+
