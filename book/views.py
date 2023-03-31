@@ -102,6 +102,8 @@ def wechat():
         find_books = {}
         row_num = 1
         for book in books:
+            if book.bookext.book_download_url is None:
+                continue
             author = book.author if book.author is not None else ""
             msg_content += f'{row_num} :《{book.title}》作者:{author} \n'
             find_books[f'{from_user}_{row_num}'] = f'{book.title}:{book.bookext.book_download_url}'
