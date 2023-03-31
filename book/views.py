@@ -5,8 +5,9 @@ import os.path
 import re
 import xml.etree.ElementTree as ET
 import config
-from book import wx_reply_xml, request, no_bind_email_msg, checkemail, reply_help, send_email, cache
+from book import request,  send_email, cache
 from book.dbModels import *
+from book.wxMsg import *
 
 
 @app.route('/api/wechat', methods=['GET', 'POST'])
@@ -32,11 +33,18 @@ def wechat():
         content = root.find('Content').text
         from_user = root.find('FromUserName').text
         to_user = root.find('ToUserName').text
+        if root.find("Event").text:
+            return wx_reply_xml(from_user, to_user, reply_subscribe)
         logging.error(f'from_user:{from_user} to_user:{to_user}')
+
+        if content == '1002':
+            return wx_reply_news(from_user, to_user)
+
+
         # 查询用户
         if root.find('MsgType').text != 'text':
             return wx_reply_xml(from_user, to_user, reply_help)
-        if content.lower() in ['?', 'h', 'help', '帮助']:
+        if content.lower() in ['?', 'h', 'help', '帮助', '？']:
             return wx_reply_xml(from_user, to_user, reply_help)
 
         from book.dbModels import User
@@ -47,17 +55,20 @@ def wechat():
             db.session.commit()
             user = User.query.filter(User.wx_openid == from_user).first()
 
+        if content.lower() == "email":
+            return wx_reply_xml(from_user, to_user, f'你好，你已经解绑邮箱:{user.email}')
+
+        if content == '1001':
+            user_email = user.email
+            if not user_email:
+                return wx_reply_xml(from_user, to_user, no_bind_email_msg)
+            user.email = ""
+            db.session.add(user)
+            db.session.commit()
+            return wx_reply_xml(from_user, to_user, f'你好，你已经解绑邮箱:{user_email}')
+
         if not user.email:
             # 绑定邮箱
-            if content.lower().startswith("email"):
-                str_text = content.split("#")
-                logging.error(str_text)
-                if len(str_text) == 2 and checkemail(str_text[1]):
-                    logging.error(str_text[1])
-                    user.email = str_text[1]
-                    db.session.add(user)
-                    db.session.commit()
-                    return wx_reply_xml(from_user, to_user, f'你好，你已经绑定绑定邮箱:{str_text[1]}')
             if checkemail(content):
                 logging.error(content)
                 user.email = content
@@ -73,9 +84,9 @@ def wechat():
                 send_info = book_info.split(":")
                 logging.error(send_info)
                 book_file = config.BOOK_FILE_DIR+send_info[1]
-                logging.error("路径:"+book_file)
+                # logging.error("路径:"+book_file)
                 if os.path.exists(book_file):
-                    send_email(send_info[0], send_info[0]+"已发送请查收附件！", user.email,book_file)
+                    send_email(send_info[0],mail_body(send_info), user.email, book_file)
                     user_log = Userlog(user_id=user.id, book_name=send_info[0], receive_email=user.email,operation_type='download')
                     db.session.add(user_log)
                     db.session.commit()
