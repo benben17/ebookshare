@@ -5,7 +5,7 @@ import time, os
 no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com
-查看帮助 请回复？'''
+查看帮助请回复 ？'''
 
 help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877534&idx=1&sn=ffd911121bd3e9e465acad01229aa862&chksm=87c37e99b0b4f78f49cdbe1bab4d7c5cdd0e927098a4f595d10623402955e02baa262df85799#rd'
 reply_help_msg = f'''<a href="{help_url}"> 发送到kindle手册 </a>
@@ -23,14 +23,14 @@ reply_subscribe = f'''hi，又一位热爱读书的朋友！
 '''
 def mail_body(bookname):
     donate_pic = 'http://mmbiz.qpic.cn/mmbiz/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1'
+    weixin_pic = 'https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchNXHehVsRb4QvN2GPrq6LUlL3ibIZmfUaCPL6dL827IaVxudiazcicvbqBlDGZSyUBHyzicUe4A0rZEBQ/0'
     return f'''
     请查收附件！<br/>
     《{bookname}》<br/>
     ----------------------------------------------------------------------------<br/>
-    <img src="https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchNXHehVsRb4QvN2GPrq6LUlL3ibIZmfUaCPL6dL827IaVxudiazcicvbqBlDGZSyUBHyzicUe4A0rZEBQ/0" /><br/>
-    <img src="{donate_pic}" /><br/>
+    <img src="{weixin_pic}" width="350" height="350">||<img src="{donate_pic}"  width="300" height="300" ><br/>
     ----------------------------------------------------------------------------<br/>
-    欢迎你使用自助查询推送 kindle电子书 sendtokindles 微信号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
+    欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
     '''
 
 def checkemail(email):
@@ -68,12 +68,13 @@ def check_signature(token, signature, timestamp, nonce):
 def wx_reply_mail_msg(book_name,user_email):
     donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn=9afeff751c06737c6c3c5de0faddc6a1#rd'
     return f'''《{book_name}》已发送到邮箱：{user_email}请查收！
-    <a href="{donate_url}">☆捐赠小二☆</a>
-    '''
-pic_url = 'https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchOuboUCtD8ia53mkkBicDnPNbXGTpHibHlEKBibBjQYAIWwOu30eiahwn1MuJGkWyXHNUU7SyJCibNRLMaQ/0?wx_fmt=jpeg'
-url = 'http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=400901109&idx=1&sn=3d70499fe8efcb0a30aabce0e1f3d0f6#rd'
+    
+    <a href="{donate_url}">☆捐赠小二☆ </a>'''
+
 
 def wx_reply_news(from_user,to_user):
+    pic_url = 'https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchOuboUCtD8ia53mkkBicDnPNbXGTpHibHlEKBibBjQYAIWwOu30eiahwn1MuJGkWyXHNUU7SyJCibNRLMaQ/0?wx_fmt=jpeg'
+    url = 'http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=400901109&idx=1&sn=3d70499fe8efcb0a30aabce0e1f3d0f6#rd'
     news_title = '发送到kindle手册'
     return f'''<xml>
           <ToUserName><![CDATA[{from_user}]]></ToUserName>
