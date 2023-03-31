@@ -1,12 +1,22 @@
 # -*-coding: utf-8-*-
+import hashlib
 import os.path
 import re
 import time, os
 from pathlib import Path
+import xml.etree.ElementTree as ET
+import config
 
 
-
-
+def parse_xml(xml_str):
+    """解析xml字符串"""
+    root = ET.fromstring(xml_str)
+    msg_type = root.findtext('MsgType')
+    from_user = root.findtext('FromUserName')
+    to_user = root.findtext('ToUserName')
+    content = root.findtext('Content')
+    event = root.findtext('Event')
+    return msg_type, from_user, to_user, content, event
 def allowed_file(filename):
     """
     :param filename: 带路径的文件

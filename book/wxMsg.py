@@ -1,3 +1,4 @@
+import hashlib
 import re
 import time, os
 
@@ -46,7 +47,6 @@ def wx_reply_xml(from_user, to_user, msg_content):
     :param msg_content: 接收消息内容
     :return:
     """
-
     return f"""
         <xml>
             <ToUserName><![CDATA[{from_user}]]></ToUserName>
@@ -56,6 +56,13 @@ def wx_reply_xml(from_user, to_user, msg_content):
             <Content><![CDATA[{msg_content}]]></Content>
         </xml>
         """
+def check_signature(token, signature, timestamp, nonce):
+    """校验签名"""
+    temp_arr = [token, timestamp, nonce]
+    temp_arr.sort()
+    temp_str = ''.join(temp_arr)
+    hash_str = hashlib.sha1(temp_str.encode('utf-8')).hexdigest()
+    return hash_str == signature
 def wx_reply_mail_msg(book_name,user_email):
     donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn=9afeff751c06737c6c3c5de0faddc6a1#rd'
     return f'''《{book_name}》已发送到邮箱：{user_email}请查收！
