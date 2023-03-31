@@ -36,14 +36,14 @@ def wechat():
         if root.find("MsgType").text == 'event':
             if root.find("Event") == 'subscribe':
                 return wx_reply_xml(from_user, to_user, reply_subscribe)
-
+        if root.find('MsgType').text != 'text':
+            return wx_reply_xml(from_user, to_user, reply_help)
         content = root.find('Content').text
         logging.error(f'from_user:{from_user} to_user:{to_user}')
         if content == '1002':
             return wx_reply_news(from_user, to_user)
         # 查询用户
-        # if root.find('MsgType').text != 'text':
-        #     return wx_reply_xml(from_user, to_user, reply_help)
+
         if content.lower() in ['?', 'h', 'help', '帮助', '？']:
             return wx_reply_xml(from_user, to_user, reply_help)
 

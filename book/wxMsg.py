@@ -5,7 +5,8 @@ no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com\n'''
 
-reply_help = '''<a href=\"http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=400901109&idx=1&sn=3d70499fe8efcb0a30aabce0e1f3d0f6#rd\"> 发送到kindle手册 </a>
+help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&amp;mid=2649877534&amp;idx=1&amp;sn=ffd911121bd3e9e465acad01229aa862&amp;chksm=87c37e99b0b4f78f49cdbe1bab4d7c5cdd0e927098a4f595d10623402955e02baa262df85799&token=305511071&lang=zh_CN#rd'
+reply_help = f'''<a href="{help_url}"> 发送到kindle手册 </a>
 回复：图书名称
 回复：邮箱地址 绑定邮箱
 回复：email 查询邮箱
@@ -13,10 +14,10 @@ reply_help = '''<a href=\"http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=4
 回复：1002  帮助手册
 '''
 
-reply_subscribe='''hi，又一位热爱读书的朋友！
+reply_subscribe = f'''hi，又一位热爱读书的朋友！
 读书推荐
 而且通过这个公众号，电子书推送到Kindle上。
-<a href="链接地址">☆点击查看帮助☆</a>
+<a href="{help_url}">☆点击查看帮助☆</a>
 
 '''
 def mail_body(bookname):
