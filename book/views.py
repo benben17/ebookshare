@@ -5,7 +5,7 @@ import os.path
 import re
 
 import config
-from book import request, send_email, cache, parse_xml
+from book import request, send_email, cache, parse_xml, search_book_content
 from book.dbModels import *
 from book.wxMsg import *
 
@@ -89,18 +89,8 @@ def wechat():
             # 搜索 图书
             from book.dbModels import Books
             books = Books.query.filter(Books.title.like(f'%{content}%')).limit(10).all()
-            msg_content = f'一共搜索到{len(books)}本书\n'
-            find_books = {}
-            row_num = 1
-            for book in books:
-                if book.bookext.book_download_url is None:
-                    continue
-                author = book.author if book.author is not None else ""
-                msg_content += f'{row_num} :《{book.title}》作者:{author} \n'
-                find_books[f'{from_user}_{row_num}'] = f'{book.title}:{book.bookext.book_download_url}'
-                row_num += 1
-            msg_content += f'发送图书编号直接发送到绑定邮箱\n'
-            cache.set_many(find_books)
+            msg_content, books_cache = search_book_content(books,from_user)
+            cache.set_many(books_cache)
             return wx_reply_xml(from_user, to_user, msg_content)
         else: # 其他未知消息
             return wx_reply_xml(from_user, to_user, reply_help_msg)
