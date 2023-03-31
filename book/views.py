@@ -36,6 +36,7 @@ def wechat():
         if root.find("MsgType").text == 'event':
             if root.find("Event") == 'subscribe':
                 return wx_reply_xml(from_user, to_user, reply_subscribe)
+
         if root.find('MsgType').text != 'text':
             return wx_reply_xml(from_user, to_user, reply_help_msg)
         content = root.find('Content').text
@@ -80,7 +81,7 @@ def wechat():
             return wx_reply_xml(from_user, to_user, no_bind_email_msg)
 
         # 发送文件
-        if re.match("[0-9]",content) and len(content) == 1 and int(content) < 10:
+        if re.match("[0-9]",content) and len(content) == 1 and int(content) <= 11:
             book_info = cache.get(f'{from_user}_{content}')
             if book_info is not None:
                 send_info = book_info.split(":")
@@ -89,7 +90,6 @@ def wechat():
                 book_name = send_info[0]
                 # logging.error("路径:"+book_file)
                 if os.path.exists(book_file):
-
                     send_email(book_name, book_name, user.email, book_file)
                     user_log = Userlog(user_id=user.id, book_name=book_name, receive_email=user.email,operation_type='download')
                     db.session.add(user_log)
@@ -112,6 +112,7 @@ def wechat():
             msg_content += f'{row_num} :《{book.title}》作者:{author} \n'
             find_books[f'{from_user}_{row_num}'] = f'{book.title}:{book.bookext.book_download_url}'
             row_num += 1
+        msg_content += f'发送图书编号直接发送到绑定邮箱\n'
         cache.set_many(find_books)
         return wx_reply_xml(from_user, to_user, msg_content)
 
