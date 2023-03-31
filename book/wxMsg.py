@@ -2,8 +2,8 @@ import re
 import time, os
 
 no_bind_email_msg = '''你好，你还没有绑定邮箱！
-请发送【email#邮箱地址】进行绑定
-例如：email#book@book.com\n'''
+请发送【邮箱地址】进行绑定
+例如：book@book.com\n'''
 
 reply_help = '''<a href=\"http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=400901109&idx=1&sn=3d70499fe8efcb0a30aabce0e1f3d0f6#rd\"> 发送到kindle手册 </a>
 回复：图书名称
@@ -16,7 +16,6 @@ reply_help = '''<a href=\"http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=4
 reply_subscribe='''hi，又一位热爱读书的朋友！
 读书推荐
 而且通过这个公众号，电子书推送到Kindle上。
-
 <a href="链接地址">☆点击查看帮助☆</a>
 
 '''
