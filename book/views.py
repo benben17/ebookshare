@@ -70,6 +70,9 @@ def wechat():
             if book_info is not None:
                 send_info = book_info.split("1")
                 send_email(send_info[0], send_info[0]+"已发送请查收附件！", user.email,config.BOOK_FILE_DIR+book_info[1])
+                user_log = Userlog(user_id=user.id, book_name=send_info[0], receive_email=user.email,operation_type='download')
+                db.session.add(user_log)
+                db.session.commit()
                 return wx_reply_xml(from_user, to_user, f"{send_info[0]}已发送到邮箱{user.email}请查收！")
             else:
                 return wx_reply_xml(from_user, to_user, '请重新搜索，发送《书籍名称》即可！')
