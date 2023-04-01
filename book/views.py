@@ -68,6 +68,9 @@ def wechat():
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
             if check_isbn(content):
                 return wx_reply_xml(from_user, to_user, not_isbn_search)
+
+            if content == "哈哈哈":
+                return wx_reply_news(from_user, to_user)
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 11:
                 if not user.email:

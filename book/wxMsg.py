@@ -83,9 +83,11 @@ def check_signature(token, signature, timestamp, nonce):
 def wx_reply_mail_msg(book_name,user_email):
     donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn=9afeff751c06737c6c3c5de0faddc6a1#rd'
     return f'''《{book_name}》
-已发送到邮箱：{user_email} 
+已发送邮箱：{user_email} 
+------------------------------
 文件发送有滞后，最好5分钟后查收，如无收到，请换一个编号重新申请发送
-<a href="{donate_url}">☆捐赠小二☆ </a>'''
+------------------------------
+      <a href="{donate_url}">☆捐赠小二☆ </a>'''
 
 
 

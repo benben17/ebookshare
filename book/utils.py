@@ -97,6 +97,8 @@ def net_book_content(books, from_user):
     for book in books:
         author = str(book['author']).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
         title = book['title']
+        if len(title) > 30:
+            title = title[:30]
         ext = book['extension']
         ipfs_cid = book['ipfs_cid']
         filesize = filesize_format(book['filesize'])

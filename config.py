@@ -20,7 +20,7 @@ MAIL_PORT = 465
 MAIL_USE_SSL = True
 MAIL_USERNAME = 'librz.link@gmail.com'
 MAIL_PASSWORD = 'hyqycxwwiwcwiswi'
-MAIL_DEFAULT_SENDER = '"kindlebooks"<librz.link@gmail.com>'
+MAIL_DEFAULT_SENDER = '"ebookshare"<librz.link@gmail.com>'
 
 
 CACHE_TYPE = "simple"
