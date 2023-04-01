@@ -28,7 +28,7 @@ def bookSend():
                     try:
                         send_email(userlog.book_name, mail_body(userlog.book_name), userlog.receive_email, file_path)
                         userlog.status = 1
-                        userlog.create_time = get_now_datetime()
+                        userlog.create_time = datetime.datetime.now()
                         db.session.add(userlog)
                         db.session.commit()
                         logging.info("发送成功"+userlog.book_name+userlog.receive_email)
