@@ -1,7 +1,7 @@
 # coding: utf-8
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 from book import app
 
@@ -10,13 +10,13 @@ db = SQLAlchemy(app)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    email = db.Column(db.String(120), unique=True)
+    name = db.Column(db.String(64))
+    email = db.Column(db.String(120))
     role = db.Column(db.String(120))
     srole = db.Column(db.Integer, default=0)
     hash_pass = db.Column(db.String(200))
     kindle_email = db.Column(db.String(120))
-    wx_openid = db.Column(db.String(64))
+    wx_openid = db.Column(db.String(64),unique=True)
     upload_times = db.Column(db.Integer, default=0)
     download_times = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
@@ -39,7 +39,7 @@ class User(db.Model):
 
 class Books(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(250), unique=True)
+    title = db.Column(db.String(250))
     author = db.Column(db.String(128))
     publisher = db.Column(db.String(128))
     extension = db.Column(db.String(128))
@@ -49,6 +49,8 @@ class Books(db.Model):
     status = db.Column(db.Integer, nullable=True)
     create_time = db.Column(db.DateTime, default=datetime.now())
     isbn = db.Column(db.String(30))
+    tags = db.Column(db.String(128))
+    UniqueConstraint('title', 'extension', name='idx_col1_col2')
     bookext = relationship('Bookurl', backref=backref('books'), uselist=False)
 
 
