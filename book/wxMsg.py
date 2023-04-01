@@ -2,6 +2,13 @@ import hashlib
 import re
 import time, os
 
+def unbind_email_msg(user_email):
+    return f'''你好，你已经解绑邮箱:{user_email}\n解除绑定回复:1001'''
+def bind_email_msg(user_email):
+    return f'''你好，你绑定邮箱:{user_email}\n解除绑定回复:1001'''
+
+no_book_content = "未找到书籍，在更新中！请换其他的书籍"
+
 no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com
@@ -17,7 +24,11 @@ reply_help_msg = f'''<a href="{help_url}"> 发送到kindle手册 </a>
 '''
 
 reply_subscribe = f'''hi，又一位热爱读书的朋友！
-读书推荐
+回复：图书名称 
+回复：邮箱地址 绑定邮箱
+回复：email 查询邮箱
+回复：1001  解绑邮箱
+回复：1002  帮助手册
 而且通过这个公众号，电子书推送到Kindle上。
 <a href="{help_url}">☆点击查看帮助☆</a>
 '''

@@ -5,6 +5,7 @@ import re
 import time, os
 from pathlib import Path
 import xml.etree.ElementTree as ET
+
 import config
 
 
@@ -20,6 +21,7 @@ def parse_xml(xml_str):
 
 
 def search_book_content(books, from_user):
+
     msg_content = f'一共搜索到{len(books)}本书:\n'
     books_cache = {}
     row_num = 1
@@ -32,6 +34,7 @@ def search_book_content(books, from_user):
         row_num += 1
     msg_content += f'发送图书编号直接发送到绑定邮箱。\n'
     return msg_content, books_cache
+
 
 def allowed_file(filename):
     """
@@ -52,8 +55,23 @@ def get_file_name(file):
     return os.path.basename(file).replace(file_suffix, "")
 
 
+
 def get_file_suffix(file):
-    if '.' in file:
+    if isinstance(file, str) and '.' in file:
         _, suffix = file.rsplit('.', 1)
-        return str(suffix.lower())
+        return suffix.lower()
+    return None
+
+
+def filesize_format(value, binary=False):
+    " bugfix for do_filesizeformat of jinja2 "
+    bytes = float(value)
+    base = 1024 if binary else 1000
+    prefixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+    for i, prefix in enumerate(prefixes):
+        unit = base ** i
+        if bytes < base ** (i + 1):
+            return f"{bytes / unit:.1f} {prefix}"
+    return f"{bytes / unit:.1f} {prefixes[-1]}"
+
 
