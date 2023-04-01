@@ -34,6 +34,7 @@ def search_book_content(books, from_user):
         msg_content += f'{row_num}: {book.title}.{book.extension}-{author} \n'
         books_cache[f'{from_user}_{row_num}'] = f'{book.title}:{book.bookext.book_download_url}'
         row_num += 1
+    msg_content += '---------------------------\n'
     msg_content += f'发送图书编号直接发送到绑定邮箱。\n'
     return msg_content, books_cache
 
