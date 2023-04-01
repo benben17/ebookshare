@@ -142,22 +142,20 @@ def download_net_book(ipfs_cid, filename):
 
     for url in url_list:
         url_with_cid = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
-        logging.info(ipfs_cid)
-        logging.info(filename)
-
+        logging.info(ipfs_cid+":"+filename)
         try:
-            response = requests.get(url_with_cid, stream=True, timeout=30)
+            response = requests.get(url_with_cid, stream=True, timeout=40)
             response.raise_for_status()  # Raise exception if response status code is not 200
             file_path = config.DOWNLOAD_DIR+filename
             with open(file_path, 'wb') as f:
                 for data in response.iter_content(chunk_size=4096):
                     f.write(data)
-            logging.info(":File downloaded successfully")
+            logging.info(f"{filename}:File downloaded successfully")
             return file_path
         except RequestException as e:
             logging.info(f"Error downloading from {url_with_cid}: {e}")
 
-    logging.error("Could not download file from any of the URLs provided")
+    logging.error(f"{filename} Could not download file from any of the URLs provided")
     return None
 
 

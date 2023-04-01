@@ -17,12 +17,13 @@ scheduler.start()
 def bookSend():
     from book.dbModels import Userlog
     from book.dbModels import db
-    logging.info("start task")
+    # logging.info("start task....")
     with app.app_context():
         userlogs = Userlog.query.filter(Userlog.status == 0).all()
         if userlogs:
             for userlog in userlogs:
                 file_path = download_net_book(userlog.ipfs_cid, userlog.book_name)
+
                 print(file_path)
                 if file_path:
                     try:
@@ -34,7 +35,11 @@ def bookSend():
                         logging.info("发送成功"+userlog.book_name+userlog.receive_email)
                     except Exception as e:
                         logging.error(e)
-        logging.info('无发送任务')
+                elif file_path is None:
+                    userlog.status = 3
+                    db.session.add(userlog)
+                    db.session.commit()
+        # logging.info('无发送任务')
 
 
 
