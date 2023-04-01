@@ -6,7 +6,9 @@ import re
 
 import config
 from book import request, send_email, cache, parse_xml, search_book_content, app
+from book.dbModels import db
 from book.wxMsg import *
+
 
 
 @app.route('/api/wechat', methods=['GET', 'POST'])
@@ -21,7 +23,7 @@ def wechat():
         return echostr if check_signature(token, signature, timestamp, nonce) else ''
 
     elif request.method == 'POST':
-        # from book.dbModels import User
+        from book.dbModels import User, Userlog, Books
         # 处理消息请求
         msg_type, from_user, to_user, content, event = parse_xml(request.data)
         from_user = from_user.strip()
@@ -36,7 +38,6 @@ def wechat():
             elif content == '1002':
                 return wx_reply_news(from_user, to_user)
             # 查找用户信息
-
             user = User.query.filter(User.wx_openid == from_user).first()
             if user is None:
                 user = User(wx_openid=from_user)
