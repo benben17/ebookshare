@@ -5,7 +5,7 @@ import os.path
 import re
 
 import config
-from book import request, send_email, cache, parse_xml, search_book_content, app
+from book import request, send_email, cache, parse_xml, search_book_content, app, check_isbn
 from book.dbModels import db
 from book.wxMsg import *
 
@@ -66,7 +66,7 @@ def wechat():
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-            if re.match("0-9", content) and len(content) == 13:
+            if check_isbn(content):
                 return wx_reply_xml(from_user, to_user, not_isbn_search)
             # 发送文件
             if re.match("[0-9]", content) and len(content) == 1 and int(content) <= 11:

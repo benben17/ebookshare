@@ -5,7 +5,7 @@ import re
 import time, os
 from pathlib import Path
 import xml.etree.ElementTree as ET
-
+import isbnlib
 import config
 
 
@@ -46,6 +46,13 @@ def allowed_file(filename):
     ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def check_isbn(str):
+    if len(str) == 13:
+        return isbnlib.is_isbn13(str)
+    elif len(str) == 10:
+        return isbnlib.is_isbn10(str)
+    else:
+        return False
 
 def allowed_ebook_ext(filename):
     ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'mobi', 'azw3', 'epub'])

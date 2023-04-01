@@ -31,7 +31,7 @@ reply_subscribe = f'''hi，又一位热爱读书的朋友！
 回复：email 查询邮箱
 回复：1001  解绑邮箱
 回复：1002  帮助手册
-而且通过这个公众号，电子书推送到Kindle上。
+通过这个公众号，电子书推送到Kindle上。
 <a href="{help_url}">☆点击查看帮助☆</a>
 '''
 def mail_body(bookname):
