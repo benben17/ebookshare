@@ -3,8 +3,6 @@ import json
 import logging
 import time
 import requests
-import yaml
-
 import config
 
 
