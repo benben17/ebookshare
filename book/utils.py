@@ -109,6 +109,7 @@ def net_book_content(books, from_user):
 
 def search_net_book(title=None,author=None,isbn=None, openid=""):
     search_url = 'https://zlib.knat.network/search?limit=10&query='
+    print(search_url)
     if not any((title, author, isbn)):
         return None
     param = ''
@@ -119,6 +120,9 @@ def search_net_book(title=None,author=None,isbn=None, openid=""):
     if isbn is not None:
         param += f'isbn:"{isbn}"'
     res = requests.get(url=search_url+param, timeout=30)
+    print("search_res+"+ str(res.json()))
+    print(str(res.text))
+    print(str(res.status_code))
     if int(res.status_code) == 200:
         json_res = res.json()
         return net_book_content(json_res['books'],openid)
