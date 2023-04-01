@@ -21,7 +21,9 @@ def parse_xml(xml_str):
 
 
 def search_book_content(books, from_user):
-
+    if len(books) == 0:
+        msg_content = f'你搜的书不存在，请尝试搜索其他书籍！\n'
+        return msg_content,None
     msg_content = f'一共搜索到{len(books)}本书:\n'
     books_cache = {}
     row_num = 1

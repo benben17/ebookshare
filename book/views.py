@@ -43,7 +43,6 @@ def wechat():
                 user = User(wx_openid=from_user)
                 db.session.add(user)
                 db.session.commit()
-
             # 查询绑定的邮箱地址
             if content.lower() == "email":
                 if not user.email:
@@ -67,7 +66,8 @@ def wechat():
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-
+            if re.match("0-9", content) and len(content) == 13:
+                return wx_reply_xml(from_user, to_user, not_isbn_search)
             # 发送文件
             if re.match("[0-9]", content) and len(content) == 1 and int(content) <= 11:
                 if not user.email:
@@ -99,7 +99,8 @@ def wechat():
             if books is None: # 未找到
                 return wx_reply_xml(from_user, to_user, no_book_content)
             msg_content, books_cache = search_book_content(books, from_user)
-            cache.set_many(books_cache) #存缓存
+            if books_cache is not None:
+                cache.set_many(books_cache) #存缓存
             return wx_reply_xml(from_user, to_user, msg_content)
         else: # 其他未知消息
             return wx_reply_xml(from_user, to_user, reply_help_msg)

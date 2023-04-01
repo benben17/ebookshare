@@ -9,6 +9,8 @@ def bind_email_msg(user_email):
 
 no_book_content = "未找到书籍，在更新中！请换其他的书籍"
 
+not_isbn_search = "不支持ISBN搜索，请输入书籍名称搜索！"
+
 no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com
