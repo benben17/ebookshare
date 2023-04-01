@@ -5,14 +5,15 @@ from flask_apscheduler import APScheduler
 scheduler = APScheduler()
 import logging
 from book.wxMsg import mail_body
-from book import send_email, app, download_net_book
+from book import send_email, app, download_net_book, get_now_datetime
+
 scheduler.init_app(app)
 scheduler.start()
 # 修改调度器执行组件冗余日志级别
 
 
 # interval example, 间隔执行, 每30秒执行一次
-@scheduler.task('interval', id='book_send', seconds=10, misfire_grace_time=900)
+@scheduler.task('interval', id='book_send', seconds=120, misfire_grace_time=900)
 def bookSend():
     from book.dbModels import Userlog
     from book.dbModels import db
@@ -27,7 +28,7 @@ def bookSend():
                     try:
                         send_email(userlog.book_name, mail_body(userlog.book_name), userlog.receive_email, file_path)
                         userlog.status = 1
-                        # userlog.create_time = datetime.datetime
+                        userlog.create_time = get_now_datetime()
                         db.session.add(userlog)
                         db.session.commit()
                         logging.info("发送成功"+userlog.book_name+userlog.receive_email)
