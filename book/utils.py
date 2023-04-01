@@ -80,13 +80,12 @@ def filesize_format(value, binary=False):
     " bugfix for do_filesizeformat of jinja2 "
     bytes = float(value)
     base = 1024 if binary else 1000
-    prefixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+    prefixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     for i, prefix in enumerate(prefixes):
         unit = base ** i
         if bytes < base ** (i + 1):
-            return f"{bytes / unit:.1f} {prefix}"
-    return f"{bytes / unit:.1f} {prefixes[-1]}"
-
+            return f"{int(bytes / unit)}{prefix}"
+    return f"{int(bytes / unit)}{prefixes[-1]}"
 
 def net_book_content(books, from_user):
     if len(books) == 0:
@@ -102,7 +101,7 @@ def net_book_content(books, from_user):
         ipfs_cid = book['ipfs_cid']
         filesize = filesize_format(book['filesize'])
         filename = f'{title}.{ext}'
-        msg_content += f'{row_num} :【{title}.{ext}|{filesize}】-{author} \n'
+        msg_content += f'{row_num} :【{title}.{ext}】-{author}-{filesize} \n'
         books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}'
         row_num += 1
     msg_content += '---------------------------\n'
@@ -165,7 +164,7 @@ def download_net_book(ipfs_cid, filename):
 def get_now_datetime():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 if __name__ == '__main__':
-    print(get_now_datetime())
+    print(filesize_format(10022))
     # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
 
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
