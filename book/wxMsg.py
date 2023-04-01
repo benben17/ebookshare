@@ -87,7 +87,7 @@ def wx_reply_mail_msg(book_name,user_email):
 
 def wx_reply_news(from_user,to_user):
     pic_url = 'https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchOuboUCtD8ia53mkkBicDnPNbXGTpHibHlEKBibBjQYAIWwOu30eiahwn1MuJGkWyXHNUU7SyJCibNRLMaQ/0?wx_fmt=jpeg'
-    url = 'http://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=400901109&idx=1&sn=3d70499fe8efcb0a30aabce0e1f3d0f6#rd'
+    url = 'https://mp.weixin.qq.com/s/20zcsd3DYDUl7cpEWZwmDw'
     news_title = '发送到kindle手册'
     return f'''<xml>
           <ToUserName><![CDATA[{from_user}]]></ToUserName>
