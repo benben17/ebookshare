@@ -11,6 +11,8 @@ no_book_content = "未找到书籍，在更新中！请换其他的书籍"
 
 not_isbn_search = "不支持ISBN搜索，请输入书籍名称搜索！"
 
+send_failed_msg = "根据其他用户报告，此书籍无法发送，请换一个编号继续！"
+
 no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com
@@ -83,6 +85,8 @@ def wx_reply_mail_msg(book_name,user_email):
     return f'''《{book_name}》已发送到邮箱：{user_email} 请稍后查收！
     文件发送有滞后，最好5分钟后查收，如无收到，请换一个编号重新申请发送
     <a href="{donate_url}">☆捐赠小二☆ </a>'''
+
+
 
 
 def wx_reply_news(from_user,to_user):

@@ -35,3 +35,5 @@ CACHE_THRESHOLD = 100   # 缓存的最大条目数
 BOOK_FILE_DIR = "/data/" # 电子书存放目录
 # 电子书下载目录
 DOWNLOAD_DIR = "/tmp/"
+
+FAILED_FlAG = 3

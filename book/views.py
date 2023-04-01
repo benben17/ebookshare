@@ -79,8 +79,11 @@ def wechat():
                 if book_info is not None:
                     send_info = book_info.split(":")
                     logging.error(send_info)
+                    userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1],Userlog.status == config.FAILED_FlAG).all()
+                    if userlog:
+                        return wx_reply_xml(from_user, to_user, send_failed_msg)
                     user_log = Userlog(user_id=user.id, book_name=send_info[0], receive_email=user.email,
-                                       operation_type='download',status=0,ipfs_cid=send_info[1])
+                                       operation_type='download', status=0, ipfs_cid=send_info[1])
                     db.session.add(user_log)
                     db.session.commit()
                     return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email))
