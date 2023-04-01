@@ -68,6 +68,8 @@ class Userlog(db.Model):
     receive_email = db.Column(db.String(120))
     download_time = db.Column(db.DateTime, default=datetime.now())
     create_time = db.Column(db.DateTime, default=datetime.now())
+    status = db.Column(db.Integer)
+    ipfs_cid = db.Column(db.String(300))
 
 
 with app.app_context():

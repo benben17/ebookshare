@@ -5,7 +5,7 @@ import os.path
 import re
 
 import config
-from book import request, send_email, cache, parse_xml, search_book_content, app, check_isbn
+from book import request, cache, parse_xml, app, check_isbn, search_net_book
 from book.dbModels import db
 from book.wxMsg import *
 
@@ -79,26 +79,18 @@ def wechat():
                 if book_info is not None:
                     send_info = book_info.split(":")
                     logging.error(send_info)
-                    book_name ,book_file = send_info[0], config.BOOK_FILE_DIR + send_info[1]
-                    # logging.error("路径:"+book_file)
-                    if os.path.exists(book_file):
-                        # 发送邮件
-                        send_email(book_name, mail_body(book_name), user.email, book_file)
-                        user_log = Userlog(user_id=user.id, book_name=book_name, receive_email=user.email,
-                                           operation_type='download')
-                        db.session.add(user_log)
-                        db.session.commit()
-                        return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(book_name, user.email))
-                    else:
-                        return wx_reply_xml(from_user, to_user, f"{book_name} 不存在！")
+                    user_log = Userlog(user_id=user.id, book_name=send_info[0], receive_email=user.email,
+                                       operation_type='download',status=0,ipfs_cid=send_info[1])
+                    db.session.add(user_log)
+                    db.session.commit()
+                    return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email))
+
                 else:
                     return wx_reply_xml(from_user, to_user, reply_help_msg)
 
             # 搜索 图书
-            books = Books.query.filter(Books.title.like(f'%{content}%')).limit(10).all()
-            if books is None: # 未找到
-                return wx_reply_xml(from_user, to_user, no_book_content)
-            msg_content, books_cache = search_book_content(books, from_user)
+
+            msg_content, books_cache = search_net_book(title=content, openid=from_user)
             if books_cache is not None:
                 cache.set_many(books_cache) #存缓存
             return wx_reply_xml(from_user, to_user, msg_content)
