@@ -3,6 +3,7 @@
 import logging
 import os.path
 import time, os
+from datetime import datetime
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import isbnlib
@@ -99,8 +100,9 @@ def net_book_content(books, from_user):
         title = book['title']
         ext = book['extension']
         ipfs_cid = book['ipfs_cid']
+        filesize = filesize_format(book['filesize'])
         filename = f'{title}.{ext}'
-        msg_content += f'{row_num} :【{title}.{ext}】-{author} \n'
+        msg_content += f'{row_num} :【{title}.{ext}|{filesize}】-{author} \n'
         books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}'
         row_num += 1
     msg_content += '---------------------------\n'
@@ -161,9 +163,10 @@ def download_net_book(ipfs_cid, filename):
 
 
 def get_now_datetime():
-    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 if __name__ == '__main__':
-    print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
+    print(get_now_datetime())
+    # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
 
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
     # download_net_book(ipfs_id,"平凡的世界.epub")
