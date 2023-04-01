@@ -105,7 +105,7 @@ def net_book_content(books, from_user):
         books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}'
         row_num += 1
     msg_content += '---------------------------\n'
-    msg_content += f'发送图书编号直接发送到绑定邮箱。\n'
+    msg_content += f'发送编号直接发送到绑定邮箱。\n'
     return msg_content, books_cache
 
 def search_net_book(title=None,author=None,isbn=None, openid=""):
