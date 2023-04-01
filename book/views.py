@@ -69,7 +69,7 @@ def wechat():
             if check_isbn(content):
                 return wx_reply_xml(from_user, to_user, not_isbn_search)
             # 发送文件
-            if re.match("[0-9]", content) and len(content) == 1 and int(content) <= 11:
+            if re.match("[0-9]", content) and int(content) <= 11:
                 if not user.email:
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
                 # user_log = Userlog.query.filter(Userlog.user_id == from_user,Userlog.create_time >= ).all()
