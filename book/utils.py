@@ -95,7 +95,7 @@ def net_book_content(books, from_user):
     books_cache = {}
     row_num = 1
     for book in books:
-        author = book['author'] if book['author'] is not None else ""
+        author = str(book['author']).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
         title = book['title']
         ext = book['extension']
         ipfs_cid = book['ipfs_cid']
@@ -164,7 +164,10 @@ def download_net_book(ipfs_cid, filename):
 def get_now_datetime():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 if __name__ == '__main__':
-    print(filesize_format(10022))
+    author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
+    author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
+    print(author)
+    # print(filesize_format(10022))
     # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
 
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
