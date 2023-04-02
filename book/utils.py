@@ -146,7 +146,7 @@ def download_net_book(ipfs_cid, filename):
         url_with_cid = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
         logging.info(ipfs_cid+":"+filename)
         try:
-            response = requests.get(url_with_cid, stream=True, timeout=40)
+            response = requests.get(url_with_cid, stream=True, timeout=30)
             response.raise_for_status()  # Raise exception if response status code is not 200
             file_path = config.DOWNLOAD_DIR+filename
             with open(file_path, 'wb') as f:
