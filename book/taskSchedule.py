@@ -14,6 +14,9 @@ from book import send_email, app, download_net_book
 class Config(object):
     SCHEDULER_API_ENABLED = True
 
+scheduler.init_app(app)
+scheduler.start()
+
 # interval example, 间隔执行, 每30秒执行一次
 @scheduler.task('interval', id='book_send', seconds=120, misfire_grace_time=900)
 def bookSend():
