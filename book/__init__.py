@@ -11,8 +11,7 @@ from flask_login import LoginManager, current_user
 from datetime import timedelta
 from book.wechat import WeChat
 from book.utils import *
-
-logging.basicConfig(filename="book.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%M-%Y %H:%M:%S", level=logging.INFO)
+logging.basicConfig(filename="book.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%m-%Y %H:%M:%S", level=logging.INFO)
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -23,10 +22,10 @@ login_manager.login_view = 'login'
 login_manager.session_protection = 'strong'
 login_manager.remember_cookie_duration = timedelta(minutes=15)
 mail = Mail(app)
-
+cache = Cache(app)
 
 # load the extension
-
+os.environ['TZ']= 'Asia/Shanghai'
 
 
 def send_async_email(app, msg):
@@ -48,7 +47,7 @@ def send_email(subject, body, receiver, attach=None):
     thr.start()
     return u'发送成功'
 
-cache = Cache(app)
+
 
 
 # 定义bookSend()函数

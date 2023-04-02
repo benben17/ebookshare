@@ -8,5 +8,10 @@ workers = multiprocessing.cpu_count() * 2 +1
 
 
 if __name__ == '__main__':
+    scheduler.init_app(app)
+    scheduler.start()
     app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
+
+
+
     app.run(debug=True,threaded=True)

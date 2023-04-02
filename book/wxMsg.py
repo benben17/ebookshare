@@ -30,15 +30,15 @@ reply_help_msg = f'''<a href="{help_url}"> 发送到kindle手册 </a>
 reply_subscribe = f'''欢迎关注books图书馆，本书站收录图书超乎你的想象
 按以下步骤将电子书自动发送到您的邮箱：
 
-1.在本公众号聊天栏里发送邮箱地址 「你的邮箱地址」,如：xxxx@163.com
+1.在聊天栏里发送邮箱地址 「你的邮箱地址」,如：xxxx@163.com
   直接发送kindle设备请查看<a href="{help_url}">帮助手册</a>
 
-2.获取书籍，在本公众号聊天栏里发送你要找的书籍，格式为 「书籍名称」，如：
+2.查询书籍，在聊天栏里发送你要找的书籍,直接回复书籍名称，如：
   平凡的世界
   
 3.发送图书编号 1-10 ，静待5分钟邮箱收书。
 
-如你觉得还满意，请推荐给你的朋友。将是我改进的动力，🙏
+如你还满意，请推荐给你的朋友。将是我改进的动力，🙏
 <a href="{help_url}">☆点击查看帮助☆</a>
 '''
 def mail_body(bookname):
@@ -48,11 +48,22 @@ def mail_body(bookname):
     请查收附件！<br/>
     《{bookname}》<br/>
     ----------------------------------------------------------------------------<br/>
-    <img src="{weixin_pic}" width="350" height="350">||<img src="{donate_pic}"  width="300" height="300" ><br/>
+    <img src="{donate_pic}"  width="300" height="300" ><br/>
     ----------------------------------------------------------------------------<br/>
     欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
     '''
 
+def send_failed_body(bookname):
+    donate_pic = 'http://mmbiz.qpic.cn/mmbiz/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1'
+    return f'''
+        
+        《{bookname}》 发送失败！<br/>
+        请重新传查询，选择其他格式的图书接收！
+        ----------------------------------------------------------------------------<br/>
+        <img src="{donate_pic}"  width="300" height="300" ><br/>
+        ----------------------------------------------------------------------------<br/>
+        欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
+        '''
 def checkemail(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if re.findall(pattern, email):

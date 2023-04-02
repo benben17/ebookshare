@@ -2,15 +2,17 @@ import datetime
 
 from flask import logging
 from flask_apscheduler import APScheduler
+
+
+
 scheduler = APScheduler()
 import logging
-from book.wxMsg import mail_body
-from book import send_email, app, download_net_book, get_now_datetime
+from book.wxMsg import mail_body, send_failed_body
+from book import send_email, app, download_net_book
 
-scheduler.init_app(app)
-scheduler.start()
-# 修改调度器执行组件冗余日志级别
 
+class Config(object):
+    SCHEDULER_API_ENABLED = True
 
 # interval example, 间隔执行, 每30秒执行一次
 @scheduler.task('interval', id='book_send', seconds=120, misfire_grace_time=900)
@@ -23,7 +25,6 @@ def bookSend():
         if userlogs:
             for userlog in userlogs:
                 file_path = download_net_book(userlog.ipfs_cid, userlog.book_name)
-
                 print(file_path)
                 if file_path:
                     try:
@@ -36,6 +37,7 @@ def bookSend():
                     except Exception as e:
                         logging.error(e)
                 elif file_path is None:
+                    send_email(userlog.book_name+"-发送失败", send_failed_body(userlog.book_name), userlog.receive_email)
                     userlog.status = 3
                     db.session.add(userlog)
                     db.session.commit()
