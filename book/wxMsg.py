@@ -18,8 +18,9 @@ no_bind_email_msg = '''你好，你还没有绑定邮箱！
 例如：book@book.com
 查看帮助请回复 ？'''
 
-help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877534&idx=1&sn=ffd911121bd3e9e465acad01229aa862&chksm=87c37e99b0b4f78f49cdbe1bab4d7c5cdd0e927098a4f595d10623402955e02baa262df85799#rd'
-reply_help_msg = f'''<a href="{help_url}"> 发送到kindle手册 </a>
+send_to_kindle_help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877562&idx=1&sn=e3789377f9303432cb0a082ff81ad335&chksm=87c37ebdb0b4f7ab49168e70181efb9206434e0bb9b7620a8f17b258686f8faf70c696c9eb9d&token=305511071&lang=zh_CN#rd'
+reply_help_msg = f'''<a href="{send_to_kindle_help_url}"> 发送到kindle手册 </a>
+建议先发送到自己邮箱，然后自己转发kindle设备
 回复：图书名称
 回复：邮箱地址 绑定邮箱
 回复：email 查询邮箱
@@ -30,20 +31,19 @@ reply_help_msg = f'''<a href="{help_url}"> 发送到kindle手册 </a>
 reply_subscribe = f'''欢迎关注books图书馆，本书站收录图书超乎你的想象
 按以下步骤将电子书自动发送到您的邮箱：
 
-1.在聊天栏里发送邮箱地址 「你的邮箱地址」,如：xxxx@163.com
-  直接发送kindle设备请查看<a href="{help_url}">帮助手册</a>
-
+1.在聊天栏里发送邮箱地址 「你的邮箱地址」,如：xxxx@163.com *
+ 
 2.查询书籍，在聊天栏里发送你要找的书籍,直接回复书籍名称，如：
   平凡的世界
   
 3.发送图书编号 1-10 ，静待5分钟邮箱收书。
 
 如你还满意，请推荐给你的朋友。将是我改进的动力，🙏
-<a href="{help_url}">☆点击查看帮助☆</a>
+直接发送kindle设备请查看<a href="{send_to_kindle_help_url}">帮助手册</a>
+建议先发送到自己邮箱，然后自己转发kindle设备*
 '''
 def mail_body(bookname):
     donate_pic = 'http://mmbiz.qpic.cn/mmbiz/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1'
-    weixin_pic = 'https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchNXHehVsRb4QvN2GPrq6LUlL3ibIZmfUaCPL6dL827IaVxudiazcicvbqBlDGZSyUBHyzicUe4A0rZEBQ/0'
     return f'''
     请查收附件！<br/>
     《{bookname}》<br/>
