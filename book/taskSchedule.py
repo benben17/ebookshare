@@ -39,7 +39,7 @@ def bookSend():
                             db.session.add(userlog)
                             db.session.commit()
                         else:
-                            send_email(userlog.book_name, mail_url_body(), userlog.receive_email)
+                            send_email(userlog.book_name, mail_url_body(userlog.book_name), userlog.receive_email)
                         logging.info("发送成功"+userlog.book_name+userlog.receive_email)
                     except Exception as e:
                         logging.error(e)
