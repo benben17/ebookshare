@@ -5,7 +5,7 @@ import os.path
 import re
 
 import config
-from book import request, cache, parse_xml, app, check_isbn, search_net_book
+from book import request, cache, parse_xml, app, check_isbn, search_net_book, get_now_date
 from book.dbModels import db
 from book.wxMsg import *
 
@@ -75,18 +75,22 @@ def wechat():
             if re.match("[0-9]", content) and int(content) <= 11:
                 if not user.email:
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
-                # user_log = Userlog.query.filter(Userlog.user_id == from_user,Userlog.create_time >= ).all()
-                # if len(user_log) >= 5:
-                #     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
+                # 每个用户每天最多下载5本书
+                usersend = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
+                                                Userlog.create_time > get_now_date()).all()
+                if len(usersend) > 5:
+                    wx_reply_xml(from_user, to_user, "今天已经下载5本书，请明天在进行发送！")
+
                 book_info = cache.get(f'{from_user}_{content}')
                 if book_info is not None:
                     send_info = book_info.split(":")
                     logging.error(send_info)
+                    # 之前是否发送失败过，如果失败则返回此书籍不可用
                     userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1],Userlog.status == config.FAILED_FlAG).all()
                     if userlog:
                         return wx_reply_xml(from_user, to_user, send_failed_msg)
-                    user_log = Userlog(user_id=user.id, book_name=send_info[0], receive_email=user.email,
-                                       operation_type='download', status=0, ipfs_cid=send_info[1])
+                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email,
+                                       operation_type='download', status=0, ipfs_cid=send_info[1],filesize=send_info[2])
                     db.session.add(user_log)
                     db.session.commit()
                     return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email))
@@ -95,7 +99,6 @@ def wechat():
                     return wx_reply_xml(from_user, to_user, reply_help_msg)
 
             # 搜索 图书
-
             msg_content, books_cache = search_net_book(title=content, openid=from_user)
             if books_cache is not None:
                 cache.set_many(books_cache) #存缓存

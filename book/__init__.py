@@ -43,7 +43,7 @@ def send_email(subject, body, receiver, attach=None):
 
     msg.html = body
     thr = Thread(target=send_async_email, args=[app, msg])
-    logging.info('发送邮件.')
+    logging.info(f'发送邮件.{subject}-接收邮箱{receiver}')
     thr.start()
     return u'发送成功'
 

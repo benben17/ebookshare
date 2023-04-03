@@ -19,6 +19,7 @@ class User(db.Model):
     wx_openid = db.Column(db.String(64),unique=True)
     upload_times = db.Column(db.Integer, default=0)
     download_times = db.Column(db.Integer, default=0)
+
     create_time = db.Column(db.DateTime, default=datetime.now())
 
     def is_authenticated(self):
@@ -70,6 +71,8 @@ class Userlog(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.now())
     status = db.Column(db.Integer)
     ipfs_cid = db.Column(db.String(300))
+    filesize = db.Column(db.Integer)
+    wx_openid = db.Column(db.String(120))
 
 
 with app.app_context():

@@ -12,7 +12,6 @@ from requests.exceptions import RequestException
 
 import config
 
-
 def parse_xml(xml_str):
     """解析xml字符串"""
     root = ET.fromstring(xml_str)
@@ -67,6 +66,9 @@ def get_file_name(file):
     file_suffix = str(Path(file).suffix)
     return os.path.basename(file).replace(file_suffix, "")
 
+def email_att_or_url(file):
+    filesize = os.path.getsize(file)
+    return filesize <= config.MAIL_ATT_MAX_SIZE
 
 
 def get_file_suffix(file):
@@ -97,17 +99,17 @@ def net_book_content(books, from_user):
     for book in books:
         author = str(book['author']).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
         title = book['title']
-        if len(title) > 30:
-            title = title[:30]
+        if len(title) > 60:
+            title = title[:60]
         ext = book['extension']
         ipfs_cid = book['ipfs_cid']
         filesize = filesize_format(book['filesize'])
         filename = f'{title}.{ext}'
         msg_content += f'{row_num} :【{title}.{ext}】-{author}-{filesize} \n'
-        books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}'
+        books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}'
         row_num += 1
     msg_content += '---------------------------\n'
-    msg_content += f'发送编号直接发送到绑定邮箱。\n'
+    msg_content += f'回复编号，发送到绑定邮箱\n'
     return msg_content, books_cache
 
 def search_net_book(title=None,author=None,isbn=None, openid=""):
@@ -123,9 +125,6 @@ def search_net_book(title=None,author=None,isbn=None, openid=""):
     if isbn is not None:
         param += f'isbn:"{isbn}"'
     res = requests.get(url=search_url+param, timeout=30)
-    # print("search_res+"+ str(res.json()))
-    # print(str(res.text))
-    # print(str(res.status_code))
     if int(res.status_code) == 200:
         json_res = res.json()
         return net_book_content(json_res['books'],openid)
@@ -136,10 +135,11 @@ def search_net_book(title=None,author=None,isbn=None, openid=""):
 
 def download_net_book(ipfs_cid, filename):
     url_list = [
-        'https://ipfs.io',
-        'https://cloudflare-ipfs.com',
         'https://dweb.link',
-        'https://gateway.pinata.cloud'
+        'https://cloudflare-ipfs.com',
+        'https://gateway.pinata.cloud',
+        'https://ipfs.jpu.jp'
+        'https://gateway.ipfs.io'
     ]
 
     for url in url_list:
@@ -161,8 +161,8 @@ def download_net_book(ipfs_cid, filename):
     return None
 
 
-def get_now_datetime():
-    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+def get_now_date():
+    return datetime.now().strftime('%Y-%m-%d 00:00:00')
 if __name__ == '__main__':
     author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
