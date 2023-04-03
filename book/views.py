@@ -66,8 +66,13 @@ def wechat():
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
+
             if check_isbn(content):
-                return wx_reply_xml(from_user, to_user, not_isbn_search)
+                msg_content, books_cache = search_net_book(isbn=content, openid=from_user)
+                if books_cache is not None:
+                    cache.set_many(books_cache)  # 存缓存
+                return wx_reply_xml(from_user, to_user, msg_content)
+            # if content == 'next':
 
             if content == "哈哈哈":
                 return wx_reply_news(from_user, to_user)
@@ -103,6 +108,7 @@ def wechat():
             if books_cache is not None:
                 cache.set_many(books_cache) #存缓存
             return wx_reply_xml(from_user, to_user, msg_content)
+
         else: # 其他未知消息
             return wx_reply_xml(from_user, to_user, reply_help_msg)
 

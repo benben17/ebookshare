@@ -39,3 +39,5 @@ DOWNLOAD_URL = "https://ebook.stararea.cn/ebookdl/"
 # 发送邮件状态
 FAILED_FlAG = 3   # 失败
 SUCCESS_FLAG = 1   # 成功
+
+PAGE_NUM = 10 #每页显示条数

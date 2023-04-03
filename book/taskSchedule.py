@@ -34,12 +34,13 @@ def bookSend():
                         if email_att_or_url(file_path):
                             send_email(userlog.book_name, mail_body(userlog.book_name), userlog.receive_email,
                                        file_path)
-                            userlog.status = config.SUCCESS_FLAG
-                            userlog.create_time = datetime.datetime.now()
-                            db.session.add(userlog)
-                            db.session.commit()
                         else:
                             send_email(userlog.book_name, mail_url_body(userlog.book_name), userlog.receive_email)
+
+                        userlog.status = config.SUCCESS_FLAG
+                        userlog.create_time = datetime.datetime.now()
+                        db.session.add(userlog)
+                        db.session.commit()
                         logging.info("发送成功"+userlog.book_name+userlog.receive_email)
                     except Exception as e:
                         logging.error(e)

@@ -12,6 +12,7 @@ from requests.exceptions import RequestException
 
 import config
 
+
 def parse_xml(xml_str):
     """解析xml字符串"""
     root = ET.fromstring(xml_str)
@@ -108,12 +109,49 @@ def net_book_content(books, from_user):
         msg_content += f'{row_num} :【{title}.{ext}】-{author}-{filesize} \n'
         books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}'
         row_num += 1
-    msg_content += '---------------------------\n'
+    msg_content += '---------'*10 +'\n'
     msg_content += f'回复编号，发送到绑定邮箱\n'
     return msg_content, books_cache
 
-def search_net_book(title=None,author=None,isbn=None, openid=""):
-    search_url = 'https://zlib.knat.network/search?limit=10&query='
+
+def cache_book(books,wx_openid):
+    if len(books) == 0:
+
+        return True
+    row_num = 1
+    books_cache = {}
+    try:
+        for book in books:
+            author = str(book['author']).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
+            title = book['title']
+            if len(title) > 60:
+                title = title[:60]
+            ext = book['extension']
+            ipfs_cid = book['ipfs_cid']
+            filesize = filesize_format(book['filesize'])
+            filename = f'{title}.{ext}'
+            books_cache[f'{wx_openid}_{row_num}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}:{author}:{filesize}'
+            row_num += 1
+        from book import  cache
+        cache.set_many(books_cache)
+        return True
+    except Exception as e:
+        logging.error(f"缓存错误:{e}")
+        return False
+def get_book_content(wx_openid,page=1):
+    from book import cache
+    i = 1 * page
+    keys = []
+    num = page * config.PAGE_NUM +1
+    while(1< num):
+        keys.append(wx_openid+'_'+str(i))
+        i += 1
+
+    books = cache.get_many(keys)
+    return books
+
+def search_net_book(title=None,author=None,isbn=None, openid="",):
+    search_url = 'https://zlib.knat.network/search?limit=20&query='
     # print(search_url)
     if not any((title, author, isbn)):
         return None
