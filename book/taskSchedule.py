@@ -31,7 +31,7 @@ def bookSend():
                 print(file_path)
                 if file_path:
                     try:
-                        if email_att_or_url(file_path):
+                        if email_att_or_url(file_path) is False:
                             send_email(userlog.book_name, mail_body(userlog.book_name), userlog.receive_email,
                                        file_path)
                         else:
