@@ -62,7 +62,7 @@ def mail_body(bookname):
 def send_failed_body(bookname):
 
     return f'''
-        《{bookname}---发送失败！<br/>
+        《{bookname}》---发送失败！<br/>
         请重新传查询，选择其他格式的图书接收！<br/>
         ----------------------------------------------------------------------------<br/>
         <img src="{donate_pic}"  width="300" height="300" ><br/>
@@ -74,7 +74,7 @@ def send_failed_body(bookname):
 def mail_download_url_body(filename):
     download_url = config.DOWNLOAD_URL+filename
     return f'''
-        《{filename}<br/>
+        《{filename}》<br/>
         ----------------------------------------------------------------------------<br/>
         |{filename}||<a href="{download_url}"> 下载地址 </a> 下载链接地址有效期24个小时，请在有效期内下载。|<br/>
         ----------------------------------------------------------------------------<br/>
