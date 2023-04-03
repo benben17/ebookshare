@@ -1,12 +1,7 @@
 # coding: utf-8
 from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship, backref
-from book import app
+from book import db
 
-db = SQLAlchemy(app)
-# db.init_app(app)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,13 +46,13 @@ class Books(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.now())
     isbn = db.Column(db.String(30))
     tags = db.Column(db.String(128))
-    UniqueConstraint('title', 'extension', name='idx_col1_col2')
-    bookext = relationship('Bookurl', backref=backref('books'), uselist=False)
+    db.UniqueConstraint('title', 'extension', name='idx_col1_col2')
+    bookext = db.relationship('Bookurl', backref=db.backref('books'), uselist=False)
 
 
 class Bookurl(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer, ForeignKey('books.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
     book_download_url = db.Column(db.String(512))
 
 
@@ -74,6 +69,28 @@ class Userlog(db.Model):
     filesize = db.Column(db.Integer)
     wx_openid = db.Column(db.String(120))
 
+class LibRss(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    url = db.Column(db.String(300))
+    isfulltext = db.Column(db.Integer)
+    category = db.Column(db.String(64))
+    creator = db.Column(db.String(64))
+    created_time = db.Column(db.DateTime, default=datetime.now())
+    subscribed = db.Column(db.Integer, default=0)  # for sort
+    invalid_date = db.Column(db.DateTime, default=datetime.now())  # some one reported it is a invalid link
 
-with app.app_context():
-    db.create_all()
+
+    # return all categories in database
+
+class MyFeed(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(64))
+    url = db.Column(db.String(300))
+    isfulltext = isfulltext = db.Column(db.Integer)
+    wx_openid = db.Column(db.String(64))  # 微信id
+    user_id = db.Column(db.Integer)
+    time = db.Column(db.DateTime, default=datetime.now())  # 源被加入的时间，用于排序
+    created_time = db.Column(db.DateTime, default=datetime.now())
+
+

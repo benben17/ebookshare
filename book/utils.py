@@ -1,6 +1,5 @@
 # -*-coding: utf-8-*-
 
-import logging
 import os.path
 import time, os
 from datetime import datetime
@@ -9,7 +8,6 @@ import xml.etree.ElementTree as ET
 import isbnlib
 import requests
 from requests.exceptions import RequestException
-
 import config
 
 
@@ -109,7 +107,7 @@ def net_book_content(books, from_user):
         msg_content += f'{row_num} :【{title}.{ext}】-{author}-{filesize} \n'
         books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}'
         row_num += 1
-    msg_content += '---------'*10 +'\n'
+    msg_content += '------------------------\n'
     msg_content += f'回复编号，发送到绑定邮箱\n'
     return msg_content, books_cache
 

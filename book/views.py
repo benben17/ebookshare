@@ -1,12 +1,7 @@
 # encoding:utf-8
 import hashlib
 import logging
-import os.path
-import re
-
-import config
-from book import request, cache, parse_xml, app, check_isbn, search_net_book, get_now_date
-from book.dbModels import db
+from book import request, cache, parse_xml, app, check_isbn, search_net_book, get_now_date, db
 from book.wxMsg import *
 
 

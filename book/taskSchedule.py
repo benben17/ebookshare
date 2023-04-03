@@ -1,19 +1,14 @@
 import datetime
 import os
-
-from flask import logging
-from flask_apscheduler import APScheduler
-
-import config
-
-scheduler = APScheduler()
 import logging
+from flask_apscheduler import APScheduler
+import config
 from book.wxMsg import mail_body, send_failed_body, mail_download_url_body
 from book import send_email, app, download_net_book, email_att_or_url, get_file_suffix, allowed_ebook_ext
-
-
 class Config(object):
     SCHEDULER_API_ENABLED = True
+scheduler = APScheduler()
+
 
 scheduler.init_app(app)
 scheduler.start()

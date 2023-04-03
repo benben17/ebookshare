@@ -3,7 +3,6 @@ import json
 import logging
 import time
 import requests
-from flask_caching import Cache
 import config
 
 class WeChat:
