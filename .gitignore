@@ -8,6 +8,7 @@ scripts/*
 scripts/
 config.py
 instance/*
+*.out
 # Vim temp/swap files
 *~
 *.orig

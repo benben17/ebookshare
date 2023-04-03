@@ -7,7 +7,7 @@ import config
 
 scheduler = APScheduler()
 import logging
-from book.wxMsg import mail_body, send_failed_body
+from book.wxMsg import mail_body, send_failed_body, mail_url_body
 from book import send_email, app, download_net_book, email_att_or_url
 
 
