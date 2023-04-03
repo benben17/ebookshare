@@ -114,4 +114,4 @@ def wechat():
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    return "hello"
+    return "欢迎关注 sendtokindles 公众号下载电子书"

@@ -8,6 +8,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 import isbnlib
 import requests
+from idna import unicode
 from requests.exceptions import RequestException
 
 import config
@@ -176,13 +177,14 @@ def download_net_book(ipfs_cid, filename):
         'https://dweb.link',
         'https://cloudflare-ipfs.com',
         'https://gateway.pinata.cloud',
+        'https://gateway.ipfs.io',
         'https://ipfs.jpu.jp'
-        'https://gateway.ipfs.io'
+
     ]
 
     for url in url_list:
         url_with_cid = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
-        logging.info(ipfs_cid+":"+filename)
+        logging.info("start download:"+filename+ipfs_cid)
         try:
             response = requests.get(url_with_cid, stream=True, timeout=30)
             response.raise_for_status()  # Raise exception if response status code is not 200
@@ -198,14 +200,22 @@ def download_net_book(ipfs_cid, filename):
     logging.error(f"{filename} Could not download file from any of the URLs provided")
     return None
 
+# 判断文件是否创建超过24小时
+def is_file_24_hours(file_path):
+    # 获取文件创建时间戳
+    ctime = os.path.getctime(file_path)
+    # 获取当前时间戳
+    current_time = time.time()
+    # 判断文件是否在24小时内创建
+    return current_time - ctime > 24 * 60 * 60
 
 def get_now_date():
     return datetime.now().strftime('%Y-%m-%d 00:00:00')
 if __name__ == '__main__':
-    author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
-    author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
-    print(author)
-    # print(filesize_format(10022))
+    # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
+    # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
+    # print(author)
+    print(filesize_format(100022000000000000000000000000))
     # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
 
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
