@@ -151,7 +151,7 @@ def get_book_content(wx_openid,page=1):
     return books
 
 def search_net_book(title=None,author=None,isbn=None, openid="",):
-    search_url = 'https://zlib.knat.network/search?limit=20&query='
+    search_url = 'https://zlib.knat.network/search?limit=12&query='
     # print(search_url)
     if not any((title, author, isbn)):
         return None

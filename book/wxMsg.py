@@ -71,7 +71,7 @@ def send_failed_body(bookname):
         '''
 
 # 当文件大于20M的时候 发送下载地址到邮箱
-def mail_url_body(filename):
+def mail_download_url_body(filename):
     download_url = config.DOWNLOAD_URL+filename
     return f'''
         《{filename}<br/>

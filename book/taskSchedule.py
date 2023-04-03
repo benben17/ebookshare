@@ -7,7 +7,7 @@ import config
 
 scheduler = APScheduler()
 import logging
-from book.wxMsg import mail_body, send_failed_body, mail_url_body
+from book.wxMsg import mail_body, send_failed_body, mail_download_url_body
 from book import send_email, app, download_net_book, email_att_or_url
 
 
@@ -35,7 +35,7 @@ def bookSend():
                             send_email(userlog.book_name, mail_body(userlog.book_name), userlog.receive_email,
                                        file_path)
                         else:
-                            send_email(userlog.book_name, mail_url_body(userlog.book_name), userlog.receive_email)
+                            send_email(userlog.book_name, mail_download_url_body(userlog.book_name), userlog.receive_email)
 
                         userlog.status = config.SUCCESS_FLAG
                         userlog.create_time = datetime.datetime.now()

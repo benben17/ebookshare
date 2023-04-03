@@ -77,7 +77,7 @@ def wechat():
             if content == "哈哈哈":
                 return wx_reply_news(from_user, to_user)
             # 发送文件
-            if re.match("[0-9]", content) and int(content) <= 11:
+            if re.match("[0-9]", content) and int(content) <= 16:
                 if not user.email:
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
                 # 每个用户每天最多下载5本书
