@@ -24,7 +24,7 @@ def wechat():
         # 处理消息请求
         msg_type, from_user, to_user, content, event = parse_xml(request.data)
         from_user = from_user.strip()
-        logging.error(from_user)
+        # logging.error(from_user)
         to_user = to_user.strip()
         if msg_type.strip() == 'event' and event.strip() == 'subscribe':
             return wx_reply_xml(from_user, to_user, reply_subscribe)
@@ -61,10 +61,11 @@ def wechat():
                 if user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
                 user.email = content
+                user.kindle_email = content
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-
+            # 检查是不是 书籍ISBN
             if check_isbn(content):
                 msg_content, books_cache = search_net_book(isbn=content, openid=from_user)
                 if books_cache is not None:
@@ -72,8 +73,8 @@ def wechat():
                 return wx_reply_xml(from_user, to_user, msg_content)
             # if content == 'next':
 
-            if content == "哈哈哈":
-                return wx_reply_news(from_user, to_user)
+            # if content == "哈哈哈":
+            #     return wx_reply_news(from_user, to_user)
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 16:
                 if not user.email:
@@ -89,10 +90,10 @@ def wechat():
                     send_info = book_info.split(":")
                     logging.error(send_info)
                     # 之前是否发送失败过，如果失败则返回此书籍不可用
-                    userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1],Userlog.status == config.SEND_FAILED).all()
+                    userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1], Userlog.status == config.SEND_FAILED).all()
                     if userlog:
                         return wx_reply_xml(from_user, to_user, send_failed_msg)
-                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email,
+                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email, user_id=user.id,
                                        operation_type='download', status=0, ipfs_cid=send_info[1],filesize=send_info[2])
                     db.session.add(user_log)
                     db.session.commit()

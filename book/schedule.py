@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import os
 import logging
 
@@ -25,9 +25,9 @@ def delete_file_out_24_hours():
         # 判断是否为文件
         if os.path.isfile(file_path) and allowed_ebook_ext(suffix):
             # 获取文件创建时间
-            create_time = datetime.datetime.fromtimestamp(os.path.getctime(file_path))
+            create_time = datetime.fromtimestamp(os.path.getctime(file_path))
             # 计算时间差
-            time_diff = datetime.datetime.now() - create_time
+            time_diff = datetime.now() - create_time
             # 如果时间差大于24小时，则删除文件
             if time_diff.total_seconds() > 24 * 60 * 60:
                 os.remove(file_path)
@@ -52,7 +52,8 @@ def book_send(send_status):
                             send_email(userlog.book_name, mail_download_url_body(userlog.book_name), userlog.receive_email)
 
                         userlog.status = config.SEND_SUCCESS
-                        userlog.create_time = datetime.datetime.now()
+
+                        userlog.create_time = datetime.now()
                         db.session.add(userlog)
                         db.session.commit()
                         logging.info("发送成功"+userlog.book_name+userlog.receive_email)
@@ -64,34 +65,6 @@ def book_send(send_status):
                     db.session.add(userlog)
                     db.session.commit()
 
-# class Config(object):
-#     JOBS = [
-#         {
-#             'id': 'retry_book_send',
-#             'func': '__main__:book_send',
-#             'args': (4),
-#             'trigger': 'cron',
-#             'day': '*',
-#             'hour': '13',
-#             'minute': '16',
-#             'second': '20'
-#         },
-#         {
-#             'id': 'book_send',
-#             'func': '__main__:book_send',
-#             'args': (0),
-#             'trigger': 'interval',
-#             'seconds': 5
-#         },
-#         {
-#             'id': 'delete_file',
-#             'func': '__main__:delete_file_out_24_hours',
-#             'trigger': 'interval',
-#             'hours': 2
-#          }
-#     ]
-#     SCHEDULER_API_ENABLED = True
-#     SCHEDULER_TIMEZONE = 'Asia/Shanghai'
 class Config(object):
     SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
     SCHEDULER_API_ENABLED = True  # 添加API
@@ -103,3 +76,5 @@ scheduler.add_job(id="delete_file",func=delete_file_out_24_hours, trigger="inter
 scheduler.add_job(id="send_file",func=book_send, args=("0"), trigger="interval", seconds=180, replace_existing=False, max_instances=2)
 scheduler.add_job(id="retry_send_file",func=book_send, args=("4"), trigger="cron", day="*", hour="01", replace_existing=False)
 scheduler.start()
+
+

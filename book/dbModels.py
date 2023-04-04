@@ -3,8 +3,6 @@ from datetime import datetime
 from book import db
 
 
-def is_active():
-    return False
 
 
 class User(db.Model):
