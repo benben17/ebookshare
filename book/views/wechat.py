@@ -1,6 +1,8 @@
 import datetime
 import json
 import logging
+
+import config
 from book import request, cache, app, db, Blueprint
 from book.wxMsg import *
 from book.utils import *
@@ -87,7 +89,7 @@ def wechat():
                     send_info = book_info.split(":")
                     logging.error(send_info)
                     # 之前是否发送失败过，如果失败则返回此书籍不可用
-                    userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1],Userlog.status == config.FAILED_FlAG).all()
+                    userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1],Userlog.status == config.SEND_FAILED).all()
                     if userlog:
                         return wx_reply_xml(from_user, to_user, send_failed_msg)
                     user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email,
