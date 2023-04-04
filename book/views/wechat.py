@@ -22,6 +22,7 @@ def wechat():
         # 处理消息请求
         msg_type, from_user, to_user, content, event = parse_xml(request.data)
         from_user = from_user.strip()
+        logging.error(from_user)
         to_user = to_user.strip()
         if msg_type.strip() == 'event' and event.strip() == 'subscribe':
             return wx_reply_xml(from_user, to_user, reply_subscribe)
