@@ -1,5 +1,5 @@
 # -*-coding: utf-8-*-
-
+import logging
 import os.path
 import time, os
 from datetime import datetime
@@ -22,7 +22,9 @@ def parse_xml(xml_str):
     return msg_type, from_user, to_user, content, event
 
 
+
 def search_book_content(books, from_user):
+    """搜索本地书籍 已经弃用"""
     if len(books) == 0:
         msg_content = f'你搜的书不存在，请尝试搜索其他书籍！\n'
         return msg_content,None
@@ -39,14 +41,6 @@ def search_book_content(books, from_user):
     msg_content += '---------------------------\n'
     msg_content += f'发送图书编号直接发送到绑定邮箱。\n'
     return msg_content, books_cache
-
-def allowed_file(filename):
-    """
-    :param filename: 带路径的文件
-    :return:
-    """
-    ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def check_isbn(str):
     if len(str) == 13:
@@ -91,62 +85,56 @@ def filesize_format(value, binary=False):
 def net_book_content(books, from_user):
     if len(books) == 0:
         msg_content = f'你搜的书不存在，请尝试搜索其他书籍！\n'
-        return msg_content,None
-    msg_content = f'一共搜索到{len(books)}本书:\n'
+        return msg_content, None
+    book_count = len(books)
+    msg_content = f'一共搜索到{book_count}本书:\n'
+    msg_content_separator = '------------------------\n'
+    email_instructions = '回复编号，发送到绑定邮箱\n'
     books_cache = {}
-    row_num = 1
-    for book in books:
+
+    for index, book in enumerate(books, start=1):
         author = str(book['author']).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
-        title = book['title']
-        if len(title) > 60:
-            title = title[:60]
+        title = book['title'][:30]
         ext = book['extension']
         ipfs_cid = book['ipfs_cid']
         filesize = filesize_format(book['filesize'])
         filename = f'{title}.{ext}'
-        msg_content += f'{row_num} :【{title}.{ext}】-{author}-{filesize} \n'
-        books_cache[f'{from_user}_{row_num}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}'
-        row_num += 1
-    msg_content += '------------------------\n'
-    msg_content += f'回复编号，发送到绑定邮箱\n'
-    return msg_content, books_cache
+        msg_content += f'{index} :【{filename}】-{author}-{filesize}\n'
+        books_cache[f'{from_user}_{index}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}'
 
+    msg_content += msg_content_separator + email_instructions
+    return msg_content, books_cache
 
 def cache_book(books,wx_openid):
     if len(books) == 0:
-
         return True
-    row_num = 1
     books_cache = {}
     try:
-        for book in books:
+        for index, book in enumerate(books, start=1):
             author = str(book['author']).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
             title = book['title']
-            if len(title) > 30:
-                title = title[:30]
+            title = title[:30]
             ext = book['extension']
             ipfs_cid = book['ipfs_cid']
             filesize = filesize_format(book['filesize'])
             filename = f'{title}.{ext}'
-            books_cache[f'{wx_openid}_{row_num}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}:{author}:{filesize}'
-            row_num += 1
+            books_cache[f'{wx_openid}_{index}'] = f'{filename}:{ipfs_cid}:{book["filesize"]}:{author}:{filesize}'
         from book import  cache
         cache.set_many(books_cache)
         return True
     except Exception as e:
         logging.error(f"缓存错误:{e}")
         return False
-def get_book_content(wx_openid,page=1):
-    from book import cache
-    i = 1 * page
-    keys = []
-    num = page * config.PAGE_NUM +1
-    while(1< num):
-        keys.append(wx_openid+'_'+str(i))
-        i += 1
-
-    books = cache.get_many(keys)
-    return books
+# def get_book_content(wx_openid,page=1):
+#     from book import cache
+#     i = 1 * page
+#     keys = []
+#     num = page * config.PAGE_NUM +1
+#     while(1< num):
+#         keys.append(wx_openid+'_'+str(i))
+#         i += 1
+#     books = cache.get_many(keys)
+#     return books
 
 def search_net_book(title=None,author=None,isbn=None, openid="",):
     search_url = 'https://zlib.knat.network/search?limit=12&query='
@@ -163,7 +151,7 @@ def search_net_book(title=None,author=None,isbn=None, openid="",):
     res = requests.get(url=search_url+param, timeout=30)
     if int(res.status_code) == 200:
         json_res = res.json()
-        return net_book_content(json_res['books'],openid)
+        return net_book_content(json_res['books'], openid)
     return False
 
 
@@ -178,21 +166,20 @@ def download_net_book(ipfs_cid, filename):
         'https://ipfs.jpu.jp'
 
     ]
-
     for url in url_list:
-        url_with_cid = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
+        full_url = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
         logging.info("start download:"+filename+ipfs_cid)
         try:
-            response = requests.get(url_with_cid, stream=True, timeout=30)
+            response = requests.get(full_url, stream=True, timeout=30)
             response.raise_for_status()  # Raise exception if response status code is not 200
             file_path = config.DOWNLOAD_DIR+filename
             with open(file_path, 'wb') as f:
-                for data in response.iter_content(chunk_size=4096):
+                for data in response.iter_content(chunk_size=2048):
                     f.write(data)
             logging.info(f"{filename}:File downloaded successfully")
             return file_path
         except RequestException as e:
-            logging.info(f"Error downloading from {url_with_cid}: {e}")
+            logging.info(f"Error downloading from {full_url}: {e}")
 
     logging.error(f"{filename} Could not download file from any of the URLs provided")
     return None
@@ -208,6 +195,13 @@ def is_file_24_hours(file_path):
 
 def get_now_date():
     return datetime.now().strftime('%Y-%m-%d 00:00:00')
+
+def new_secret_key(length=8):
+    import random
+    allchars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789'
+    return ''.join([random.choice(allchars) for i in range(length)])
+
+
 if __name__ == '__main__':
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))

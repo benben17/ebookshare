@@ -1,1 +1,1 @@
-echo "# ebookshare" >> README.md
+ebookshare

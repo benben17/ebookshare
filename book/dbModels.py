@@ -14,7 +14,7 @@ class User(db.Model):
     wx_openid = db.Column(db.String(64),unique=True)
     upload_times = db.Column(db.Integer, default=0)
     download_times = db.Column(db.Integer, default=0)
-
+    feed_count = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
     def is_authenticated(self):
@@ -69,16 +69,20 @@ class Userlog(db.Model):
     filesize = db.Column(db.Integer)
     wx_openid = db.Column(db.String(120))
 
-class LibRss(db.Model):
+class Librss(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
+    title = db.Column(db.String(200))
     url = db.Column(db.String(300))
     isfulltext = db.Column(db.Integer)
-    category = db.Column(db.String(64))
+    desc = db.Column(db.String(300))
+    category = db.Column(db.String(64),index=True)
     creator = db.Column(db.String(64))
     created_time = db.Column(db.DateTime, default=datetime.now())
     subscribed = db.Column(db.Integer, default=0)  # for sort
     invalid_date = db.Column(db.DateTime, default=datetime.now())  # some one reported it is a invalid link
+
+    def __repr__(self):
+        return self.title
 
 
     # return all categories in database
@@ -88,8 +92,8 @@ class MyFeed(db.Model):
     title = db.Column(db.String(64))
     url = db.Column(db.String(300))
     isfulltext = isfulltext = db.Column(db.Integer)
-    wx_openid = db.Column(db.String(64))  # 微信id
-    user_id = db.Column(db.Integer)
+    wx_openid = db.Column(db.String(64),index=True)  # 微信id
+    user_id = db.Column(db.Integer,index=True)
     time = db.Column(db.DateTime, default=datetime.now())  # 源被加入的时间，用于排序
     created_time = db.Column(db.DateTime, default=datetime.now())
 

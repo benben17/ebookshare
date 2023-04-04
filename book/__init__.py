@@ -1,16 +1,11 @@
 # -*-coding: utf-8-*-
-
-
 from threading import Thread
-from flask import request
-from flask import Flask
+from flask import Flask, request, Blueprint
 from flask_caching import Cache
 from flask_mail import Mail, Message, Attachment
 from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
-from book.utils import *
 import logging
-logging.basicConfig(filename="book.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%m-%Y %H:%M:%S", level=logging.INFO)
 
 
 
@@ -18,7 +13,6 @@ app = Flask(__name__)
 app.config.from_object('config')
 # principals = Principal(app)
 # login_manager = LoginManager(app)
-
 # login_manager.login_view = 'login'
 # login_manager.session_protection = 'strong'
 # login_manager.remember_cookie_duration = timedelta(minutes=15)
@@ -30,9 +24,14 @@ from book.dbModels import *
 with app.app_context():
     db.create_all()
 # load the extension
-os.environ['TZ']= 'Asia/Shanghai'
 
+# logging.basicConfig(filename="book.log", filemode="w", format="%(asctime)s %(name)s:%(levelname)s:%(message)s", datefmt="%d-%m-%Y %H:%M:%S", level=logging.INFO)
 
+from book.views import user, feed, wechat
+
+# app.register_blueprint(user, url_prefix='user')
+# app.register_blueprint(feed, url_prefix='feed')
+# app.register_blueprint(wechat, url_prefix='')
 
 
 def send_async_email(app, msg):

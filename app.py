@@ -1,12 +1,8 @@
 from book import app
-from book.dbModels import *
-from book.views import *
-from book.taskSchedule import *
 
 
 
 
 if __name__ == '__main__':
-
-    app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
+    print(app.url_map)
     app.run(debug=True,threaded=True)

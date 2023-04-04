@@ -3,13 +3,12 @@ APPID = "wx0630c28def50cbfd"
 APPSECRET = "20764c0ae174a1e12c78e809a877c382"
 wechat_token = "kindlebooks"
 
-UPLOAD_FOLDER = "/var/www"
-
 SECRET_KEY = os.getenv('SECRET_KEY','ebook')
 SQLALCHEMY_DATABASE_URI = "sqlite:///ebook.db"
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 CSRF_ENABLED = True
 
+os.environ['TZ']= 'Asia/Shanghai'
 
 # flask mail
 # Flask-Mail settings
@@ -41,3 +40,5 @@ FAILED_FlAG = 3   # 失败
 SUCCESS_FLAG = 1   # 成功
 
 PAGE_NUM = 10 #每页显示条数
+
+RSS2EBOOK_URL = 'https://benben5-191802.an.r.appspot.com'
