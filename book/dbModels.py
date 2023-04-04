@@ -18,10 +18,10 @@ class User(db.Model):
     active = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
-    def __init__(self, username=None, password=None, active=True):
+    def __init__(self, username=None, password=None, active=True, wx_openid=None):
         self.username = username
         self.password = password
-        self.active = True
+        self.active = active
     def is_authenticated(self):
         return False
 
