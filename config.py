@@ -36,9 +36,18 @@ BOOK_FILE_DIR = "/data/" # 电子书存放目录
 DOWNLOAD_DIR = "/opt/ebookdl/"
 DOWNLOAD_URL = "https://ebook.stararea.cn/ebookdl/"
 # 发送邮件状态
-FAILED_FlAG = 3   # 失败
-SUCCESS_FLAG = 1   # 成功
+SEND_FAILED = 3   # 失败
+SEND_SUCCESS = 1   # 成功
+SEND_UNKONOW = 4
 
 PAGE_NUM = 10 #每页显示条数
 
 RSS2EBOOK_URL = 'https://benben5-191802.an.r.appspot.com'
+
+
+# jwt
+JWT_SECRET_KEY = os.environ.get('ebookshare') or 'ebookshare'
+JWT_COOKIE_CSRF_PROTECT = True
+JWT_CSRF_CHECK_FORM = True
+JWT_ACCESS_TOKEN_EXPIRES = os.environ.get('JWT_ACCESS_TOKEN_EXPIRES')
+PROPAGATE_EXCEPTIONS = True

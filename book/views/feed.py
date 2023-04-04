@@ -1,7 +1,6 @@
 import requests
 import config
 from book import app, request, Blueprint
-# feed = Blueprint('feed', __name__)
 from flask import jsonify
 
 headers = {

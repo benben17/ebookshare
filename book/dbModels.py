@@ -15,8 +15,13 @@ class User(db.Model):
     upload_times = db.Column(db.Integer, default=0)
     download_times = db.Column(db.Integer, default=0)
     feed_count = db.Column(db.Integer, default=0)
+    active = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
+    def __init__(self, username=None, password=None, active=True):
+        self.username = username
+        self.password = password
+        self.active = True
     def is_authenticated(self):
         return False
 
