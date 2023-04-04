@@ -3,6 +3,10 @@ from datetime import datetime
 from book import db
 
 
+def is_active():
+    return False
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
@@ -18,15 +22,6 @@ class User(db.Model):
     active = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
-    def __init__(self, username=None, password=None, active=True, wx_openid=None):
-        self.username = username
-        self.password = password
-        self.active = active
-    def is_authenticated(self):
-        return False
-
-    def is_active(self):
-        return False
 
     def is_anonymous(self):
         return False
