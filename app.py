@@ -1,5 +1,7 @@
 import logging
 
+from flask import Flask
+
 from book import app
 from book.schedule import *
 

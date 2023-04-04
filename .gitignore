@@ -9,6 +9,7 @@ scripts/
 config.py
 /instance/
 instance/
+*.db
 *.out
 # Vim temp/swap files
 *~
@@ -28,8 +29,6 @@ instance/
 *.mo
 *.pot
 
-*.log
-
 # PyBuilder
 target/
 
@@ -47,4 +46,4 @@ target/
 s3upload.py
 
 # Folder to direct output to when testing command-line (will be ignored by git)
-testout/
+logs/
