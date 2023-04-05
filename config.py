@@ -36,7 +36,7 @@ CACHE_THRESHOLD = 100   # 缓存的最大条目数
 
 
 # 电子书下载目录
-DOWNLOAD_DIR = os.path.join(basedir, 'ebooks')
+DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')
 # print(DOWNLOAD_DIR)
 DOWNLOAD_URL = "https://ebook.stararea.cn/download/"
 # 发送邮件状态

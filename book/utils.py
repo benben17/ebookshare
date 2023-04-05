@@ -88,8 +88,8 @@ def net_book_content(books, from_user):
         return msg_content, None
     book_count = len(books)
     msg_content = f'一共搜索到{book_count}本书:\n'
-    msg_content_separator = '------------------------\n'
-    email_instructions = '回复编号，发送到绑定邮箱\n'
+    msg_content_separator = '--------------------------\n'
+    email_instructions = '回复【1-15】编号，发送到绑定邮箱\n'
     books_cache = {}
 
     for index, book in enumerate(books, start=1):

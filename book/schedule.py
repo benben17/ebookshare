@@ -59,9 +59,12 @@ def book_send(send_status):
                     except Exception as e:
                         logging.error(e)
                 elif file_path is None:
-                    send_email(userlog.book_name + "-发送失败", send_failed_body(userlog.book_name),
+                    send_email(userlog.book_name + "-下载文件失败", send_failed_body(userlog.book_name),
                                userlog.receive_email)
-                    userlog.status = config.SEND_UNKONOW
+                    if send_status == '3' or send_status ==3:
+                        userlog.status = config.SEND_FAILED
+                    else:
+                        userlog.status = config.SEND_UNKONOW
                     db.session.add(userlog)
                     db.session.commit()
 
