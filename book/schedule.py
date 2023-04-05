@@ -78,7 +78,7 @@ scheduler = APScheduler(BackgroundScheduler())
 scheduler.init_app(app)
 scheduler.add_job(id="delete_file", func=delete_file_out_24_hours, trigger="interval", hours=2, replace_existing=False)
 scheduler.add_job(id="send_file", func=book_send, args=("0"), trigger="interval", seconds=180, replace_existing=False,
-                  max_instances=2)
+                  max_instances=3)
 scheduler.add_job(id="retry_send_file", func=book_send, args=("4"), trigger="cron", day="*", hour="01",
                   replace_existing=False)
 scheduler.start()
