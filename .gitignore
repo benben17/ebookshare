@@ -44,4 +44,5 @@ db/
 /venv/
 venv/*
 ebooks/
+/ebooks/
 db/ebook.db
