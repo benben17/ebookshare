@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-import logging
 
 from flask_apscheduler import APScheduler
 from flask_apscheduler.scheduler import BackgroundScheduler

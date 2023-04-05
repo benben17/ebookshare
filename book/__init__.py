@@ -61,8 +61,10 @@ def send_email(subject, body, receiver, attach=None):
 logging.basicConfig(level=logging.INFO)  # 调试debug级(开发环境)
 file_log_handler = RotatingFileHandler("{}/logs/books.log".format(os.path.dirname(app.root_path)),
                                        maxBytes=1024 * 1024 * 100, backupCount=10)  # 100M
-formatter = logging.Formatter('%(asctime)s %(levelname)s: %(filename)s:%(lineno)d %(message)s')  # 时间,日志级别,记录日志文件,行数,信息
+formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(filename)s-%(funcName)s-%(lineno)s-%(message)s')  # 时间,日志级别,记录日志文件,行数,信息
 # 将日志记录器指定日志的格式
 file_log_handler.setFormatter(formatter)
 # 为全局的日志工具对象添加日志记录器
 logging.getLogger().addHandler(file_log_handler)
+
+

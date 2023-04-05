@@ -43,5 +43,5 @@ logs/
 db/
 /venv/
 venv/*
-
+ebooks/
 db/ebook.db
