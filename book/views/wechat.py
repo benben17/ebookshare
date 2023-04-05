@@ -2,6 +2,8 @@ import datetime
 import json
 import logging
 
+from flask import redirect, send_from_directory, render_template
+
 import config
 from book import request, cache, app, db, Blueprint
 from book.wxMsg import *
@@ -110,6 +112,20 @@ def wechat():
 
         else: # 其他未知消息
             return wx_reply_xml(from_user, to_user, reply_help_msg)
+
+
+@app.route('/download/<path:filename>')
+def dl(filename):
+    logging.error(config.DOWNLOAD_DIR,filename)
+    if os.path.exists(os.path.join(config.DOWNLOAD_DIR,filename)) is False:
+        return redirect("/download/404")
+    return send_from_directory(config.DOWNLOAD_DIR, filename)
+    # return APIResponse.success(data="欢迎关注 sendtokindles 公众号下载电子书")
+
+@app.route("/download/404")
+def download_404():
+    # logging.error(app.template_folder)
+    return render_template('404.html')
 
 
 class WeChat:

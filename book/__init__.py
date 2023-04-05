@@ -1,5 +1,5 @@
 # -*-coding: utf-8-*-
-
+import os
 from logging.handlers import RotatingFileHandler
 from threading import Thread
 from flask import Flask, request, Blueprint
@@ -59,7 +59,7 @@ def send_email(subject, body, receiver, attach=None):
 初始化日志
 """
 logging.basicConfig(level=logging.INFO)  # 调试debug级(开发环境)
-file_log_handler = RotatingFileHandler("{}/logs/books.log".format(app.root_path.replace("/book", "")),
+file_log_handler = RotatingFileHandler("{}/logs/books.log".format(os.path.dirname(app.root_path)),
                                        maxBytes=1024 * 1024 * 100, backupCount=10)  # 100M
 formatter = logging.Formatter('%(asctime)s %(levelname)s: %(filename)s:%(lineno)d %(message)s')  # 时间,日志级别,记录日志文件,行数,信息
 # 将日志记录器指定日志的格式

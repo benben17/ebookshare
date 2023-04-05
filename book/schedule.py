@@ -16,12 +16,12 @@ from book.utils import *
 # logging.info('无发送任务')
 
 def delete_file_out_24_hours():
-    print("delete_file_out_24_hours")
+    logging.info("delete_file_out_24_hours")
     for filename in os.listdir(config.DOWNLOAD_DIR):
         file_path = os.path.join(config.DOWNLOAD_DIR, filename)
-        suffix = get_file_suffix(file_path)
+
         # 判断是否为文件
-        if os.path.isfile(file_path) and allowed_ebook_ext(suffix):
+        if os.path.isfile(file_path) and allowed_ebook_ext(os.path.basename(file_path)):
             # 获取文件创建时间
             create_time = datetime.fromtimestamp(os.path.getctime(file_path))
             # 计算时间差
@@ -29,7 +29,7 @@ def delete_file_out_24_hours():
             # 如果时间差大于24小时，则删除文件
             if time_diff.total_seconds() > 24 * 60 * 60:
                 os.remove(file_path)
-
+                logging.info(f"delete file : {file_path}")
 
 def book_send(send_status):
     from book.dbModels import Userlog

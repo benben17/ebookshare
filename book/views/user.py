@@ -1,14 +1,19 @@
 # encoding:utf-8
 import hashlib
-import logging
+
+import os
+
+import flask
+from flask import send_from_directory, redirect, render_template
+
+import config
 from book import request, cache, app, db, Blueprint
 # user = Blueprint('user', __name__)
-
+import logging
 from book.ApiResponse import APIResponse
 
-@app.route('/', methods=['GET', 'POST'])
+
+@app.route("/")
 def home():
-
-    # return APIResponse.success(data="欢迎关注 sendtokindles 公众号下载电子书")
-
-    return "欢迎关注 sendtokindles 公众号下载电子书"
+    # logging.error(app.template_folder)
+    return "欢迎关注公众号：sendtokindles 下载电子书"

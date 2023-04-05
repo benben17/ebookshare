@@ -1,12 +1,13 @@
 import os
+basedir= os.path.abspath(os.path.dirname(__file__))
 APPID = "wx0630c28def50cbfd"
 APPSECRET = "20764c0ae174a1e12c78e809a877c382"
 wechat_token = "kindlebooks"
 
 SECRET_KEY = os.getenv('SECRET_KEY','ebook')
-basedir= os.path.abspath(os.path.dirname(__file__))
+
 SQLALCHEMY_DATABASE_URI = "sqlite:///"+ os.path.join(basedir,'db/ebook.db')
-print(os.path.join(basedir,'db/ebook.db'))
+
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 CSRF_ENABLED = True
 
@@ -35,8 +36,9 @@ CACHE_THRESHOLD = 100   # 缓存的最大条目数
 
 
 # 电子书下载目录
-DOWNLOAD_DIR = "/opt/ebookdl/"
-DOWNLOAD_URL = "https://ebook.stararea.cn/ebookdl/"
+DOWNLOAD_DIR = os.path.join(basedir, 'ebooks')
+# print(DOWNLOAD_DIR)
+DOWNLOAD_URL = "https://ebook.stararea.cn/download/"
 # 发送邮件状态
 SEND_FAILED = 3   # 失败
 SEND_SUCCESS = 1   # 成功

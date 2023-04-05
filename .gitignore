@@ -3,11 +3,6 @@ __pycache__/
 *.py[cod]
 .idea
 *.DS_Store
-s3upload.py
-scripts/*
-scripts/
-config.py
-db/ebook.db
 *.db
 *.out
 # Vim temp/swap files
@@ -22,9 +17,6 @@ db/ebook.db
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
-/venv/
-venv/*
-
 
 # Translations
 *.mo
@@ -32,7 +24,6 @@ venv/*
 
 # PyBuilder
 target/
-
 *.bak
 *.dat
 *.data
@@ -49,3 +40,7 @@ target/
 # Folder to direct output to when testing command-line (will be ignored by git)
 logs/
 db/
+/venv/
+venv/*
+
+db/ebook.db
