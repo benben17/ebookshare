@@ -31,7 +31,7 @@ CACHE_OPTIONS = {}    # 可选字典,在缓存类实例化期间传递，也是�
 CACHE_DEFAULT_TIMEOUT = 600  # 默认过期/超时时间，单位为秒
 CACHE_THRESHOLD = 100   # 缓存的最大条目数
 
-BOOK_FILE_DIR = "/data/" # 电子书存放目录
+
 # 电子书下载目录
 DOWNLOAD_DIR = "/opt/ebookdl/"
 DOWNLOAD_URL = "https://ebook.stararea.cn/ebookdl/"

@@ -9,6 +9,7 @@ scripts/
 config.py
 /instance/
 instance/
+instance/ebook.db
 *.db
 *.out
 # Vim temp/swap files
@@ -23,6 +24,8 @@ instance/
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+/venv/
+venv/*
 
 
 # Translations
@@ -47,3 +50,4 @@ s3upload.py
 
 # Folder to direct output to when testing command-line (will be ignored by git)
 logs/
+instance/

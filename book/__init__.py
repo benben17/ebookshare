@@ -1,5 +1,5 @@
 # -*-coding: utf-8-*-
-import os
+
 from logging.handlers import RotatingFileHandler
 from threading import Thread
 from flask import Flask, request, Blueprint
@@ -21,11 +21,13 @@ cache = Cache(app)
 
 db = SQLAlchemy(app)
 from book.dbModels import *
+
 with app.app_context():
     db.create_all()
 # load the extension
 
 from book.views import user, feed, wechat
+
 
 # app.register_blueprint(user, url_prefix='user')
 # app.register_blueprint(feed, url_prefix='feed')
@@ -35,6 +37,7 @@ from book.views import user, feed, wechat
 def send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
+
 
 def send_email(subject, body, receiver, attach=None):
     msg = Message(subject, recipients=[receiver])
@@ -52,16 +55,14 @@ def send_email(subject, body, receiver, attach=None):
     return u'发送成功'
 
 
-
 """
 初始化日志
 """
 logging.basicConfig(level=logging.INFO)  # 调试debug级(开发环境)
-file_log_handler = RotatingFileHandler("{}/logs/books.log".format(app.root_path.replace("/book","")), maxBytes=1024 * 1024 * 100, backupCount=10)  # 100M
+file_log_handler = RotatingFileHandler("{}/logs/books.log".format(app.root_path.replace("/book", "")),
+                                       maxBytes=1024 * 1024 * 100, backupCount=10)  # 100M
 formatter = logging.Formatter('%(asctime)s %(levelname)s: %(filename)s:%(lineno)d %(message)s')  # 时间,日志级别,记录日志文件,行数,信息
 # 将日志记录器指定日志的格式
 file_log_handler.setFormatter(formatter)
 # 为全局的日志工具对象添加日志记录器
 logging.getLogger().addHandler(file_log_handler)
-
-

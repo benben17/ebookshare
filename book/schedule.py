@@ -2,20 +2,18 @@ from datetime import datetime
 import os
 import logging
 
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask_apscheduler import APScheduler
+from flask_apscheduler.scheduler import BackgroundScheduler
 import config
 from book.wxMsg import mail_body, send_failed_body, mail_download_url_body
 from book import send_email, app
 from book.utils import *
 
 
-
-
 # interval example, 间隔执行, 每30秒执行一次
 # @scheduler.task('interval', id='book_send', seconds=180, misfire_grace_time=900, max_instances=3)
 
-        # logging.info('无发送任务')
+# logging.info('无发送任务')
 
 def delete_file_out_24_hours():
     print("delete_file_out_24_hours")
@@ -49,31 +47,36 @@ def book_send(send_status):
                             send_email(userlog.book_name, mail_body(userlog.book_name), userlog.receive_email,
                                        file_path)
                         else:
-                            send_email(userlog.book_name, mail_download_url_body(userlog.book_name), userlog.receive_email)
+                            send_email(userlog.book_name, mail_download_url_body(userlog.book_name),
+                                       userlog.receive_email)
 
                         userlog.status = config.SEND_SUCCESS
 
                         userlog.create_time = datetime.now()
                         db.session.add(userlog)
                         db.session.commit()
-                        logging.info("发送成功"+userlog.book_name+userlog.receive_email)
+                        logging.info("发送成功" + userlog.book_name + userlog.receive_email)
                     except Exception as e:
                         logging.error(e)
                 elif file_path is None:
-                    send_email(userlog.book_name+"-发送失败", send_failed_body(userlog.book_name), userlog.receive_email)
+                    send_email(userlog.book_name + "-发送失败", send_failed_body(userlog.book_name),
+                               userlog.receive_email)
                     userlog.status = config.SEND_UNKONOW
                     db.session.add(userlog)
                     db.session.commit()
+
 
 class Config(object):
     SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
     SCHEDULER_API_ENABLED = True  # 添加API
 
+
 scheduler = APScheduler(BackgroundScheduler())
+
 scheduler.init_app(app)
-scheduler.add_job(id="delete_file",func=delete_file_out_24_hours, trigger="interval", hours=2, replace_existing=False)
-scheduler.add_job(id="send_file",func=book_send, args=("0"), trigger="interval", seconds=180, replace_existing=False, max_instances=2)
-scheduler.add_job(id="retry_send_file",func=book_send, args=("4"), trigger="cron", day="*", hour="01", replace_existing=False)
+scheduler.add_job(id="delete_file", func=delete_file_out_24_hours, trigger="interval", hours=2, replace_existing=False)
+scheduler.add_job(id="send_file", func=book_send, args=("0"), trigger="interval", seconds=180, replace_existing=False,
+                  max_instances=2)
+scheduler.add_job(id="retry_send_file", func=book_send, args=("4"), trigger="cron", day="*", hour="01",
+                  replace_existing=False)
 scheduler.start()
-
-

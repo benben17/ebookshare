@@ -9,4 +9,5 @@ from book.schedule import *
 
 if __name__ == '__main__':
 
+    print(app.root_path)
     app.run(debug=True,threaded=True,use_reloader=False)
