@@ -116,7 +116,6 @@ def wechat():
 
 @app.route('/download/<path:filename>')
 def dl(filename):
-    logging.error(config.DOWNLOAD_DIR,filename)
     if os.path.exists(os.path.join(config.DOWNLOAD_DIR,filename)) is False:
         return redirect("/download/404")
     return send_from_directory(config.DOWNLOAD_DIR, filename)
