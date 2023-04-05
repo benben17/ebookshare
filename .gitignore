@@ -7,9 +7,7 @@ s3upload.py
 scripts/*
 scripts/
 config.py
-/instance/
-instance/
-instance/ebook.db
+db/ebook.db
 *.db
 *.out
 # Vim temp/swap files
@@ -46,8 +44,8 @@ target/
 *.azw
 *.azw[34]
 *.pyc
-s3upload.py
+*.db
 
 # Folder to direct output to when testing command-line (will be ignored by git)
 logs/
-instance/
+db/

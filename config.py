@@ -4,7 +4,9 @@ APPSECRET = "20764c0ae174a1e12c78e809a877c382"
 wechat_token = "kindlebooks"
 
 SECRET_KEY = os.getenv('SECRET_KEY','ebook')
-SQLALCHEMY_DATABASE_URI = "sqlite:///ebook.db"
+basedir= os.path.abspath(os.path.dirname(__file__))
+SQLALCHEMY_DATABASE_URI = "sqlite:///"+ os.path.join(basedir,'db/ebook.db')
+print(os.path.join(basedir,'db/ebook.db'))
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 CSRF_ENABLED = True
 
