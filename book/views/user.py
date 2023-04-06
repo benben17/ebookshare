@@ -3,14 +3,14 @@ import hashlib
 
 import os
 from operator import or_
-from flask import redirect, render_template, g, flash, current_app, url_for
+from flask import redirect, render_template, g, flash, current_app, url_for, session
 from sqlalchemy.sql.functions import current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import current_user, login_user, logout_user, login_required
 from book import request, cache, app, db, User
-from flask_principal import Identity, identity_changed, RoleNeed
+from flask_principal import Identity, identity_changed, RoleNeed, Permission, AnonymousIdentity
 from book.ApiResponse import APIResponse
-from book.form import UserForm, LoginForm, ForgetPasswdForm
+from book.form import UserForm, LoginForm, ForgetPasswdForm, PasswdForm
 from book.utils import check_email, generate_code
 from book.mailUtil import send_email
 
@@ -18,7 +18,9 @@ from book.mailUtil import send_email
 # def before_request():
 #     g.user = current_user
 
-
+admin_permission = Permission(RoleNeed('admin'))
+dev_permission = Permission(RoleNeed('dev'))
+audit_permission = Permission(RoleNeed('audit'))
 @app.route("/")
 def home():
     # logging.error(app.template_folder)
@@ -62,7 +64,10 @@ def mail_code(email):
             send_email("注册rss2ebook验证码", verify_mail_code, email)
     return APIResponse.bad_request(msg="邮箱错误！")
 
-
+@app.route('/user')
+def user():
+    users = User.query.filter().all()
+    return render_template('user.html', users=users)
 @app.route("/user/sign_up")
 def sign_up():
     """GET|POST /create-account: create account form handler
@@ -103,3 +108,60 @@ def forget_passwd():
         db.session.commit()
         return redirect("/login")
     return render_template('forget_passwd.html', form=form)
+@app.route('/passwd', methods = ['GET', 'POST'])
+@login_required
+def passwd():
+    form = PasswdForm()
+    if form.validate_on_submit():
+        if form.new_pass.data == form.rep_pass.data:
+            if check_password_hash(current_user.hash_pass, form.old_pass.data):
+                current_user.hash_pass = generate_password_hash(form.new_pass.data)
+                db.session.commit()
+                return redirect('dashboard')
+
+
+    return render_template('passwd.html', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    for key in ('identity.name', 'identity.auth_type'):
+        session.pop(key, None)
+    identity_changed.send(current_app._get_current_object(),
+                          identity=AnonymousIdentity())
+    return redirect('login')
+
+@app.route('/user/create', methods = ['GET', 'POST'])
+@admin_permission.require()
+def user_create():
+    form = UserForm()
+    if form.validate_on_submit():
+        user = User()
+        user.name = form.name.data
+        user.hash_pass = generate_password_hash(form.passwd.data)
+        user.role = form.role.data
+        user.email = form.email.data
+        db.session.add(user)
+        db.session.commit()
+        return redirect('user')
+    return render_template('user_create.html', form=form)
+
+@app.route('/user/update/<int:id>', methods = ['GET', 'POST'])
+@admin_permission.require()
+def user_update(id):
+    user = User.query.get(id)
+    form = UserForm()
+    if form.validate_on_submit():
+        user.hash_pass = generate_password_hash(form.passwd.data)
+        user.email = form.email.data
+        db.session.commit()
+        return redirect('user')
+    return render_template('user_update.html', form=form, user=user)
+@app.route('/user/delete/<int:id>', methods = ['GET', 'POST'])
+@admin_permission.require()
+def user_delete(id):
+    user = User.query.get(id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect('user')
