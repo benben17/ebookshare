@@ -5,7 +5,7 @@ import logging
 from flask import redirect, send_from_directory, render_template
 
 import config
-from book import request, cache, app, db, Blueprint
+from book import request, cache, app, db
 from book.wxMsg import *
 from book.utils import *
 # wx = Blueprint('wx', __name__)
@@ -59,7 +59,7 @@ def wechat():
                 return wx_reply_xml(from_user, to_user, unbind_email_msg(user_email))
 
             # 绑定邮箱
-            if checkemail(content):
+            if check_email(content):
                 if user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
                 user.email = content

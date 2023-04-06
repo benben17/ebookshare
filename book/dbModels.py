@@ -1,5 +1,9 @@
 # coding: utf-8
 from datetime import datetime
+
+from flask import jsonify
+from sqlalchemy import inspect
+
 from book import db
 
 
@@ -20,6 +24,11 @@ class User(db.Model):
     active = db.Column(db.Integer, default=0)
     create_time = db.Column(db.DateTime, default=datetime.now())
 
+    def is_authenticated(self):
+        return False
+
+    def is_active(self):
+        return False
 
     def is_anonymous(self):
         return False
@@ -82,6 +91,19 @@ class Librss(db.Model):
     def __repr__(self):
         return self.title
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'url': self.url,
+            'isfulltext': self.isfulltext,
+            'desc': self.desc,
+            'category': self.category,
+            'creator': self.creator,
+            'created_time': self.created_time.isoformat() if self.created_time is not None else None,
+            'subscribed': self.subscribed,
+            'invalid_date': self.invalid_date.isoformat() if self.invalid_date is not None else None
+        }
 
     # return all categories in database
 
@@ -92,7 +114,17 @@ class MyFeed(db.Model):
     isfulltext = isfulltext = db.Column(db.Integer)
     wx_openid = db.Column(db.String(64),index=True)  # 微信id
     user_id = db.Column(db.Integer,index=True)
-    time = db.Column(db.DateTime, default=datetime.now())  # 源被加入的时间，用于排序
+    feed_time = db.Column(db.DateTime, default=datetime.now())  # 订阅时间
     created_time = db.Column(db.DateTime, default=datetime.now())
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'url': self.url,
+            'isfulltext': self.isfulltext,
+            'time': self.feed_time if self.feed_time is not None else None ,
+            'created_time': self.created_time.isoformat() if self.created_time is not None else None
+        }
 
 

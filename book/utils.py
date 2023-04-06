@@ -1,13 +1,18 @@
 # -*-coding: utf-8-*-
 import logging
 import os.path
+import re
 import time, os
 from datetime import datetime
 from pathlib import Path
 import xml.etree.ElementTree as ET
+import random
+
 import isbnlib
 import requests
 from requests.exceptions import RequestException
+from sqlalchemy import inspect
+
 import config
 
 
@@ -202,13 +207,43 @@ def new_secret_key(length=8):
     return ''.join([random.choice(allchars) for i in range(length)])
 
 
+def model_to_dict(self, model):
+    """
+    Convert a SQLAlchemy model instance into a JSON-serializable dict.
+    """
+    if not model:
+        return None
+    # get the attributes of the model instance
+    attributes = inspect(model).attrs
+    # convert the attributes to a dictionary
+    data = {}
+    for attribute in attributes:
+        value = getattr(model, attribute.key)
+        # convert datetime objects to ISO format
+        if isinstance(value, datetime):
+            value = value.isoformat() if value is not None else None
+        data[attribute.key] = value
+    return data
+
+def check_email(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if re.findall(pattern, email):
+        return True
+    else:
+        return False
+def generate_code():
+    code = []
+    for i in range(6):
+        code.append(str(random.randint(0, 9)))
+    return ''.join(code)
+
 if __name__ == '__main__':
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)
-    print(filesize_format(100022000000000000000000000000))
+    # print(filesize_format(100022000000000000000000000000))
     # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
-
+    print(generate_code())
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
     # download_net_book(ipfs_id,"平凡的世界.epub")
 

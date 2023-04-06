@@ -85,12 +85,7 @@ def mail_download_url_body(filename):
         欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
         '''
 
-def checkemail(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if re.findall(pattern, email):
-        return True
-    else:
-        return False
+
 
 create_time = str(int(time.time()))
 def wx_reply_xml(from_user, to_user, msg_content):

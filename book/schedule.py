@@ -5,8 +5,9 @@ from flask_apscheduler import APScheduler
 from flask_apscheduler.scheduler import BackgroundScheduler
 import config
 from book.wxMsg import mail_body, send_failed_body, mail_download_url_body
-from book import send_email, app
+from book import app
 from book.utils import *
+from book.mailUtil import send_email
 
 
 # interval example, 间隔执行, 每30秒执行一次
@@ -33,7 +34,7 @@ def delete_file_out_24_hours():
 def book_send(send_status):
     from book.dbModels import Userlog
     from book.dbModels import db
-    # logging.info("start task....")
+
     with app.app_context():
         userlogs = Userlog.query.filter(Userlog.status == send_status).all()
         if userlogs:
@@ -60,7 +61,7 @@ def book_send(send_status):
                 elif file_path is None:
                     send_email(userlog.book_name + "-下载文件失败", send_failed_body(userlog.book_name),
                                userlog.receive_email)
-                    if send_status == '3' or send_status ==3:
+                    if send_status == '3' or send_status == 3:
                         userlog.status = config.SEND_FAILED
                     else:
                         userlog.status = config.SEND_UNKONOW
