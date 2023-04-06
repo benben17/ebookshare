@@ -21,4 +21,6 @@ class ForgetPasswdForm(FlaskForm):
     email = StringField(u'邮箱', validators=[DataRequired()])
     verify_code = StringField(u'验证码', validators=[DataRequired()])
     new_pass = PasswordField(u'新密码', validators=[DataRequired()])
-
+class LoginForm(FlaskForm):
+    name = StringField(u'用户名', validators=[DataRequired()])
+    passwd = PasswordField(u'密码', validators=[DataRequired()])

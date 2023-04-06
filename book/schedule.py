@@ -73,7 +73,6 @@ class Config(object):
     SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
     SCHEDULER_API_ENABLED = True  # 添加API
 
-
 scheduler = APScheduler(BackgroundScheduler())
 
 scheduler.init_app(app)

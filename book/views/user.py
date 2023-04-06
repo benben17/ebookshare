@@ -14,9 +14,9 @@ from book.form import UserForm, LoginForm, ForgetPasswdForm
 from book.utils import check_email, generate_code
 from book.mailUtil import send_email
 
-@app.before_request
-def before_request():
-    g.user = current_user
+# @app.before_request
+# def before_request():
+#     g.user = current_user
 
 
 @app.route("/")
@@ -24,15 +24,20 @@ def home():
     # logging.error(app.template_folder)
     return "欢迎关注公众号：sendtokindles 下载电子书"
 
+@app.before_request
+def before_request():
+    g.user = current_user
 
-@app.route('/login', methods=['POST'])
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+@app.route('/login', methods = ['GET', 'POST'])
 def login():
     form = LoginForm()
     user = User.query.filter(or_(User.name == form.name.data, User.email == form.name.data)).first()
-
     if user is not None:
         if check_password_hash(user.hash_pass, form.passwd.data):
-
             login_user(user)
             identity_changed.send(current_app._get_current_object(),
                                   identity=Identity(user.id))
@@ -41,7 +46,7 @@ def login():
             flash(u'密码不正确！')
     else:
         flash(u'用户不存在！')
-    return render_template('login.html')
+    return render_template('login.html',form=form)
 
 
 @app.route("/email/code/<email>")
@@ -83,12 +88,6 @@ def sign_up():
         return redirect(request.args.get('next') or url_for('content.home'))
 
     return render_template('/user/sign_up.html', form=form)
-
-
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return "ok"
 
 
 @app.route('/user/forget/passwd')
