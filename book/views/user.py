@@ -1,11 +1,12 @@
 # encoding:utf-8
+import datetime
 import hashlib
 import logging
+import random
+import time
 
-import os
 from operator import or_
-from flask import redirect, flash
-from flask_jwt_extended import jwt_required, create_access_token
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import config
@@ -63,10 +64,9 @@ def sign_up():
         user = User.query.filter(or_(User.email == data['email'], User.name == data['email'])).first()
         if user:
             APIResponse.bad_request(msg="此邮箱已注册，请直接登录！")
-
-
         logging.error(generate_password_hash(data['passwd']))
         user = User()
+        user.id = str(int(time.time()))
         user.hash_pass = generate_password_hash(data['passwd'])
         user.email = data['email']
         user.name = user.email.split("@")[0]
@@ -95,15 +95,22 @@ def forget_passwd():
     return APIResponse.bad_request(msg="用户名不允许为空")
 
 @app.route('/logout')
-
 def logout():
 
 
     return APIResponse.success()
 
-
+@app.route('/user/info')
+@jwt_required()
+def user_info():
+    t_user = get_jwt_identity()
+    user = User.query().get(t_user['id'])
+    return APIResponse.success(data=model_to_dict(user))
 
 @app.route('/user/update/<id>', methods = ['GET', 'POST'])
 def user_update(id):
     user = User.query.get(id)
     return APIResponse.success()
+
+
+

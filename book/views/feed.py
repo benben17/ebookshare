@@ -2,7 +2,7 @@ import json
 import logging
 
 import requests
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 import config
 from book import app, request, Blueprint, User, db
@@ -15,6 +15,7 @@ headers = {
 }
 
 rss2ebook_key = 'rss2Ebook.com.luck!'
+
 # 用户同步
 @app.route('/api/v2/sync/user/add',  methods=['POST'])
 @jwt_required()
@@ -46,11 +47,15 @@ def get_my_feed_deliver():
 @app.route('/api/v2/my/rss/add',methods=['POST'])
 @jwt_required()
 def get_my_rss_add():
-    data = request.get_json()
     api_path = '/api/v2/rss/add'
     res = sync_post(api_path)
     if res['data']['status'] == 'ok':
-        user = User.query.filter(User.name == data['user_name']).get()
+        myuser = get_jwt_identity()
+        user = User.query.get(myuser['id'])
+        if user.feed_count >= 5 and user.role == config.DEFAULT_USER_ROLE:
+            return APIResponse.bad_request(msg="已达到最大订阅数，请升级用户")
+        if user.feed_count >= 100:
+            return APIResponse.bad_request(msg="已达到最大订阅数")
         user.feed_count = user.feed_count+1
         db.session.add(user)
         db.session.commit()
@@ -69,10 +74,10 @@ def get_pub_rss():
 @jwt_required()
 def get_my_rss_del():
     api_path = '/api/v2/rss/add'
-    data = request.get_json()
     res = sync_post(api_path)
+    user = get_jwt_identity()
     if res['data']['status'] == 'ok':
-        user = User.query.filter(User.name == data['user_name']).get()
+        user = User.query.get(user['id'])
         user.feed_count = user.feed_count-1 if user.feed_count == 0 else 0
         db.session.add(user)
         db.session.commit()
@@ -81,9 +86,10 @@ def get_my_rss_del():
 
 def sync_post(path):
     data = request.get_json()
+    user = get_jwt_identity()
     if data:
         data['key'] = rss2ebook_key
-
+        data['user_name'] = user['name']
     res = requests.post(config.RSS2EBOOK_URL+path, data=data, headers=headers)
     if res.status_code == 200:
         return APIResponse.success(json.loads(res.text))

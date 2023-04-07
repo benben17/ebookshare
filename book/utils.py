@@ -234,8 +234,10 @@ def generate_code():
         code.append(str(random.randint(0, 9)))
     return ''.join(code)
 
+
+
 if __name__ == '__main__':
-    print("a")
+    print(generate_id())
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)

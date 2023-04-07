@@ -61,7 +61,7 @@ def book_send(send_status):
                 elif file_path is None:
                     send_email(userlog.book_name + "-下载文件失败", send_failed_body(userlog.book_name),
                                userlog.receive_email)
-                    if send_status == '3' or send_status == 3:
+                    if int(send_status) == 4:
                         userlog.status = config.SEND_FAILED
                     else:
                         userlog.status = config.SEND_UNKONOW

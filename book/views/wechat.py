@@ -3,6 +3,8 @@ import json
 import logging
 
 from flask import redirect, send_from_directory, render_template
+from sqlalchemy import or_
+from werkzeug.security import generate_password_hash
 
 import config
 from book import request, cache, app, db
@@ -22,7 +24,7 @@ def wechat():
         return echostr if check_signature(token, signature, timestamp, nonce) else ''
 
     elif request.method == 'POST':
-        from book.dbModels import User, Userlog, Books
+        from book.dbModels import User, Userlog
         # 处理消息请求
         msg_type, from_user, to_user, content, event = parse_xml(request.data)
         from_user = from_user.strip()
@@ -40,9 +42,7 @@ def wechat():
             # 查找用户信息
             user = User.query.filter(User.wx_openid == from_user).first()
             if user is None:
-                user = User(wx_openid=from_user)
-                db.session.add(user)
-                db.session.commit()
+                user = User()
             # 查询绑定的邮箱地址
             if content.lower() == "email":
                 if not user.email:
@@ -57,13 +57,18 @@ def wechat():
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, unbind_email_msg(user_email))
-
             # 绑定邮箱
             if check_email(content):
                 if user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
+                user = User.query.filter(or_(User.email == content,User.kindle_email==content)).get()
+                if user is None:
+                    user = User()
+                user.wx_openid = from_user
                 user.email = content
                 user.kindle_email = content
+                user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
+                user.role = config.DEFAULT_USER_ROLE
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
@@ -92,9 +97,9 @@ def wechat():
                     send_info = book_info.split(":")
                     logging.error(send_info)
                     # 之前是否发送失败过，如果失败则返回此书籍不可用
-                    userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1], Userlog.status == config.SEND_FAILED).all()
-                    if userlog:
-                        return wx_reply_xml(from_user, to_user, send_failed_msg)
+                    # userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1], Userlog.status == config.SEND_FAILED).all()
+                    # if userlog:
+                    #     return wx_reply_xml(from_user, to_user, send_failed_msg)
                     user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email, user_id=user.id,
                                        operation_type='download', status=0, ipfs_cid=send_info[1],filesize=send_info[2])
                     db.session.add(user_log)
