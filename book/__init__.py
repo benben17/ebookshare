@@ -3,19 +3,13 @@ import os
 from logging.handlers import RotatingFileHandler
 from flask import Flask, request, Blueprint, redirect
 from flask_caching import Cache
-from flask_login import LoginManager
+from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderError, WrongTokenError
 from flask_mail import Mail, Message, Attachment
 from datetime import timedelta, date
 from flask_sqlalchemy import SQLAlchemy
 import logging
-
 app = Flask(__name__)
 app.config.from_object('config')
-# principals = Principal(app)
-# login_manager = LoginManager(app)
-# login_manager.login_view = 'login'
-# login_manager.session_protection = 'strong'
-# login_manager.remember_cookie_duration = timedelta(minutes=15)
 mail = Mail(app)
 cache = Cache(app)
 
@@ -45,19 +39,25 @@ formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(filename)s-%(funcName
 file_log_handler.setFormatter(formatter)
 # 为全局的日志工具对象添加日志记录器
 logging.getLogger().addHandler(file_log_handler)
+from flask_jwt_extended import JWTManager
+
+app.config['JWT_SECRET_KEY'] = 'rss2ebook'  # Change this to a secure random key in production
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 
 
 
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
-login_manager.session_protection = 'strong'
-login_manager.remember_cookie_duration = timedelta(minutes=15)
+jwt = JWTManager(app)
 
-@login_manager.user_loader
-def load_user(id):
-    return User.query.get(id)
-@login_manager.unauthorized_handler
-def unauthorized():
-    return redirect('/login')
+@app.errorhandler(NoAuthorizationError)
+@app.errorhandler(InvalidHeaderError)
+@app.errorhandler(WrongTokenError)
+def handle_auth_error(e):
+    return jsonify({'code': 10000, 'msg': str(e), "data": ""}), 200
+
+
+
+
+
 
 

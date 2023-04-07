@@ -22,6 +22,7 @@ class User(db.Model):
     download_times = db.Column(db.Integer, default=0)
     feed_count = db.Column(db.Integer, default=0)
     active = db.Column(db.Integer, default=0)
+    expires = db.Column(db.DateTime)  # 超过了此日期后账号自动停止推送
     create_time = db.Column(db.DateTime, default=datetime.now())
 
     def is_authenticated(self):
@@ -109,6 +110,7 @@ class Librss(db.Model):
 
 class MyFeed(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    rss_id = db.Column(db.Integer, index=True)
     title = db.Column(db.String(64))
     url = db.Column(db.String(300))
     isfulltext = isfulltext = db.Column(db.Integer)

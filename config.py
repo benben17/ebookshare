@@ -49,9 +49,7 @@ PAGE_NUM = 10 #每页显示条数
 RSS2EBOOK_URL = 'https://benben5-191802.an.r.appspot.com'
 
 
-# jwt
-JWT_SECRET_KEY = os.environ.get('ebookshare') or 'ebookshare'
-JWT_COOKIE_CSRF_PROTECT = True
-JWT_CSRF_CHECK_FORM = True
-JWT_ACCESS_TOKEN_EXPIRES = os.environ.get('JWT_ACCESS_TOKEN_EXPIRES')
-PROPAGATE_EXCEPTIONS = True
+DEFAULT_USER_ROLE='default'
+
+
+

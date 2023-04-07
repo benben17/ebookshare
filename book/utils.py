@@ -159,9 +159,6 @@ def search_net_book(title=None,author=None,isbn=None, openid="",):
         return net_book_content(json_res['books'], openid)
     return False
 
-
-
-
 def download_net_book(ipfs_cid, filename):
     url_list = [
         'https://dweb.link',
@@ -207,7 +204,7 @@ def new_secret_key(length=8):
     return ''.join([random.choice(allchars) for i in range(length)])
 
 
-def model_to_dict(self, model):
+def model_to_dict(model):
     """
     Convert a SQLAlchemy model instance into a JSON-serializable dict.
     """
@@ -238,12 +235,12 @@ def generate_code():
     return ''.join(code)
 
 if __name__ == '__main__':
+    print("a")
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)
     # print(filesize_format(100022000000000000000000000000))
     # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
-    print(generate_code())
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
     # download_net_book(ipfs_id,"平凡的世界.epub")
 
