@@ -1,11 +1,14 @@
 # encoding:utf-8
 import datetime
 import hashlib
+import json
 import logging
 import random
 import time
 
 from operator import or_
+
+import requests
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -14,6 +17,7 @@ from book import request, cache, app, db, User
 from book.ApiResponse import APIResponse
 from book.utils import check_email, generate_code, model_to_dict
 from book.mailUtil import send_email
+from book.views.feed import rss2ebook_key
 
 
 @app.route("/")
@@ -22,8 +26,7 @@ def home():
     return "欢迎关注公众号：sendtokindles 下载电子书"
 
 
-
-@app.route('/login', methods = ['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     data = request.get_json()
     if data['email'] and data['passwd']:
@@ -32,7 +35,7 @@ def login():
             if check_password_hash(user.hash_pass, data['passwd']):
                 user_info = model_to_dict(user)
                 access_token = create_access_token(identity=user_info)
-                data = {"user":user_info,"token":access_token}
+                data = {"user": user_info, "token": access_token}
                 return APIResponse.success(data=data)
             else:
                 APIResponse.bad_request(data="密码不正确")
@@ -55,7 +58,7 @@ def mail_code(email):
     return APIResponse.bad_request(msg="邮箱错误！")
 
 
-@app.route("/user/sign_up",methods = ['GET', 'POST'])
+@app.route("/user/sign_up", methods=['GET', 'POST'])
 def sign_up():
     """GET|POST /create-account: create account form handler
     """
@@ -71,13 +74,16 @@ def sign_up():
         user.email = data['email']
         user.name = user.email.split("@")[0]
         user.role = config.DEFAULT_USER_ROLE
-        db.session.add(user)
-        db.session.commit()
-        user_info = model_to_dict(user)
-        access_token = create_access_token(identity=user_info)
-        data = {"user": user_info, "token": access_token}
-        return APIResponse.success(data=data)
 
+        if sync_user(user):
+            db.session.add(user)
+            db.session.commit()
+            user_info = model_to_dict(user)
+            access_token = create_access_token(identity=user_info)
+            data = {"user": user_info, "token": access_token}
+            return APIResponse.success(data=data)
+        else:
+            APIResponse.bad_request(msg="注册失败！")
     return APIResponse.bad_request(msg="用户名密码为空！")
 
 
@@ -94,11 +100,11 @@ def forget_passwd():
         return APIResponse.success()
     return APIResponse.bad_request(msg="用户名不允许为空")
 
+
 @app.route('/logout')
 def logout():
-
-
     return APIResponse.success()
+
 
 @app.route('/user/info')
 @jwt_required()
@@ -107,10 +113,22 @@ def user_info():
     user = User.query().get(t_user['id'])
     return APIResponse.success(data=model_to_dict(user))
 
-@app.route('/user/update/<id>', methods = ['GET', 'POST'])
+
+@app.route('/user/update/<id>', methods=['GET', 'POST'])
 def user_update(id):
     user = User.query.get(id)
     return APIResponse.success()
 
 
-
+def sync_user(user):
+    path = '/api/v2/sync/user/add'
+    data={}
+    data['key'] = rss2ebook_key
+    data['user_name'] = user.name
+    data['to_email'] = user.email
+    res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=config.headers)
+    if res.status_code == 200:
+        res = json.loads(res.text)
+        if res['status'].lower() == 'ok':
+            return True
+    return False

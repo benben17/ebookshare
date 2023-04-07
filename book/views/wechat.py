@@ -7,7 +7,7 @@ from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
 
 import config
-from book import request, cache, app, db
+from book import request, cache, app, db, upgradeUser
 from book.wxMsg import *
 from book.utils import *
 # wx = Blueprint('wx', __name__)
@@ -79,6 +79,14 @@ def wechat():
                     cache.set_many(books_cache)  # 存缓存
                 return wx_reply_xml(from_user, to_user, msg_content)
             # if content == 'next':
+            if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s' and content.startswith("upgrade"):
+                info = content.split(":")
+                if len(info) == 3:
+                    upgrade_user = User.query.filter(or_(User.email == info[1], User.name == info[1])).get()
+                    if upgrade_user:
+                        upgradeUser.upgrade_user_thread(user, days=int(info[2]))
+                        return wx_reply_xml(from_user, to_user, f"{user.name}:用户升级中")
+                return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
 
             # if content == "哈哈哈":
             #     return wx_reply_news(from_user, to_user)

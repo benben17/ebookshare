@@ -47,10 +47,14 @@ SEND_UNKONOW = 4
 PAGE_NUM = 10 #每页显示条数
 
 RSS2EBOOK_URL = 'https://benben5-191802.an.r.appspot.com'
-
+RSS2EBOOK_KEY = 'rss2Ebook.com.luck!'
 
 DEFAULT_USER_ROLE = 'default'
 DEFAULT_USER_PASSWD = 'sendtokindles'
+
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
 
 
 

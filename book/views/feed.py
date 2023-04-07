@@ -10,15 +10,12 @@ from flask import jsonify
 
 from book.ApiResponse import APIResponse
 
-headers = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-}
 
-rss2ebook_key = 'rss2Ebook.com.luck!'
+
+rss2ebook_key = config.RSS2EBOOK_KEY
 
 # 用户同步
 @app.route('/api/v2/sync/user/add',  methods=['POST'])
-@jwt_required()
 def user_add():
     return sync_post(request.path)
 
@@ -90,7 +87,7 @@ def sync_post(path):
     if data:
         data['key'] = rss2ebook_key
         data['user_name'] = user['name']
-    res = requests.post(config.RSS2EBOOK_URL+path, data=data, headers=headers)
+    res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=config.headers)
     if res.status_code == 200:
         return APIResponse.success(json.loads(res.text))
     else:
