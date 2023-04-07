@@ -1,1 +1,1 @@
-from . import user, feed, wechat, myfeed
+from . import *

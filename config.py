@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 basedir= os.path.abspath(os.path.dirname(__file__))
 APPID = "wx0630c28def50cbfd"
 APPSECRET = "20764c0ae174a1e12c78e809a877c382"
@@ -34,6 +36,15 @@ CACHE_OPTIONS = {}    # 可选字典,在缓存类实例化期间传递，也是�
 CACHE_DEFAULT_TIMEOUT = 600  # 默认过期/超时时间，单位为秒
 CACHE_THRESHOLD = 100   # 缓存的最大条目数
 
+JSON_AS_ASCII = False
+
+#JWT
+JWT_SECRET_KEY = 'rss2ebook'
+JWT_ACCESS_TOKEN_EXPIRES = False
+JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+
+SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
+SCHEDULER_API_ENABLED = True  # 添加API
 
 # 电子书下载目录
 DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')

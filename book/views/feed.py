@@ -5,14 +5,14 @@ import requests
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 import config
-from book import app, request, Blueprint, User, db
+from book import app, request, User, db
 from flask import jsonify
 
 from book.ApiResponse import APIResponse
 
 
 
-rss2ebook_key = config.RSS2EBOOK_KEY
+
 
 # 用户同步
 @app.route('/api/v2/sync/user/add',  methods=['POST'])
@@ -85,7 +85,7 @@ def sync_post(path):
     data = request.get_json()
     user = get_jwt_identity()
     if data:
-        data['key'] = rss2ebook_key
+        data['key'] = config.RSS2EBOOK_KEY
         data['user_name'] = user['name']
     res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=config.headers)
     if res.status_code == 200:

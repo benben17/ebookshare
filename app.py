@@ -1,8 +1,7 @@
-
-# from flask import Flask
-# from book import app
+from book.views import user, feed, wechat, myfeed
 from book.schedule import *
 from book import *
+
 
 
 

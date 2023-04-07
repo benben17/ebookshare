@@ -1,19 +1,10 @@
-from datetime import datetime
-import os
-
 from flask_apscheduler import APScheduler
 from flask_apscheduler.scheduler import BackgroundScheduler
-import config
 from book.wxMsg import mail_body, send_failed_body, mail_download_url_body
 from book import app
 from book.utils import *
 from book.mailUtil import send_email
 
-
-# interval example, 间隔执行, 每30秒执行一次
-# @scheduler.task('interval', id='book_send', seconds=180, misfire_grace_time=900, max_instances=3)
-
-# logging.info('无发送任务')
 
 def delete_file_out_24_hours():
     logging.info("delete_file_out_24_hours")
@@ -30,6 +21,7 @@ def delete_file_out_24_hours():
             if time_diff.total_seconds() > 24 * 60 * 60:
                 os.remove(file_path)
                 logging.info(f"delete file : {file_path}")
+
 
 def book_send(send_status):
     from book.dbModels import Userlog
@@ -69,13 +61,9 @@ def book_send(send_status):
                     db.session.commit()
 
 
-class Config(object):
-    SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
-    SCHEDULER_API_ENABLED = True  # 添加API
-
 scheduler = APScheduler(BackgroundScheduler())
-
 scheduler.init_app(app)
+
 scheduler.add_job(id="delete_file", func=delete_file_out_24_hours, trigger="interval", hours=2, replace_existing=False)
 scheduler.add_job(id="send_file", func=book_send, args=("0"), trigger="interval", seconds=180, replace_existing=False,
                   max_instances=3)

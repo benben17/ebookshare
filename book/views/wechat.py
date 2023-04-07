@@ -1,16 +1,12 @@
 import datetime
 import json
 import logging
-
 from flask import redirect, send_from_directory, render_template
 from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
-
-import config
 from book import request, cache, app, db, upgradeUser
 from book.wxMsg import *
 from book.utils import *
-# wx = Blueprint('wx', __name__)
 
 @app.route('/api/wechat', methods=['GET', 'POST'])
 def wechat():

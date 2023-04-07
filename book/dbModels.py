@@ -1,12 +1,6 @@
 # coding: utf-8
 from datetime import datetime
-
-from flask import jsonify
-from sqlalchemy import inspect
-
 from book import db
-
-
 
 
 class User(db.Model):

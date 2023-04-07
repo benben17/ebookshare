@@ -26,11 +26,12 @@ no_bind_email_msg = '''你好，你还没有绑定邮箱！
 send_to_kindle_help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877562&idx=1&sn=e3789377f9303432cb0a082ff81ad335&chksm=87c37ebdb0b4f7ab49168e70181efb9206434e0bb9b7620a8f17b258686f8faf70c696c9eb9d&token=305511071&lang=zh_CN#rd'
 reply_help_msg = f'''<a href="{send_to_kindle_help_url}"> 发送到kindle手册 </a>
 建议先发送到自己邮箱，然后自己转发kindle设备
-回复：图书名称
+回复：图书名称 搜索书籍
 回复：邮箱地址 绑定邮箱
-回复：email 查询邮箱
-回复：1001  解绑邮箱
-回复：1002  帮助手册
+回复：email   查询邮箱
+回复：1001    解绑邮箱
+回复：1002    帮助手册
+回复：1008    <a href="">英文杂志</a>
 '''
 
 reply_subscribe = f'''欢迎关注books图书馆，本书站收录图书超乎你的想象
@@ -38,8 +39,7 @@ reply_subscribe = f'''欢迎关注books图书馆，本书站收录图书超乎�
 
 1.在聊天栏里发送邮箱地址 「你的邮箱地址」,如：xxxx@163.com *
  
-2.查询书籍，在聊天栏里发送你要找的书籍,直接回复书籍名称，如：
-  平凡的世界
+2.查询书籍，在聊天栏里发送你要找的书籍,直接回复书籍名称，如：平凡的世界
   
 3.发送图书编号 1-15 ，静待5分钟邮箱收书。
 

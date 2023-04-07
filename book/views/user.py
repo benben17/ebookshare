@@ -17,7 +17,7 @@ from book import request, cache, app, db, User
 from book.ApiResponse import APIResponse
 from book.utils import check_email, generate_code, model_to_dict
 from book.mailUtil import send_email
-from book.views.feed import rss2ebook_key
+
 
 
 @app.route("/")
@@ -26,80 +26,94 @@ def home():
     return "欢迎关注公众号：sendtokindles 下载电子书"
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    if data['email'] and data['passwd']:
-        user = User.query.filter(or_(User.name == data['email'], User.email == data['email'])).first()
-        if user is not None:
-            if check_password_hash(user.hash_pass, data['passwd']):
-                user_info = model_to_dict(user)
-                access_token = create_access_token(identity=user_info)
-                data = {"user": user_info, "token": access_token}
-                return APIResponse.success(data=data)
-            else:
-                APIResponse.bad_request(data="密码不正确")
-        else:
-            APIResponse.bad_request(data="用户不存在")
-    return APIResponse.bad_request(msg="用户名密码为空！")
+    if not all(key in data for key in ['email', 'passwd']):
+        return APIResponse.bad_request(msg="用户名密码为空！")
+
+    user = User.query.filter(or_(User.name == data['email'], User.email == data['email'])).first()
+    if user is None:
+        return APIResponse.bad_request(msg="用户不存在")
+
+    if not check_password_hash(user.hash_pass, data['passwd']):
+        return APIResponse.bad_request(msg="密码不正确")
+
+    user_info = model_to_dict(user)
+    access_token = create_access_token(identity=user_info)
+    data = {"user": user_info, "token": access_token}
+    return APIResponse.success(data=data)
 
 
 @app.route("/email/code/<email>")
-def mail_code(email):
-    print(check_email(email))
-    if check_email(email) is True:
+def send_email_verification_code(email):
+    if check_email(email):
         user = User.query.filter(or_(User.email == email, User.name == email)).first()
         if user:
-            return APIResponse.bad_request(msg="邮箱已注册,请直接登录。")
+            return APIResponse.bad_request(msg="该邮箱已注册，请直接登录。")
         else:
-            verify_mail_code = generate_code()
-            cache.set(email, verify_mail_code, timeout=300)
-            send_email("注册rss2ebook验证码", verify_mail_code, email)
-    return APIResponse.bad_request(msg="邮箱错误！")
+            verification_code = generate_code()
+            cache.set(email, verification_code, timeout=300)
+            send_email("RSS2EBOOK 验证码", verification_code, email)
+            return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
+    else:
+        return APIResponse.bad_request(msg="无效的邮箱地址！")
 
 
-@app.route("/user/sign_up", methods=['GET', 'POST'])
+@app.route("/user/sign_up", methods=['POST'])
 def sign_up():
-    """GET|POST /create-account: create account form handler
+    """POST /user/sign_up: user sign up handler
     """
     data = request.get_json()
-    if data['email'] and data['passwd']:
-        user = User.query.filter(or_(User.email == data['email'], User.name == data['email'])).first()
-        if user:
-            APIResponse.bad_request(msg="此邮箱已注册，请直接登录！")
-        logging.error(generate_password_hash(data['passwd']))
-        user = User()
-        user.id = str(int(time.time()))
-        user.hash_pass = generate_password_hash(data['passwd'])
-        user.email = data['email']
-        user.name = user.email.split("@")[0]
-        user.role = config.DEFAULT_USER_ROLE
+    if not data.get('email') or not data.get('passwd'):
+        return APIResponse.bad_request(msg="用户名密码为空！")
 
-        if sync_user(user):
-            db.session.add(user)
-            db.session.commit()
-            user_info = model_to_dict(user)
-            access_token = create_access_token(identity=user_info)
-            data = {"user": user_info, "token": access_token}
-            return APIResponse.success(data=data)
-        else:
-            APIResponse.bad_request(msg="注册失败！")
-    return APIResponse.bad_request(msg="用户名密码为空！")
+    email = data['email']
+    passwd = data['passwd']
+    if not check_email(email):
+        return APIResponse.bad_request(msg="无效的邮箱地址！")
+
+    user = User.query.filter(or_(User.email == email, User.name == email)).first()
+    if user:
+        return APIResponse.bad_request(msg="此邮箱已注册，请直接登录！")
+
+    user = User()
+    user.id = str(int(time.time()))
+    user.hash_pass = generate_password_hash(passwd)
+    user.email = email
+    user.name = user.email.split("@")[0]
+    user.role = config.DEFAULT_USER_ROLE
+
+    if sync_user(user):
+        db.session.add(user)
+        db.session.commit()
+        user_info = model_to_dict(user)
+        access_token = create_access_token(identity=user_info)
+        data = {"user": user_info, "token": access_token}
+        return APIResponse.success(data=data)
+    else:
+        return APIResponse.bad_request(msg="注册失败！")
 
 
-@app.route('/user/forget/passwd')
+
+@app.route('/user/forget/passwd', methods=['POST'])
 @jwt_required()
 def forget_passwd():
     data = request.get_json()
-    if data['user_name']:
-        user = User.query.filter(or_(User.email == data['user_name'], User.name == data['user_name'])).first()
-        user.hash_pass = generate_password_hash(data['passwd'])
-        db.session.add(user)
-        db.session.commit()
-        send_email(f'{data["user_name"]}重置密码', user.hash_pass, user.email)
-        return APIResponse.success()
-    return APIResponse.bad_request(msg="用户名不允许为空")
+    user_name = data.get('user_name')
 
+    if user_name:
+        user = User.query.filter(or_(User.email == user_name, User.name == user_name)).first()
+        if user:
+            user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
+            db.session.add(user)
+            db.session.commit()
+            send_email(f'{user_name} 重置密码', user.hash_pass, user.email)
+            return APIResponse.success(msg="密码重置成功，新密码发送至邮箱")
+        else:
+            return APIResponse.bad_request(msg="用户不存在！")
+    else:
+        return APIResponse.bad_request(msg="用户名或密码为空！")
 
 @app.route('/logout')
 def logout():
@@ -123,7 +137,7 @@ def user_update(id):
 def sync_user(user):
     path = '/api/v2/sync/user/add'
     data={}
-    data['key'] = rss2ebook_key
+    data['key'] = config.RSS2EBOOK_KEY
     data['user_name'] = user.name
     data['to_email'] = user.email
     res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=config.headers)
