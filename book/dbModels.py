@@ -21,6 +21,7 @@ class User(db.Model):
     active = db.Column(db.Integer, default=0)
     expires = db.Column(db.DateTime)  # 超过了此日期后账号自动停止推送
     create_time = db.Column(db.DateTime, default=datetime.now())
+    is_reg_rss = db.Column(db.Boolean, default=False)
 
     def is_authenticated(self):
         return False
@@ -36,6 +37,7 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % (self.name)
+
 
 
 class Books(db.Model):

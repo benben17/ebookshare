@@ -74,15 +74,17 @@ def sign_up():
         return APIResponse.bad_request(msg="无效的邮箱地址！")
 
     user = User.query.filter(or_(User.email == email, User.name == email)).first()
-    if user:
-        return APIResponse.bad_request(msg="此邮箱已注册，请直接登录！")
+    if user is None:
+        user = User()
+        user.id = str(int(time.time()))
+        user.hash_pass = generate_password_hash(passwd)
+        user.email = email
+        user.name = user.email.split("@")[0]
+        user.role = config.DEFAULT_USER_ROLE
+        user.is_reg_rss = True
 
-    user = User()
-    user.id = str(int(time.time()))
-    user.hash_pass = generate_password_hash(passwd)
-    user.email = email
-    user.name = user.email.split("@")[0]
-    user.role = config.DEFAULT_USER_ROLE
+    if user.is_reg_rss:
+        return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
 
     if sync_user(user):
         db.session.add(user)
@@ -93,8 +95,6 @@ def sign_up():
         return APIResponse.success(data=data)
     else:
         return APIResponse.bad_request(msg="注册失败！")
-
-
 
 @app.route('/user/forget/passwd', methods=['POST'])
 @jwt_required()
@@ -136,10 +136,11 @@ def user_update(id):
 
 def sync_user(user):
     path = '/api/v2/sync/user/add'
-    data={}
-    data['key'] = config.RSS2EBOOK_KEY
-    data['user_name'] = user.name
-    data['to_email'] = user.email
+    data = {
+        'key': config.RSS2EBOOK_KEY,
+        'user_name': user.name,
+        'to_email': user.email
+    }
     res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=config.headers)
     if res.status_code == 200:
         res = json.loads(res.text)

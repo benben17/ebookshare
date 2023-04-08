@@ -81,7 +81,7 @@ def wechat():
                     upgrade_user = User.query.filter(or_(User.email == info[1], User.name == info[1])).first()
                     if upgrade_user:
                         upgradeUser.upgrade_user_thread(user, days=int(info[2]))
-                        return wx_reply_xml(from_user, to_user, f"{user.name}:用户升级中")
+                        return wx_reply_xml(from_user, to_user, f"{upgrade_user.name}:用户升级中")
                 return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
 
             # if content == "哈哈哈":
@@ -189,5 +189,5 @@ if __name__ == '__main__':
     with app.app_context():
         from book.dbModels import User
         content = '892100089@qq.com'
-        user = User.query.filter(or_(User.email == content, User.kindle_email == content))
+        user = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
         print(user.email)
