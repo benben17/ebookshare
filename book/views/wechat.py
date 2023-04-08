@@ -57,7 +57,7 @@ def wechat():
             if check_email(content):
                 if user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                user = User.query.filter(or_(User.email == content,User.kindle_email==content)).get()
+                user = User.query.filter(or_(User.email == content,User.kindle_email==content)).first()
                 if user is None:
                     user = User()
                 user.wx_openid = from_user
@@ -78,7 +78,7 @@ def wechat():
             if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s' and content.startswith("upgrade"):
                 info = content.split(":")
                 if len(info) == 3:
-                    upgrade_user = User.query.filter(or_(User.email == info[1], User.name == info[1])).get()
+                    upgrade_user = User.query.filter(or_(User.email == info[1], User.name == info[1])).first()
                     if upgrade_user:
                         upgradeUser.upgrade_user_thread(user, days=int(info[2]))
                         return wx_reply_xml(from_user, to_user, f"{user.name}:用户升级中")
@@ -186,4 +186,8 @@ class WeChat:
         except Exception as e:
             print(e)
 if __name__ == '__main__':
-    print(str(int(time.time())))
+    with app.app_context():
+        from book.dbModels import User
+        content = '892100089@qq.com'
+        user = User.query.filter(or_(User.email == content, User.kindle_email == content))
+        print(user.email)

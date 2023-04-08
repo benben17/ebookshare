@@ -8,8 +8,7 @@ from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderErr
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-
-
+from sqlalchemy import or_
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -52,3 +51,5 @@ def error_date(error):
 
 
 from book.dbModels import *
+
+
