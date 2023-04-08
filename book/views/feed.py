@@ -1,5 +1,4 @@
 import json
-import logging
 
 import requests
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -8,7 +7,7 @@ import config
 from book import app, request, User, db
 from flask import jsonify
 
-from book.ApiResponse import APIResponse
+from book.utils.ApiResponse import APIResponse
 
 
 # 用户同步
@@ -45,7 +44,7 @@ def get_my_feed_deliver():
 
 @app.route('/api/v2/my/rss/add', methods=['POST'])
 @jwt_required()
-def get_my_rss_add():
+def my_rss_add():
     api_path = '/api/v2/rss/add'
     res = sync_post(api_path)
     if res['data']['status'] == 'ok':
@@ -72,8 +71,8 @@ def get_pub_rss():
 # 删除我的订阅
 @app.route('/api/v2/my/rss/del', methods=['POST'])
 @jwt_required()
-def get_my_rss_del():
-    api_path = '/api/v2/rss/add'
+def my_rss_del():
+    api_path = '/api/v2/rss/del'
     res = sync_post(api_path)
     user = get_jwt_identity()
     if res['data']['status'] == 'ok':
@@ -83,13 +82,15 @@ def get_my_rss_del():
         db.session.commit()
     return res
 
-
 @app.route('/api/v2/rss/share', methods=['POST'])
 @jwt_required()
-def share_rss():
+def rss_share():
     return sync_post(request.path)
 
-
+@app.route('/api/v2/rss/invalid', methods=['POST'])
+@jwt_required()
+def rss_invalid():
+    return sync_post(request.path)
 def sync_post(path):
     data = request.get_json()
     user = get_jwt_identity()

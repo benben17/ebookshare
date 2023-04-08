@@ -1,7 +1,6 @@
 import logging
 from threading import Thread
 from flask_mail import Message
-
 from book import mail, app
 
 

@@ -44,7 +44,7 @@ JWT_ACCESS_TOKEN_EXPIRES = False
 JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
 SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
-SCHEDULER_API_ENABLED = True  # 添加API
+SCHEDULER_API_ENABLED = False  # 添加API
 
 # 电子书下载目录
 DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')

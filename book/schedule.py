@@ -1,9 +1,9 @@
 from flask_apscheduler import APScheduler
 from flask_apscheduler.scheduler import BackgroundScheduler
-from book.wxMsg import mail_body, send_failed_body, mail_download_url_body
+from book.utils.wxMsg import mail_body, send_failed_body, mail_download_url_body
 from book import app
+from book.utils.mailUtil import send_email
 from book.utils import *
-from book.mailUtil import send_email
 
 
 def delete_file_out_24_hours():

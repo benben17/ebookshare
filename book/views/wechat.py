@@ -1,12 +1,14 @@
-import datetime
 import json
 import logging
+
+import requests
 from flask import redirect, send_from_directory, render_template
 from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
 from book import request, cache, app, db, upgradeUser
-from book.wxMsg import *
 from book.utils import *
+from book.utils.wxMsg import *
+
 
 @app.route('/api/wechat', methods=['GET', 'POST'])
 def wechat():
@@ -100,10 +102,7 @@ def wechat():
                 if book_info is not None:
                     send_info = book_info.split(":")
                     logging.error(send_info)
-                    # 之前是否发送失败过，如果失败则返回此书籍不可用
-                    # userlog = Userlog.query.filter(Userlog.book_name == send_info[0],Userlog.ipfs_cid == send_info[1], Userlog.status == config.SEND_FAILED).all()
-                    # if userlog:
-                    #     return wx_reply_xml(from_user, to_user, send_failed_msg)
+
                     user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email, user_id=user.id,
                                        operation_type='download', status=0, ipfs_cid=send_info[1],filesize=send_info[2])
                     db.session.add(user_log)
@@ -126,14 +125,10 @@ def wechat():
 @app.route('/download/<path:filename>')
 def dl(filename):
     if os.path.exists(os.path.join(config.DOWNLOAD_DIR,filename)) is False:
-        return redirect("/download/404")
+        return redirect("/404")
     return send_from_directory(config.DOWNLOAD_DIR, filename)
     # return APIResponse.success(data="欢迎关注 sendtokindles 公众号下载电子书")
 
-@app.route("/download/404")
-def download_404():
-    # logging.error(app.template_folder)
-    return render_template('404.html')
 
 
 class WeChat:

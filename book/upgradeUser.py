@@ -1,9 +1,7 @@
 import datetime
 import logging
 import threading
-
 import requests
-
 import config
 from book import db
 

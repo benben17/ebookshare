@@ -1,10 +1,11 @@
-from flask import  jsonify
+from flask import jsonify
 
 
 class ApiException(Exception):
     def __init__(self, message, code):
         super().__init__(message)
         self.code = code
+
 
 class CodeMap:
     success = 200
@@ -22,10 +23,8 @@ class APIResponse:
         self.msg = msg
         self.code = code
 
-
     def to_dict(self):
         return {'code': self.code, 'data': self.data, 'msg': self.msg}
-
 
     def to_json(self, **kwargs):
         return jsonify(self.to_dict(), **kwargs)

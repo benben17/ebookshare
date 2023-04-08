@@ -1,9 +1,5 @@
 # encoding:utf-8
-import datetime
-import hashlib
 import json
-import logging
-import random
 import time
 
 from operator import or_
@@ -14,19 +10,12 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import config
 from book import request, cache, app, db, User
-from book.ApiResponse import APIResponse
+from book.utils.ApiResponse import APIResponse
 from book.utils import check_email, generate_code, model_to_dict
-from book.mailUtil import send_email
+from book.utils.mailUtil import send_email
 
 
-
-@app.route("/")
-def home():
-    # logging.error(app.template_folder)
-    return "欢迎关注公众号：sendtokindles 下载电子书"
-
-
-@app.route('/login', methods=['POST'])
+@app.route('/user/login', methods=['POST'])
 def login():
     data = request.get_json()
     if not all(key in data for key in ['email', 'passwd']):
@@ -45,7 +34,7 @@ def login():
     return APIResponse.success(data=data)
 
 
-@app.route("/email/code/<email>")
+@app.route("/user/email/code/<email>")
 def send_email_verification_code(email):
     if check_email(email):
         user = User.query.filter(or_(User.email == email, User.name == email)).first()
@@ -90,11 +79,13 @@ def sign_up():
         db.session.add(user)
         db.session.commit()
         user_info = model_to_dict(user)
+        user_info['hash_pass'] = ""
         access_token = create_access_token(identity=user_info)
         data = {"user": user_info, "token": access_token}
         return APIResponse.success(data=data)
     else:
         return APIResponse.bad_request(msg="注册失败！")
+
 
 @app.route('/user/forget/passwd', methods=['POST'])
 @jwt_required()
@@ -115,7 +106,8 @@ def forget_passwd():
     else:
         return APIResponse.bad_request(msg="用户名或密码为空！")
 
-@app.route('/logout')
+
+@app.route('/user/logout')
 def logout():
     return APIResponse.success()
 
@@ -124,8 +116,12 @@ def logout():
 @jwt_required()
 def user_info():
     t_user = get_jwt_identity()
-    user = User.query().get(t_user['id'])
-    return APIResponse.success(data=model_to_dict(user))
+    user = User.query.get(t_user['id'])
+    user.hash_pass = ""
+    user_json = model_to_dict(user)
+    access_token = create_access_token(identity=user_json)
+    data = {"user": user_json, "token": access_token}
+    return APIResponse.success(data=data)
 
 
 @app.route('/user/update/<id>', methods=['GET', 'POST'])

@@ -1,14 +1,16 @@
+# coding: utf-8
 import hashlib
-import re
 import time, os
-
 import config
 
 
 def unbind_email_msg(user_email):
     return f'''你好，你已经解绑邮箱:{user_email}\n解除绑定回复:1001'''
+
+
 def bind_email_msg(user_email):
     return f'''你好，你绑定邮箱:{user_email}\n解除绑定回复:1001'''
+
 
 no_book_content = "未找到书籍，在更新中！请换其他的书籍"
 
@@ -20,8 +22,6 @@ no_bind_email_msg = '''你好，你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com
 查看帮助请回复 ？'''
-
-
 
 send_to_kindle_help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877562&idx=1&sn=e3789377f9303432cb0a082ff81ad335&chksm=87c37ebdb0b4f7ab49168e70181efb9206434e0bb9b7620a8f17b258686f8faf70c696c9eb9d&token=305511071&lang=zh_CN#rd'
 reply_help_msg = f'''<a href="{send_to_kindle_help_url}"> 发送到kindle手册 </a>
@@ -48,7 +48,11 @@ reply_subscribe = f'''欢迎关注books图书馆，本书站收录图书超乎�
 建议先发送到自己邮箱，然后自己转发kindle设备*
 '''
 
-donate_pic = 'http://mmbiz.qpic.cn/mmbiz/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1'
+donate_pic = 'http://mmbiz.qpic.cn/mmbiz' \
+             '/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640' \
+             '?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1 '
+
+
 def mail_body(bookname):
     return f'''
     请查收附件！<br/>
@@ -59,8 +63,8 @@ def mail_body(bookname):
     欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
     '''
 
-def send_failed_body(bookname):
 
+def send_failed_body(bookname):
     return f'''
         《{bookname}》---发送失败！<br/>
         <p style="color:red"> 书籍下载失败 </p>
@@ -71,9 +75,10 @@ def send_failed_body(bookname):
         欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
         '''
 
+
 # 当文件大于20M的时候 发送下载地址到邮箱
 def mail_download_url_body(filename):
-    download_url = config.DOWNLOAD_URL+filename
+    download_url = config.DOWNLOAD_URL + filename
     return f'''
         《{filename}》<br/>
         ---------------------------------------------------------<br/>
@@ -86,8 +91,9 @@ def mail_download_url_body(filename):
         '''
 
 
-
 create_time = str(int(time.time()))
+
+
 def wx_reply_xml(from_user, to_user, msg_content):
     """
     desc: 微信回复消息模版
@@ -105,6 +111,8 @@ def wx_reply_xml(from_user, to_user, msg_content):
             <Content><![CDATA[{msg_content}]]></Content>
         </xml>
         """
+
+
 def check_signature(token, signature, timestamp, nonce):
     """校验签名"""
     temp_arr = [token, timestamp, nonce]
@@ -112,22 +120,21 @@ def check_signature(token, signature, timestamp, nonce):
     temp_str = ''.join(temp_arr)
     hash_str = hashlib.sha1(temp_str.encode('utf-8')).hexdigest()
     return hash_str == signature
-def wx_reply_mail_msg(book_name,user_email):
-    donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn=9afeff751c06737c6c3c5de0faddc6a1#rd'
+
+
+def wx_reply_mail_msg(book_name, user_email):
+    donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn=9afeff751c06737c6c3c5de0faddc6a1#rd '
     return f'''《{book_name}》
 已发送邮箱：{user_email} 
 -------------注意-------------
 当文件大于20M的时候 发送下载地址到邮箱！
 文件发送有滞后，最好5分钟后查收，如无收到，请换一个编号重新申请发送！
 ------------------------------
-           <a href="{donate_url}">☆打赏☆ </a>
+           <a href="{donate_url}">☆ 打赏 ☆</a>
 '''
 
 
-
-
-
-def wx_reply_news(from_user,to_user):
+def wx_reply_news(from_user, to_user):
     pic_url = 'https://mmbiz.qlogo.cn/mmbiz/6J0PjZVpchOuboUCtD8ia53mkkBicDnPNbXGTpHibHlEKBibBjQYAIWwOu30eiahwn1MuJGkWyXHNUU7SyJCibNRLMaQ/0?wx_fmt=jpeg'
     url = 'https://mp.weixin.qq.com/s/20zcsd3DYDUl7cpEWZwmDw'
     news_title = '发送到kindle手册'
