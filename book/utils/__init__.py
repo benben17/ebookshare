@@ -134,6 +134,11 @@ def search_net_book(title=None, author=None, isbn=None, openid="", ):
 
 
 def download_net_book(ipfs_cid, filename):
+    file_path = config.DOWNLOAD_DIR + filename
+    # 当文件存在，不下载直接返回文件路径
+    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+        return file_path
+
     url_list = [
         'https://dweb.link',
         'https://cloudflare-ipfs.com',
@@ -148,7 +153,7 @@ def download_net_book(ipfs_cid, filename):
         try:
             response = requests.get(full_url, stream=True, timeout=30)
             response.raise_for_status()  # Raise exception if response status code is not 200
-            file_path = config.DOWNLOAD_DIR + filename
+
             with open(file_path, 'wb') as f:
                 for data in response.iter_content(chunk_size=2048):
                     f.write(data)

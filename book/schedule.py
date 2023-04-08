@@ -32,7 +32,6 @@ def book_send(send_status):
         if userlogs:
             for userlog in userlogs:
                 file_path = download_net_book(userlog.ipfs_cid, userlog.book_name)
-                print(file_path)
                 if file_path:
                     try:
                         if email_att_or_url(file_path) is False:
@@ -43,7 +42,6 @@ def book_send(send_status):
                                        userlog.receive_email)
 
                         userlog.status = config.SEND_SUCCESS
-
                         userlog.create_time = datetime.now()
                         db.session.add(userlog)
                         db.session.commit()

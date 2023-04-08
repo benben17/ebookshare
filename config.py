@@ -63,9 +63,6 @@ RSS2EBOOK_KEY = 'rss2Ebook.com.luck!'
 DEFAULT_USER_ROLE = 'default'
 DEFAULT_USER_PASSWD = 'sendtokindles'
 
-headers = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-}
 
 
 
