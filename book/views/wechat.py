@@ -57,7 +57,7 @@ def wechat():
             if check_email(content):
                 if user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                user = User.query.filter(or_(User.email == content,User.kindle_email==content)).first()
+                user = User.query.filter(User.wx_openid == from_user).first()
                 if user is None:
                     user = User()
                 user.wx_openid = from_user
