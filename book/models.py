@@ -1,9 +1,10 @@
 # coding: utf-8
-from datetime import datetime
 from book import db
+from datetime import datetime
 
 
 class User(db.Model):
+    __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     email = db.Column(db.String(120))
@@ -36,8 +37,8 @@ class User(db.Model):
         return '<User %r>' % (self.name)
 
 
-
 class Books(db.Model):
+    __tablename__ = "books"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(250))
     author = db.Column(db.String(128))
@@ -55,12 +56,14 @@ class Books(db.Model):
 
 
 class Bookurl(db.Model):
+    __tablename__ = "book_url"
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
     book_download_url = db.Column(db.String(512))
 
 
 class Userlog(db.Model):
+    __tablename__ = "user_log"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     book_name = db.Column(db.String(300))
@@ -73,56 +76,17 @@ class Userlog(db.Model):
     filesize = db.Column(db.Integer)
     wx_openid = db.Column(db.String(120))
 
-class Librss(db.Model):
+
+class UserPay(db.Model):
+    __tablename__ = "user_pay"
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200))
-    url = db.Column(db.String(300))
-    isfulltext = db.Column(db.Integer)
-    desc = db.Column(db.String(300))
-    category = db.Column(db.String(64),index=True)
-    creator = db.Column(db.String(64))
-    created_time = db.Column(db.DateTime, default=datetime.now())
-    subscribed = db.Column(db.Integer, default=0)  # for sort
-    invalid_date = db.Column(db.DateTime, default=datetime.now())  # some one reported it is a invalid link
+    user_id = db.Column(db.Integer)
+    name = db.Column(db.String(300))  # 年费 月费
+    pay_type = db.Column(db.String(24))  # ali weixin
+    user_email = db.Column(db.String(120))
+    pay_time = db.Column(db.DateTime, default=datetime.now())
+    create_time = db.Column(db.DateTime, default=datetime.now())
+    status = db.Column(db.Integer)
 
     def __repr__(self):
-        return self.title
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'title': self.title,
-            'url': self.url,
-            'isfulltext': self.isfulltext,
-            'desc': self.desc,
-            'category': self.category,
-            'creator': self.creator,
-            'created_time': self.created_time.isoformat() if self.created_time is not None else None,
-            'subscribed': self.subscribed,
-            'invalid_date': self.invalid_date.isoformat() if self.invalid_date is not None else None
-        }
-
-    # return all categories in database
-
-class MyFeed(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    rss_id = db.Column(db.Integer, index=True)
-    title = db.Column(db.String(64))
-    url = db.Column(db.String(300))
-    isfulltext = isfulltext = db.Column(db.Integer)
-    wx_openid = db.Column(db.String(64),index=True)  # 微信id
-    user_id = db.Column(db.Integer,index=True)
-    feed_time = db.Column(db.DateTime, default=datetime.now())  # 订阅时间
-    created_time = db.Column(db.DateTime, default=datetime.now())
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'title': self.title,
-            'url': self.url,
-            'isfulltext': self.isfulltext,
-            'time': self.feed_time if self.feed_time is not None else None ,
-            'created_time': self.created_time.isoformat() if self.created_time is not None else None
-        }
-
-
+        return self.user_name

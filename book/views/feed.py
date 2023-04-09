@@ -4,7 +4,7 @@ import requests
 from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
-from book.dbModels import User, db
+from book.models import User, db
 from book.utils import get_file_name
 from book.utils.ApiResponse import APIResponse
 

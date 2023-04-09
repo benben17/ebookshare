@@ -7,7 +7,7 @@ from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
 from book import cache
-from book.dbModels import db, User
+from book.models import db, User
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
 from book.utils import check_email, generate_code, model_to_dict, get_file_name

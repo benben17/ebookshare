@@ -26,7 +26,7 @@ def delete_file_out_24_hours():
 
 
 def book_send(send_status):
-    from book.dbModels import Userlog, db
+    from book.models import Userlog, db
     with app.app_context():
         userlogs = Userlog.query.filter(Userlog.status == send_status).all()
         if userlogs:

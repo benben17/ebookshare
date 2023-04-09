@@ -23,7 +23,7 @@ def wechat():
         return echostr if check_signature(token, signature, timestamp, nonce) else ''
 
     elif request.method == 'POST':
-        from book.dbModels import User, Userlog
+        from book.models import User, Userlog
         # 处理消息请求
         msg_type, from_user, to_user, content, event = parse_xml(request.data)
         from_user = from_user.strip()
