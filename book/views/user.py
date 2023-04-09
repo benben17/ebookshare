@@ -91,7 +91,7 @@ def sign_up():
 @jwt_required()
 def forget_passwd():
     data = request.get_json()
-    user_name = data.get('user_name')
+    user_name = data.get('email')
 
     if user_name:
         user = User.query.filter(or_(User.email == user_name, User.name == user_name)).first()
@@ -99,7 +99,7 @@ def forget_passwd():
             user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
             db.session.add(user)
             db.session.commit()
-            send_email(f'{user_name} 重置密码', user.hash_pass, user.email)
+            send_email(f'{user_name} 重置密码', f'{user.email}:新密码为：{config.DEFAULT_USER_PASSWD}', user.email)
             return APIResponse.success(msg="密码重置成功，新密码发送至邮箱")
         else:
             return APIResponse.bad_request(msg="用户不存在！")
