@@ -63,6 +63,7 @@ def sign_up():
         return APIResponse.bad_request(msg="无效的邮箱地址！")
 
     user = User.query.filter(or_(User.email == email, User.name == email)).first()
+
     if user is None:
         user = User()
         user.id = str(int(time.time()))
@@ -71,10 +72,9 @@ def sign_up():
         user.name = user.email.split("@")[0]
         user.role = config.DEFAULT_USER_ROLE
         user.is_reg_rss = True
-
-    if user.is_reg_rss:
-        return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
-
+    else:
+        if user.is_reg_rss:
+            return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
     if sync_user(user):
         db.session.add(user)
         db.session.commit()
@@ -92,7 +92,6 @@ def sign_up():
 def forget_passwd():
     data = request.get_json()
     user_name = data.get('email')
-
     if user_name:
         user = User.query.filter(or_(User.email == user_name, User.name == user_name)).first()
         if user:
@@ -100,11 +99,11 @@ def forget_passwd():
             db.session.add(user)
             db.session.commit()
             send_email(f'{user_name} 重置密码', f'{user.email}:新密码为：{config.DEFAULT_USER_PASSWD}', user.email)
-            return APIResponse.success(msg="密码重置成功，新密码发送至邮箱")
+            return APIResponse.success(msg="密码重置成功，新密码发送至邮箱！")
         else:
             return APIResponse.bad_request(msg="用户不存在！")
     else:
-        return APIResponse.bad_request(msg="用户名或密码为空！")
+        return APIResponse.bad_request(msg="用户名或邮箱地址为空！")
 
 
 @app.route('/user/logout')
