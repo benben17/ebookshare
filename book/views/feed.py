@@ -1,4 +1,6 @@
 import json
+import logging
+
 import requests
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
@@ -13,6 +15,8 @@ headers = {
 # 用户同步
 @app.route('/api/v2/sync/user/add', methods=['POST'])
 def user_add():
+
+
     res = sync_post(request.path)
     if res['status'].lower() == "ok":
         return APIResponse.success(msg=res['msg'])
@@ -112,6 +116,7 @@ def my_rss_add():
 def get_pub_rss():
     api_path = '/api/v2/rss/pub'
     res = sync_post(api_path)
+    # logging.error(res)
     if res['status'] == "ok":
         return APIResponse.success(data=res['data'])
     else:
@@ -170,6 +175,6 @@ def sync_post(path):
         json_data = json.loads(res.text)
         if json_data['status'] == "ok":
             return json_data
-        return {"status": "failed", "msg": res.content}
+        return {"status": "failed", "msg": json_data['msg']}
     else:
-        return {"status": "failed", "msg": res.content}
+        return {"status": "failed", "msg": res.text}

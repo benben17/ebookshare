@@ -134,7 +134,8 @@ def sync_user(user):
     data = {
         'key': config.RSS2EBOOK_KEY,
         'user_name': user.name,
-        'to_email': user.email
+        'to_email': user.email,
+        'expiration_days': '360'
     }
     res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=config.headers)
     if res.status_code == 200:

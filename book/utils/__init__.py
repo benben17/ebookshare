@@ -144,8 +144,8 @@ def download_net_book(ipfs_cid, filename):
         'https://cloudflare-ipfs.com',
         'https://gateway.pinata.cloud',
         'https://gateway.ipfs.io',
-        'https://ipfs.jpu.jp'
-
+        'https://ipfs.jpu.jp',
+        'https://cf-ipfs.com'
     ]
     for url in url_list:
         full_url = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
@@ -160,19 +160,16 @@ def download_net_book(ipfs_cid, filename):
             logging.info(f"{filename}:File downloaded successfully")
             return file_path
         except RequestException as e:
-            logging.info(f"Error downloading from {full_url}: {e}")
-
+            logging.error(f"Error downloading from {full_url}: {e}")
     logging.error(f"{filename} Could not download file from any of the URLs provided")
     return None
 
 
-# 判断文件是否创建超过24小时
+
 def is_file_24_hours(file_path):
-    # 获取文件创建时间戳
+    '''判断文件是否创建超过24小时'''
     ctime = os.path.getctime(file_path)
-    # 获取当前时间戳
     current_time = time.time()
-    # 判断文件是否在24小时内创建
     return current_time - ctime > 24 * 60 * 60
 
 
