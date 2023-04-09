@@ -59,20 +59,16 @@ def wechat():
             if check_email(content):
                 if user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                user_info = User.query.filter(or_(User.email == content, User.name == content,User.wx_openid == from_user)).first()
+                user_info = User.query.filter(or_(User.email == content, User.name == content, User.wx_openid == from_user)).first()
                 if user_info:
                     if not user_info.wx_openid or user_info.wx_openid is None:
                         user_info.wx_openid = from_user
-                elif user_info is None:
-                    user_info = User()
-                    user_info.email = content
-                    user_info.kindle_email = content
-                    user_info.wx_openid = from_user
-                    user_info.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
-                    user_info.role = config.DEFAULT_USER_ROLE
+                else:
+                    hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
+                    user_info = User(email=content, kindle_email=content, wx_openid=from_user, hash_pass=hash_pass, role=config.DEFAULT_USER_ROLE)
                 db.session.add(user_info)
                 db.session.commit()
-                return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
+                return wx_reply_xml(from_user, to_user, bind_email_msg(content))
 
             # 检查是不是 书籍ISBN
             if check_isbn(content):
