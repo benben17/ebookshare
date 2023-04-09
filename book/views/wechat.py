@@ -59,13 +59,22 @@ def wechat():
             if check_email(content):
                 if user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                user_info = User.query.filter(or_(User.email == content, User.name == content, User.wx_openid == from_user)).first()
+                else:
+                    user.email = content
+                    user.kindle_email = content
+                    db.session.add(user)
+                    db.session.commit()
+                    return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
+                user_info = User.query.filter(or_(User.email == content, User.name == content)).first()
                 if user_info:
                     if not user_info.wx_openid or user_info.wx_openid is None:
                         user_info.wx_openid = from_user
-                else:
-                    hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
-                    user_info = User(email=content, kindle_email=content, wx_openid=from_user, hash_pass=hash_pass, role=config.DEFAULT_USER_ROLE)
+                        db.session.add(user_info)
+                        db.session.commit()
+                    return wx_reply_xml(from_user, to_user, bind_email_msg(content))
+
+                hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
+                user_info = User(email=content, kindle_email=content, wx_openid=from_user, hash_pass=hash_pass, role=config.DEFAULT_USER_ROLE)
                 db.session.add(user_info)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(content))
