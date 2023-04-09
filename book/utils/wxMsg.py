@@ -1,24 +1,23 @@
 # coding: utf-8
 import hashlib
-import time, os
+import time
 import config
+
+create_time = str(int(time.time()))
 
 
 def unbind_email_msg(user_email):
-    return f'''你好，你已经解绑邮箱:{user_email}\n解除绑定回复:1001'''
+    return f'''已经解绑邮箱:{user_email}\n解除绑定回复:1001'''
 
 
 def bind_email_msg(user_email):
-    return f'''你好，你绑定邮箱:{user_email}\n解除绑定回复:1001'''
+    return f'''绑定邮箱:{user_email}\n解除绑定回复:1001'''
 
 
 no_book_content = "未找到书籍，在更新中！请换其他的书籍"
-
 not_isbn_search = "不支持ISBN搜索，请输入书籍名称搜索！"
-
 send_failed_msg = "根据其他用户报告，此书籍无法发送，请换一个编号继续！"
-
-no_bind_email_msg = '''你好，你还没有绑定邮箱！
+no_bind_email_msg = '''你还没有绑定邮箱！
 请发送【邮箱地址】进行绑定
 例如：book@book.com
 查看帮助请回复 ？'''
@@ -37,7 +36,7 @@ reply_help_msg = f'''<a href="{send_to_kindle_help_url}"> 发送到kindle手册 
 reply_subscribe = f'''欢迎关注books图书馆，本书站收录图书超乎你的想象
 按以下步骤将电子书自动发送到您的邮箱：
 
-1.在聊天栏里发送邮箱地址 「你的邮箱地址」,如：xxxx@163.com *
+1.在聊天栏里发送邮箱地址 「你的邮箱地址」,如：xxxx@163.com
  
 2.查询书籍，在聊天栏里发送你要找的书籍,直接回复书籍名称，如：平凡的世界
   
@@ -76,8 +75,8 @@ def send_failed_body(bookname):
         '''
 
 
-# 当文件大于20M的时候 发送下载地址到邮箱
 def mail_download_url_body(filename):
+    """当文件大于20M的时候 发送下载地址到邮箱"""
     download_url = config.DOWNLOAD_URL + filename
     return f'''
         《{filename}》<br/>
@@ -89,9 +88,6 @@ def mail_download_url_body(filename):
         ----------------------------------------------------------<br/>
         欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
         '''
-
-
-create_time = str(int(time.time()))
 
 
 def wx_reply_xml(from_user, to_user, msg_content):
@@ -114,7 +110,7 @@ def wx_reply_xml(from_user, to_user, msg_content):
 
 
 def check_signature(token, signature, timestamp, nonce):
-    """校验签名"""
+    """微信校验签名"""
     temp_arr = [token, timestamp, nonce]
     temp_arr.sort()
     temp_str = ''.join(temp_arr)

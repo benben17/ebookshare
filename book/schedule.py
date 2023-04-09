@@ -1,7 +1,9 @@
+# encoding:utf-8
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask_apscheduler import APScheduler
-from flask_apscheduler.scheduler import BackgroundScheduler
-from book.utils.wxMsg import mail_body, send_failed_body, mail_download_url_body
+
 from book import app
+from book.utils.wxMsg import mail_body, send_failed_body, mail_download_url_body
 from book.utils.mailUtil import send_email
 from book.utils import *
 
@@ -24,9 +26,7 @@ def delete_file_out_24_hours():
 
 
 def book_send(send_status):
-    from book.dbModels import Userlog
-    from book.dbModels import db
-
+    from book.dbModels import Userlog, db
     with app.app_context():
         userlogs = Userlog.query.filter(Userlog.status == send_status).all()
         if userlogs:
@@ -61,7 +61,6 @@ def book_send(send_status):
 
 scheduler = APScheduler(BackgroundScheduler())
 scheduler.init_app(app)
-
 scheduler.add_job(id="delete_file", func=delete_file_out_24_hours, trigger="interval", hours=2, replace_existing=False)
 scheduler.add_job(id="send_file", func=book_send, args=("0"), trigger="interval", seconds=180, replace_existing=False,
                   max_instances=3)

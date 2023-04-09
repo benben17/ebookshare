@@ -1,21 +1,26 @@
 # encoding:utf-8
 import json
 import time
-
-from operator import or_
-
 import requests
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
-
 import config
-from book import request, cache, app, db, User
+from book import cache
+from book.dbModels import db, User
+from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
-from book.utils import check_email, generate_code, model_to_dict
+from book.utils import check_email, generate_code, model_to_dict, get_file_name
 from book.utils.mailUtil import send_email
 
+blueprint = Blueprint(
+    get_file_name(__file__),
+    __name__,
+    url_prefix='/user'
+)
 
-@app.route('/user/login', methods=['POST'])
+
+@blueprint.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     if not all(key in data for key in ['email', 'passwd']):
@@ -34,8 +39,8 @@ def login():
     return APIResponse.success(data=data)
 
 
-@app.route("/user/email/code/<email>")
-def send_email_verification_code(email):
+@blueprint.route("/email/code/<email>")
+def email_verify_code(email):
     if check_email(email):
         user = User.query.filter(or_(User.email == email, User.name == email)).first()
         if user:
@@ -49,7 +54,7 @@ def send_email_verification_code(email):
         return APIResponse.bad_request(msg="无效的邮箱地址！")
 
 
-@app.route("/user/sign_up", methods=['POST'])
+@blueprint.route("/sign_up", methods=['POST'])
 def sign_up():
     """POST /user/sign_up: user sign up handler
     """
@@ -87,7 +92,7 @@ def sign_up():
         return APIResponse.bad_request(msg="注册失败！")
 
 
-@app.route('/user/forget/passwd', methods=['POST'])
+@blueprint.route('/forget/passwd', methods=['POST'])
 @jwt_required()
 def forget_passwd():
     data = request.get_json()
@@ -106,12 +111,12 @@ def forget_passwd():
         return APIResponse.bad_request(msg="用户名或邮箱地址为空！")
 
 
-@app.route('/user/logout')
+@blueprint.route('/logout')
 def logout():
     return APIResponse.success()
 
 
-@app.route('/user/info')
+@blueprint.route('/info')
 @jwt_required()
 def user_info():
     t_user = get_jwt_identity()
@@ -123,7 +128,7 @@ def user_info():
     return APIResponse.success(data=data)
 
 
-@app.route('/user/update/<id>', methods=['GET', 'POST'])
+@blueprint.route('/update/<id>', methods=['GET', 'POST'])
 def user_update(id):
     user = User.query.get(id)
     return APIResponse.success()

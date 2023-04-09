@@ -1,11 +1,13 @@
 import logging
-from flask import request
+from flask import request, Blueprint
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from book import app, jwt, Userlog, db
+
+from book.utils import get_file_name
 from book.utils.ApiResponse import APIResponse
+from book.dbModels import Userlog, db
 
-
-@app.route("/user/send/ebook", methods=["POST"])
+blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
+@blueprint.route("/send/ebook", methods=["POST"])
 @jwt_required()
 def dl_ebook():
     try:

@@ -1,22 +1,20 @@
+# -*-coding: utf-8-*-
 import json
-import logging
-
 import requests
+from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
-from book import app, request, User, db
+from book.dbModels import User, db
+from book.utils import get_file_name
 from book.utils.ApiResponse import APIResponse
 
-headers = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-}
+headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
 
 
-# 用户同步
-@app.route('/api/v2/sync/user/add', methods=['POST'])
+@blueprint.route('/sync/user/add', methods=['POST'])
 def user_add():
-
-
+    """用户同步"""
     res = sync_post(request.path)
     if res['status'].lower() == "ok":
         return APIResponse.success(msg=res['msg'])
@@ -24,10 +22,10 @@ def user_add():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-# 用户设置
-@app.route('/api/v2/sync/user/seting', methods=['POST'])
+@blueprint.route('/sync/user/seting', methods=['POST'])
 @jwt_required()
 def user_setting():
+    """用户设置"""
     res = sync_post(request.path)
     if res['status'].lower() == "ok":
         return APIResponse.success(msg=res['msg'])
@@ -35,9 +33,10 @@ def user_setting():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-@app.route('/api/v2/sync/user/upgrade', methods=['POST'])
+@blueprint.route('/sync/user/upgrade', methods=['POST'])
 @jwt_required()
 def user_upgrade():
+    """订阅用户升级到付费用户"""
     res = sync_post(request.path)
     if res['status'].lower() == "ok":
         return APIResponse.success(msg=res['msg'])
@@ -45,23 +44,21 @@ def user_upgrade():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-@app.route('/api/v2/sync/user/info', methods=['POST'])
+@blueprint.route('/sync/user/info', methods=['POST'])
 @jwt_required()
 def rss_user_info():
     res = sync_post(request.path)
     if res['status'] == "ok":
-        print(res['data'])
-        # print(type(res['data']))
         user_info = res['data']
         return APIResponse.success(data=user_info)
     else:
         return APIResponse.bad_request(msg=res['msg'])
 
 
-# 获取发送日志
-@app.route('/api/v2/my/deliver/logs', methods=['POST'])
+@blueprint.route('/my/deliver/logs', methods=['POST'])
 @jwt_required()
 def get_deliver_logs():
+    """获取发送订阅日志"""
     res = sync_post(request.path)
     if res['status'] == "ok":
         return APIResponse.success(data=res['data'])
@@ -69,7 +66,7 @@ def get_deliver_logs():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-@app.route('/api/v2/feed/book/deliver', methods=['POST'])
+@blueprint.route('/feed/book/deliver', methods=['POST'])
 @jwt_required()
 def get_my_feed_deliver():
     res = sync_post(request.path)
@@ -79,9 +76,9 @@ def get_my_feed_deliver():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-@app.route('/api/v2/my/rss', methods=['POST'])
+@blueprint.route('/my/rss', methods=['POST'])
 @jwt_required()
-def rss_my():
+def my_rss():
     api_path = '/api/v2/rss/myrss'
     res = sync_post(api_path)
     if res['status'].lower() == "ok":
@@ -90,7 +87,7 @@ def rss_my():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-@app.route('/api/v2/my/rss/add', methods=['POST'])
+@blueprint.route('/my/rss/add', methods=['POST'])
 @jwt_required()
 def my_rss_add():
     api_path = '/api/v2/rss/add'
@@ -110,23 +107,22 @@ def my_rss_add():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-# 公共订阅源
-@app.route('/api/v2/rss/pub', methods=['POST'])
+@blueprint.route('/rss/pub', methods=['POST'])
 @jwt_required()
 def get_pub_rss():
+    """公共订阅源"""
     api_path = '/api/v2/rss/pub'
     res = sync_post(api_path)
-    # logging.error(res)
     if res['status'] == "ok":
         return APIResponse.success(data=res['data'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
 
 
-# 删除我的订阅
-@app.route('/api/v2/my/rss/del', methods=['POST'])
+@blueprint.route('/my/rss/del', methods=['POST'])
 @jwt_required()
 def my_rss_del():
+    """删除我的订阅"""
     api_path = '/api/v2/rss/del'
     res = sync_post(api_path)
     user = get_jwt_identity()
@@ -140,9 +136,10 @@ def my_rss_del():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-@app.route('/api/v2/rss/share', methods=['POST'])
+@blueprint.route('/rss/share', methods=['POST'])
 @jwt_required()
 def rss_share():
+    """订阅源共享"""
     res = sync_post(request.path)
     if res['status'].lower() == "ok":
         return APIResponse.success(msg=res['msg'])
@@ -150,7 +147,7 @@ def rss_share():
         return APIResponse.bad_request(msg=res['msg'])
 
 
-@app.route('/api/v2/rss/invalid', methods=['POST'])
+@blueprint.route('/rss/invalid', methods=['POST'])
 @jwt_required()
 def rss_invalid():
     res = sync_post(request.path)
@@ -170,7 +167,6 @@ def sync_post(path):
     request_url = config.RSS2EBOOK_URL
     # request_url = "http://127.0.0.1:8080"
     res = requests.post(request_url + path, data=data, headers=headers, timeout=60)
-    # print(res.content)
     if res.status_code == 200:
         json_data = json.loads(res.text)
         if json_data['status'] == "ok":

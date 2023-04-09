@@ -1,6 +1,9 @@
+# -*- encoding: utf-8 -*-
+"""
+Copyright (c) 2019 - present benben
+"""
 from flask import render_template
 
-from . import user, feed, wechat, myfeed
 from book import app
 
 
@@ -14,3 +17,8 @@ def page_404():
 def home():
     # logging.error(app.template_folder)
     return "欢迎关注公众号：sendtokindles 下载电子书"
+
+
+
+
+

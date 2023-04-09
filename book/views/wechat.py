@@ -1,16 +1,17 @@
 import json
-import logging
-
-import requests
-from flask import redirect, send_from_directory, render_template
+from flask import redirect, send_from_directory, request, Blueprint
 from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
-from book import request, cache, app, db, upgradeUser
+from book import cache, db, upgradeUser
 from book.utils import *
 from book.utils.wxMsg import *
 
-
-@app.route('/api/wechat', methods=['GET', 'POST'])
+blueprint = Blueprint(
+    get_file_name(__file__),
+    __name__,
+    url_prefix='/api'
+)
+@blueprint.route('/wechat', methods=['GET', 'POST'])
 def wechat():
     if request.method == 'GET':
         # 处理验证请求
@@ -131,8 +132,8 @@ def wechat():
             return wx_reply_xml(from_user, to_user, reply_help_msg)
 
 
-@app.route('/download/<path:filename>')
-def dl(filename):
+@blueprint.route('/download/<path:filename>')
+def dl_file(filename):
     if os.path.exists(os.path.join(config.DOWNLOAD_DIR,filename)) is False:
         return redirect("/404")
     return send_from_directory(config.DOWNLOAD_DIR, filename)
@@ -189,9 +190,3 @@ class WeChat:
             print("a")
         except Exception as e:
             print(e)
-if __name__ == '__main__':
-    with app.app_context():
-        from book.dbModels import User
-        content = '892100089@qq.com'
-        user_info = User.query.filter(or_(User.email==content,User.name==content)).first()
-        print(user_info.name)

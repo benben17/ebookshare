@@ -218,7 +218,7 @@ def generate_code():
 
 
 if __name__ == '__main__':
-    print("aaa")
+    print(get_file_name(__file__))
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)
