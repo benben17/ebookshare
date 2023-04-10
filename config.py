@@ -48,7 +48,7 @@ SCHEDULER_API_ENABLED = False  # 添加API
 # 电子书下载目录
 DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')
 DOWNLOAD_URL = "https://ebook.stararea.cn/download/"
-
+BOOKSEARCH_URL = "https://zlib.knat.network"
 # 发送邮件状态
 SEND_FAILED = 3  # 失败
 SEND_SUCCESS = 1  # 成功
@@ -63,5 +63,6 @@ rss_host = {
     "primary": "https://benben5-191802.an.r.appspot.com",
     "second": "https://benben10-191802.an.r.appspot.com"
 }
+
 
 

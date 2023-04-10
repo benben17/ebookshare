@@ -199,4 +199,4 @@ if __name__ == "__main__":
             # request_url = "http://127.0.0.1:8080"
             res = requests.post(get_rss_host() + path, data=data, headers=headers, timeout=60)
             print(rss)
-            print(res.text,res.status_code)
+            print(res.text, res.status_code)
