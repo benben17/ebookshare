@@ -10,7 +10,7 @@ from book import cache, app
 from book.models import db, User
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
-from book.utils import check_email, generate_code, model_to_dict, get_file_name
+from book.utils import check_email, generate_code, model_to_dict, get_file_name, get_rss_host
 from book.utils.mailUtil import send_email
 
 blueprint = Blueprint(
@@ -151,9 +151,9 @@ def sync_user(user):
         'to_email': user.email,
         'expiration_days': '360'
     }
-    rss_host = config.rss_host['primary']
+
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    res = requests.post(rss_host + path, data=data, headers=headers)
+    res = requests.post(get_rss_host() + path, data=data, headers=headers)
     if res.status_code == 200:
         res = json.loads(res.text)
         if res['status'].lower() == 'ok':

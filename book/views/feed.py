@@ -5,7 +5,7 @@ from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
 from book.models import User, db
-from book.utils import get_file_name
+from book.utils import get_file_name, get_rss_host
 from book.utils.ApiResponse import APIResponse
 
 headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -164,8 +164,7 @@ def sync_post(path):
         data['key'] = config.RSS2EBOOK_KEY
         data['user_name'] = user['name']
         data['creator'] = user['name']
-    rss_host = config.rss_host['primary']
-    res = requests.post(rss_host + path, data=data, headers=headers, timeout=60)
+    res = requests.post(get_rss_host() + path, data=data, headers=headers, timeout=60)
     if res.status_code == 200:
         json_data = json.loads(res.text)
         if json_data['status'] == "ok":
@@ -196,8 +195,8 @@ if __name__ == "__main__":
                     "is_fulltext": rss[2],
                     "category": rss[3]
                     }
-            request_url = config.rss_host['primary']
+
             # request_url = "http://127.0.0.1:8080"
-            res = requests.post(request_url + path, data=data, headers=headers, timeout=60)
+            res = requests.post(get_rss_host() + path, data=data, headers=headers, timeout=60)
             print(rss)
             print(res.text,res.status_code)

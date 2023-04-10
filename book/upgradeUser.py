@@ -8,6 +8,7 @@ from flask_sqlalchemy.session import Session
 import config
 from book import db, app
 from book.models import UserPay
+from book.utils import get_rss_host
 
 
 def upgrade_user(user_name, days, expires, pay_id):
@@ -19,8 +20,7 @@ def upgrade_user(user_name, days, expires, pay_id):
         'expires': expires
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    rss_host = config.rss_host['primary']
-    res = requests.post(rss_host + path, data=data, headers=headers)
+    res = requests.post(get_rss_host() + path, data=data, headers=headers)
     if res.status_code != 200:
         logging.error(res.text)
     if res.status_code == 200:
