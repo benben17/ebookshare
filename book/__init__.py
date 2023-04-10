@@ -10,6 +10,8 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 
+import config
+
 app = Flask(__name__)
 app.config.from_object('config')
 
@@ -20,15 +22,15 @@ jwt = JWTManager(app)
 
 from book.models import *
 with app.app_context():
-    db_dir = os.path.join(app.root_path, "db")
+    db_dir = os.path.join(config.basedir, "db")
     if not os.path.exists(db_dir):
         os.mkdir(db_dir)
     db.create_all()
 
-log_dir = os.path.join(app.root_path, "log")
+log_dir = os.path.join(config.basedir, "logs")
 if not os.path.exists(log_dir):
     os.mkdir(log_dir)
-ebooks_dir = os.path.join(app.root_path, "ebooks")
+ebooks_dir = os.path.join(config.basedir, "ebooks")
 if not os.path.exists(ebooks_dir):
     os.mkdir(ebooks_dir)
 
