@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import logging
 import threading
 import requests
+from flask_sqlalchemy.session import Session
+
 import config
 from book import db, app
-from book.models import UserPay, User
+from book.models import UserPay
 
 
 def upgrade_user(user_name, days, expires, pay_id):
@@ -23,7 +25,7 @@ def upgrade_user(user_name, days, expires, pay_id):
     if res.status_code == 200:
         try:
             data = json.loads(res.text)
-            pay_log = UserPay.query.get(pay_id)
+            pay_log = UserPay.query.filter_by(id=pay_id).first()
             if data['status'].lower() == "ok":
                 pay_log.status = 'success'
             else:
@@ -58,5 +60,4 @@ def upgrade_user_thread(user, days):
 
 if __name__ == "__main__":
     with app.app_context():
-        pay_log = User.query.get(1)
-        print(pay_log)
+        pay_log = UserPay.query.filter_by(id=1).first()

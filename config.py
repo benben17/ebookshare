@@ -8,7 +8,7 @@ APPSECRET = "20764c0ae174a1e12c78e809a877c382"
 wechat_token = "kindlebooks"
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'rss2ebook')
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'db/ebook.sqlite')
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'db/ebook.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = False
 CSRF_ENABLED = True
@@ -49,8 +49,8 @@ SCHEDULER_API_ENABLED = False  # 添加API
 
 # 电子书下载目录
 DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')
-# print(DOWNLOAD_DIR)
 DOWNLOAD_URL = "https://ebook.stararea.cn/download/"
+
 # 发送邮件状态
 SEND_FAILED = 3   # 失败
 SEND_SUCCESS = 1   # 成功
