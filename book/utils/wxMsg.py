@@ -150,3 +150,14 @@ def wx_reply_news(from_user, to_user):
           </Articles>
         </xml>
         '''
+
+
+def download_url(user_log):
+    urls = ['https://ipfs.joaoleitao.org/ipfs/',
+            'https://gateway.pinata.cloud/ipfs/',
+            'https://cloudflare-ipfs.com/ipfs/',
+            'https://hardbin.com/ipfs/']
+    msg = ""
+    for index, url in enumerate(urls, start=1):
+        msg += f'<a href="{url}{user_log.ipfs_cid}?filename={user_log.book_name}">点击下载{index}</a>\n'
+    return msg

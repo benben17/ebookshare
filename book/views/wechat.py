@@ -104,8 +104,7 @@ def wechat():
             #     return wx_reply_news(from_user, to_user)
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 16:
-                if not user.email:
-                    return wx_reply_xml(from_user, to_user, no_bind_email_msg)
+
                 # 每个用户每天最多下载5本书
                 usersend = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
                                                 Userlog.create_time > get_now_date()).all()
@@ -115,14 +114,15 @@ def wechat():
                 book_info = cache.get(f'{from_user}_{content}')
                 if book_info is not None:
                     send_info = book_info.split(":")
-                    logging.error(send_info)
-
                     user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email,
                                        user_id=user.id,
                                        operation_type='download', status=SEND_STATUS.WAITING, ipfs_cid=send_info[1],
                                        filesize=send_info[2])
                     db.session.add(user_log)
                     db.session.commit()
+                    if not user.email:
+                        return wx_reply_xml(from_user, to_user, download_url(user_log))
+
                     return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email)+download_url(user_log))
 
                 else:
@@ -146,13 +146,5 @@ def dl_file(filename):
     # return APIResponse.success(data="欢迎关注 sendtokindles 公众号下载电子书")
 
 
-def download_url(user_log):
-    urls = ['https://ipfs.joaoleitao.org/ipfs/',
-            'https://gateway.pinata.cloud/ipfs/',
-            'https://cloudflare-ipfs.com/ipfs/',
-            'https://hardbin.com/ipfs/']
-    msg = ""
-    for index, url in enumerate(urls, start=1):
-        msg += f'<a href="{url}{user_log.ipfs_cid}?filename={user_log.book_name}">点击下载{index}</a>\n'
-    return msg
+
 
