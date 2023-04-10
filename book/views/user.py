@@ -34,6 +34,7 @@ def login():
         return APIResponse.bad_request(msg="密码不正确")
 
     user_info = model_to_dict(user)
+
     access_token = create_access_token(identity=user_info)
     data = {"user": user_info, "token": access_token}
     return APIResponse.success(data=data)

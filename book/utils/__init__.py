@@ -196,8 +196,6 @@ def model_to_dict(model):
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
             value = value.isoformat() if value is not None else None
-        if attribute.key == 'hash_pass':
-            continue
         data[attribute.key] = value
     return data
 
