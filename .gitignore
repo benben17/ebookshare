@@ -39,9 +39,7 @@ target/
 ebooks/*
 
 # Folder to direct output to when testing command-line (will be ignored by git)
-logs/
 /venv/
 venv/*
-ebooks/
-/ebooks/
+/ebooks/*
 db/ebook.db
