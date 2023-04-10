@@ -220,6 +220,7 @@ def generate_code():
 def create_app_dir():
     dirs = ['logs', 'ebooks', 'db']
     for dir in dirs:
+        # print(os.path.join(config.basedir, dir))
         if not os.path.exists(os.path.join(config.basedir, dir)):
             os.mkdir(os.path.join(config.basedir, dir))
 
