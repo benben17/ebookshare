@@ -51,6 +51,7 @@ def ebook_send_log():
 
 
 @blueprint.route("/ebook/search", methods=["GET"])
+@jwt_required()
 def ebook_search():
     search_url = f'{config.BOOKSEARCH_URL}/search?limit=60&query='
     title = request.args.get("title")

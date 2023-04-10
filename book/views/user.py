@@ -61,7 +61,7 @@ def sign_up():
     """
     data = request.get_json()
     if not data.get('email') or not data.get('passwd'):
-        return APIResponse.bad_request(msg="用户名密码为空！")
+        return APIResponse.bad_request(msg="邮箱或密码不允许为空！")
 
     email = data['email']
     passwd = data['passwd']
@@ -69,24 +69,21 @@ def sign_up():
         return APIResponse.bad_request(msg="无效的邮箱地址！")
 
     user = User.query.filter(or_(User.email == email, User.name == email)).first()
-
-    if user is None:
-        user = User()
-        user.id = int(time.time())
-        user.hash_pass = generate_password_hash(passwd)
-        user.email = email
-        user.name = user.email.split("@")[0]
-        user.kindle_email = email
-        user.role = config.DEFAULT_USER_ROLE
-        user.is_reg_rss = True
-    else:
+    if user:
         return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
+    user = User()
+    user.id = int(time.time())
+    user.hash_pass = generate_password_hash(passwd)
+    user.email = email
+    user.name = user.email.split("@")[0]
+    user.kindle_email = email
+    user.role = config.DEFAULT_USER_ROLE
+    user.is_reg_rss = True
 
     if sync_user(user):
         db.session.add(user)
         db.session.commit()
         user_info = model_to_dict(user)
-        user_info['hash_pass'] = ""
         access_token = create_access_token(identity=user_info)
         data = {"user": user_info, "token": access_token}
         return APIResponse.success(data=data)

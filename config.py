@@ -45,24 +45,22 @@ JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
 SCHEDULER_API_ENABLED = False  # 添加API
 
-# 电子书下载目录
-DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')
-DOWNLOAD_URL = "https://ebook.stararea.cn/download/"
-BOOKSEARCH_URL = "https://zlib.knat.network"
-# 发送邮件状态
-SEND_FAILED = 3  # 失败
-SEND_SUCCESS = 1  # 成功
-SEND_UNKONOW = 4
+# 电子书 配置
+DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')   # 下载目录
+DOWNLOAD_URL = "https://ebook.stararea.cn/download/"  # 下载URL
+BOOKSEARCH_URL = "https://zlib.knat.network"        # ebook 搜索地址
+rss_host = {    # rss 源后台主机
+    "primary": "https://benben5-191802.an.r.appspot.com",
+    "second": "https://benben10-191802.an.r.appspot.com"
+}
+
 
 RSS2EBOOK_KEY = 'rss2Ebook.com.luck!'
 
 DEFAULT_USER_ROLE = 'default'
 DEFAULT_USER_PASSWD = 'sendtokindles'
 
-rss_host = {
-    "primary": "https://benben5-191802.an.r.appspot.com",
-    "second": "https://benben10-191802.an.r.appspot.com"
-}
+
 
 
 

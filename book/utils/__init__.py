@@ -144,8 +144,9 @@ def download_net_book(ipfs_cid, filename):
         'https://cloudflare-ipfs.com',
         'https://gateway.pinata.cloud',
         'https://gateway.ipfs.io',
-        'https://ipfs.jpu.jp',
-        'https://cf-ipfs.com'
+        'https://ipfs.joaoleitao.org',
+        'https://cf-ipfs.com',
+        'https://hardbin.com'
     ]
     for url in url_list:
         full_url = f"{url}/ipfs/{ipfs_cid}?filename={filename}"

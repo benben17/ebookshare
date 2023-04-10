@@ -2,7 +2,8 @@ import json
 from flask import redirect, send_from_directory, request, Blueprint
 from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
-from book import cache, db, upgradeUser
+from book import cache, db, upgradeUser, User
+from book.dicts import SEND_STATUS
 from book.utils import *
 from book.utils.wxMsg import *
 
@@ -11,6 +12,8 @@ blueprint = Blueprint(
     __name__,
     url_prefix='/api'
 )
+
+
 @blueprint.route('/wechat', methods=['GET', 'POST'])
 def wechat():
     if request.method == 'GET':
@@ -75,7 +78,8 @@ def wechat():
                     return wx_reply_xml(from_user, to_user, bind_email_msg(content))
 
                 hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
-                user_info = User(email=content, kindle_email=content, wx_openid=from_user, hash_pass=hash_pass, role=config.DEFAULT_USER_ROLE)
+                user_info = User(email=content, kindle_email=content, wx_openid=from_user, hash_pass=hash_pass,
+                                 role=config.DEFAULT_USER_ROLE)
                 db.session.add(user_info)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(content))
@@ -113,11 +117,13 @@ def wechat():
                     send_info = book_info.split(":")
                     logging.error(send_info)
 
-                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email, user_id=user.id,
-                                       operation_type='download', status=0, ipfs_cid=send_info[1],filesize=send_info[2])
+                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email,
+                                       user_id=user.id,
+                                       operation_type='download', status=SEND_STATUS.WAITING, ipfs_cid=send_info[1],
+                                       filesize=send_info[2])
                     db.session.add(user_log)
                     db.session.commit()
-                    return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email))
+                    return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email)+download_url(user_log))
 
                 else:
                     return wx_reply_xml(from_user, to_user, reply_help_msg)
@@ -125,68 +131,28 @@ def wechat():
             # 搜索 图书
             msg_content, books_cache = search_net_book(title=content, openid=from_user)
             if books_cache is not None:
-                cache.set_many(books_cache) #存缓存
+                cache.set_many(books_cache)  # 存缓存
             return wx_reply_xml(from_user, to_user, msg_content)
 
-        else: # 其他未知消息
+        else:  # 其他未知消息
             return wx_reply_xml(from_user, to_user, reply_help_msg)
 
 
 @blueprint.route('/download/<path:filename>')
 def dl_file(filename):
-    if os.path.exists(os.path.join(config.DOWNLOAD_DIR,filename)) is False:
+    if os.path.exists(os.path.join(config.DOWNLOAD_DIR, filename)) is False:
         return redirect("/404")
     return send_from_directory(config.DOWNLOAD_DIR, filename)
     # return APIResponse.success(data="欢迎关注 sendtokindles 公众号下载电子书")
 
 
+def download_url(user_log):
+    urls = ['https://ipfs.joaoleitao.org/ipfs/',
+            'https://gateway.pinata.cloud/ipfs/',
+            'https://cloudflare-ipfs.com/ipfs/',
+            'https://hardbin.com/ipfs/']
+    msg = ""
+    for index, url in enumerate(urls, start=1):
+        msg += f'<a href="{url}{user_log.ipfs_cid}?filename={user_log.book_name}">点击下载{index}</a>\n'
+    return msg
 
-class WeChat:
-    def __init__(self):
-        self.APPID = config.APPID
-        self.APPSECRET= config.APPSECRET
-
-    def get_token(self):
-
-        token_url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}'
-        try:
-            res = requests.get(token_url.format(self.APPID,self.APPSECRET))
-            json_res = json.loads(res.text)
-            if 'access_token' in json_res:
-                # cache.add('access_token',json_res['access_token'])
-                return json_res['access_token']
-        except Exception as e:
-            logging.error("获取token 失败！："+e)
-    def create_menu(self):
-        ACCESS_TOKEN = self.get_token()
-        create_menu_button_url= f'https://api.weixin.qq.com/cgi-bin/menu/create?access_token={ACCESS_TOKEN}'
-        my = "http://www.baidu.com"
-        param = '''{
-            "button": [
-                {
-                    "type": "click",
-                    "name": "个人中心",
-                    "key": "{my}"
-                },
-                {
-                    "name": "菜单",
-                    "sub_button": [
-                        {
-                            "type": "view",
-                            "name": "搜索",
-                            "url": "http://www.soso.com/"
-                        },
-                        {
-                            "type": "click",
-                            "name": "赞一下我们",
-                            "key": "V1001_GOOD"
-                        }]
-                }]
-        }'''
-        param.format(my)
-        requests.post(create_menu_button_url,param)
-
-        try:
-            print("a")
-        except Exception as e:
-            print(e)
