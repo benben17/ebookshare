@@ -196,6 +196,8 @@ def model_to_dict(model):
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
             value = value.isoformat() if value is not None else None
+        if attribute.key == "user_pay_log" or attribute.key == "hash_pass":
+            continue
         data[attribute.key] = value
     return data
 
@@ -225,6 +227,7 @@ def create_app_dir():
 
 if __name__ == '__main__':
     print(get_file_name(__file__))
+
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)

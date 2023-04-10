@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identi
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
-from book import cache
+from book import cache, app
 from book.models import db, User
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
@@ -34,7 +34,7 @@ def login():
         return APIResponse.bad_request(msg="密码不正确")
 
     user_info = model_to_dict(user)
-
+    # print(user_info)
     access_token = create_access_token(identity=user_info)
     data = {"user": user_info, "token": access_token}
     return APIResponse.success(data=data)
@@ -158,3 +158,9 @@ def sync_user(user):
             return True
     return False
 
+if __name__ == '__main__':
+    with app.app_context():
+        passwd=generate_password_hash('admin')
+        user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
+        db.session.add(user)
+        db.session.commit()
