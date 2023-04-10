@@ -72,15 +72,16 @@ def sign_up():
 
     if user is None:
         user = User()
-        user.id = str(int(time.time()))
+        user.id = int(time.time())
         user.hash_pass = generate_password_hash(passwd)
         user.email = email
         user.name = user.email.split("@")[0]
+        user.kindle_email = email
         user.role = config.DEFAULT_USER_ROLE
         user.is_reg_rss = True
     else:
-        if user.is_reg_rss:
-            return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
+        return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
+
     if sync_user(user):
         db.session.add(user)
         db.session.commit()
@@ -160,8 +161,9 @@ def sync_user(user):
     return False
 
 if __name__ == '__main__':
-    with app.app_context():
-        passwd=generate_password_hash('admin')
-        user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
-        db.session.add(user)
-        db.session.commit()
+    print("a")
+    # with app.app_context():
+    #     passwd=generate_password_hash('admin')
+    #     user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
+    #     db.session.add(user)
+    #     db.session.commit()
