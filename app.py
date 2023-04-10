@@ -1,7 +1,7 @@
 # from book.views import user, feed, wechat, myfeed
 import os
 
-from book import *
+from book import app
 from book.schedule import *
 
 
