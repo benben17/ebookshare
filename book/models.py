@@ -20,6 +20,7 @@ class User(db.Model):
     expires = db.Column(db.DateTime)  # 超过了此日期后账号自动停止推送
     create_time = db.Column(db.DateTime, default=datetime.now())
     is_reg_rss = db.Column(db.Boolean, default=False)
+    user_pay_log = db.relationship("UserPay", uselist=True, backref="user", lazy='dynamic')
 
     def is_authenticated(self):
         return False
@@ -55,6 +56,7 @@ class Books(db.Model):
     bookext = db.relationship('Bookurl', backref=db.backref('books'), uselist=False)
 
 
+
 class Bookurl(db.Model):
     __tablename__ = "book_url"
     id = db.Column(db.Integer, primary_key=True)
@@ -63,9 +65,9 @@ class Bookurl(db.Model):
 
 
 class Userlog(db.Model):
-    __tablename__ = "user_log"
+    __tablename__ = "userlog"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     book_name = db.Column(db.String(300))
     operation_type = db.Column(db.String(24), default='download')
     receive_email = db.Column(db.String(120))
@@ -80,7 +82,7 @@ class Userlog(db.Model):
 class UserPay(db.Model):
     __tablename__ = "user_pay"
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String(300))  # 年费 月费
     pay_type = db.Column(db.String(24))  # ali weixin
     user_email = db.Column(db.String(120))
@@ -90,3 +92,7 @@ class UserPay(db.Model):
 
     def __repr__(self):
         return self.user_name
+
+    @classmethod
+    def get_by_id(cls, user_id):
+        return cls.query.filter_by(id=user_id).first()

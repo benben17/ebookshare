@@ -27,9 +27,9 @@ def upgrade_user(user_name, days, expires, pay_id):
             data = json.loads(res.text)
             pay_log = UserPay.query.filter_by(id=pay_id).first()
             if data['status'].lower() == "ok":
-                pay_log.status = 'success'
+                pay_log.status = 1
             else:
-                pay_log.status = 'failed'
+                pay_log.status = 0
             db.session.add(pay_log)
             db.session.commit()
         except Exception as e:

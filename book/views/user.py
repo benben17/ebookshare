@@ -3,7 +3,7 @@ import json
 import time
 import requests
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
-from sqlalchemy import or_
+from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
 from book import cache
@@ -19,7 +19,7 @@ blueprint = Blueprint(
     url_prefix='/user'
 )
 
-headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
 @blueprint.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -121,17 +121,24 @@ def logout():
 def user_info():
     t_user = get_jwt_identity()
     user = User.query.get(t_user['id'])
-    user.hash_pass = ""
     user_json = model_to_dict(user)
     access_token = create_access_token(identity=user_json)
     data = {"user": user_json, "token": access_token}
     return APIResponse.success(data=data)
 
-
-@blueprint.route('/update/<id>', methods=['GET', 'POST'])
-def user_update(id):
-    user = User.query.get(id)
-    return APIResponse.success()
+@blueprint.route('/passwd/change', methods=['GET', 'POST'])
+@jwt_required()
+def user_passwd_change():
+    data = request.get_json()
+    user = get_jwt_identity()
+    user_email = data['email']
+    if user.email != user_email:
+        return APIResponse.internal_server_error(msg="邮箱错误!")
+    new_pass = data['passwd']
+    user.hash_pass = generate_password_hash(new_pass)
+    db.session.add(user)
+    db.session.commit()
+    return APIResponse.success(msg="密码修改成功！")
 
 
 def sync_user(user):
@@ -142,9 +149,11 @@ def sync_user(user):
         'to_email': user.email,
         'expiration_days': '360'
     }
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=headers)
     if res.status_code == 200:
         res = json.loads(res.text)
         if res['status'].lower() == 'ok':
             return True
     return False
+
