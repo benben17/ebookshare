@@ -165,7 +165,6 @@ def download_net_book(ipfs_cid, filename):
     return None
 
 
-
 def is_file_24_hours(file_path):
     '''判断文件是否创建超过24小时'''
     ctime = os.path.getctime(file_path)
@@ -216,6 +215,13 @@ def generate_code():
     for i in range(6):
         code.append(str(random.randint(0, 9)))
     return ''.join(code)
+
+
+def create_app_dir():
+    dirs = ['logs', 'ebooks', 'db']
+    for dir in dirs:
+        if not os.path.exists(os.path.join(config.basedir, dir)):
+            os.mkdir(os.path.join(config.basedir, dir))
 
 
 if __name__ == '__main__':
