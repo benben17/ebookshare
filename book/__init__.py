@@ -19,10 +19,18 @@ cache = Cache(app)
 jwt = JWTManager(app)
 
 from book.models import *
-
 with app.app_context():
+    db_dir = os.path.join(app.root_path, "db")
+    if not os.path.exists(db_dir):
+        os.mkdir(db_dir)
     db.create_all()
 
+log_dir = os.path.join(app.root_path, "log")
+if not os.path.exists(log_dir):
+    os.mkdir(log_dir)
+ebooks_dir = os.path.join(app.root_path, "ebooks")
+if not os.path.exists(ebooks_dir):
+    os.mkdir(ebooks_dir)
 
 @app.errorhandler(NoAuthorizationError)
 @app.errorhandler(InvalidHeaderError)
