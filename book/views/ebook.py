@@ -1,13 +1,15 @@
+# -*-coding: utf-8-*-
 import logging
 from flask import request, Blueprint
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
-from book.utils import get_file_name
+from book.utils import get_file_name, model_to_dict
 from book.utils.ApiResponse import APIResponse
 from book.models import Userlog, db
-
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
-@blueprint.route("/send/ebook", methods=["POST"])
+
+
+@blueprint.route("/ebook/send", methods=["POST"])
 @jwt_required()
 def dl_ebook():
     try:
@@ -19,7 +21,6 @@ def dl_ebook():
         user = get_jwt_identity()
         if user.wx_openid is None:
             return APIResponse.bad_request(msg="请先关注公众号，发送注册邮箱进行绑定")
-
         filesize = data.get('filesize', 0)
         user_log = Userlog(wx_openid=user.wx_openid, book_name=book_name, receive_email=user.kindle_email,
                            user_id=user.id, operation_type='download',
@@ -27,7 +28,20 @@ def dl_ebook():
         db.session.add(user_log)
         db.session.commit()
         return APIResponse.success(msg="发送成功，邮箱接收！")
-
     except Exception as e:
         logging.error(e)
         return APIResponse.bad_request(msg="发送失败")
+
+
+@blueprint.route("/ebook/send/log", methods=["POST"])
+@jwt_required()
+def ebook_send_log():
+    user = get_jwt_identity()
+    send_logs = Userlog.query.filter_by(user_id=user.id).all()
+    if not send_logs:
+        return APIResponse.success(msg="无记录")
+
+    data = []
+    for log in send_logs:
+        data.append(model_to_dict(log))
+    APIResponse.success(data=data)

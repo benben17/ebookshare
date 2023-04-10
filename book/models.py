@@ -56,7 +56,6 @@ class Books(db.Model):
     bookext = db.relationship('Bookurl', backref=db.backref('books'), uselist=False)
 
 
-
 class Bookurl(db.Model):
     __tablename__ = "book_url"
     id = db.Column(db.Integer, primary_key=True)

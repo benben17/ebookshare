@@ -19,7 +19,8 @@ def upgrade_user(user_name, days, expires, pay_id):
         'expires': expires
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=headers)
+    rss_host = config.rss_host['primary']
+    res = requests.post(rss_host + path, data=data, headers=headers)
     if res.status_code != 200:
         logging.error(res.text)
     if res.status_code == 200:

@@ -24,16 +24,9 @@ jwt = JWTManager(app)
 create_app_dir()
 
 from book.models import *
+
 with app.app_context():
     db.create_all()
-
-
-@app.errorhandler(NoAuthorizationError)
-@app.errorhandler(InvalidHeaderError)
-@app.errorhandler(WrongTokenError)
-def handle_auth_error(e):
-    return jsonify({'code': 10000, 'msg': str(e), "data": ""}), 200
-
 
 from book.views import *
 
@@ -46,11 +39,24 @@ for model_name in modules:
 Initialize logging
 """
 logfile = f"{os.path.dirname(app.root_path)}/logs/books.log"
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 handler = RotatingFileHandler(logfile, maxBytes=1024 * 1024 * 100, backupCount=10)  # 最大100M
-# Time, log level, log file, line number, message
+"""Time, log level, log file, line number, message"""
 formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(filename)s-%(funcName)s-%(lineno)s-%(message)s')
 handler.setFormatter(formatter)
 logging.getLogger().addHandler(handler)
 
-from .models import *
+
+
+@app.errorhandler(404)
+def error_date(error):
+    return jsonify({'code': 404, 'msg': '404'}), 404
+
+
+@app.errorhandler(NoAuthorizationError)
+@app.errorhandler(InvalidHeaderError)
+@app.errorhandler(WrongTokenError)
+def handle_auth_error(e):
+    return jsonify({'code': 10000, 'msg': str(e), "data": ""}), 200
+
+

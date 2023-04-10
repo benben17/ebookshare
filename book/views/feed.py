@@ -164,9 +164,8 @@ def sync_post(path):
         data['key'] = config.RSS2EBOOK_KEY
         data['user_name'] = user['name']
         data['creator'] = user['name']
-    request_url = config.RSS2EBOOK_URL
-    # request_url = "http://127.0.0.1:8080"
-    res = requests.post(request_url + path, data=data, headers=headers, timeout=60)
+    rss_host = config.rss_host['primary']
+    res = requests.post(rss_host + path, data=data, headers=headers, timeout=60)
     if res.status_code == 200:
         json_data = json.loads(res.text)
         if json_data['status'] == "ok":
@@ -197,7 +196,7 @@ if __name__ == "__main__":
                     "is_fulltext": rss[2],
                     "category": rss[3]
                     }
-            request_url = config.RSS2EBOOK_URL
+            request_url = config.rss_host['primary']
             # request_url = "http://127.0.0.1:8080"
             res = requests.post(request_url + path, data=data, headers=headers, timeout=60)
             print(rss)

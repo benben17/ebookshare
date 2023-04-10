@@ -190,14 +190,15 @@ def model_to_dict(model):
         return None
     # get the attributes of the model instance
     attributes = inspect(model).attrs
+    filter_list = ["user_pay_log", "hash_pass"]
     data = {}
     for attribute in attributes:
+        if attribute.key in filter_list:
+            continue
         value = getattr(model, attribute.key)
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
             value = value.isoformat() if value is not None else None
-        if attribute.key == "user_pay_log" or attribute.key == "hash_pass":
-            continue
         data[attribute.key] = value
     return data
 

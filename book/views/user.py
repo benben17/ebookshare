@@ -150,8 +150,9 @@ def sync_user(user):
         'to_email': user.email,
         'expiration_days': '360'
     }
+    rss_host = config.rss_host['primary']
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    res = requests.post(config.RSS2EBOOK_URL + path, data=data, headers=headers)
+    res = requests.post(rss_host + path, data=data, headers=headers)
     if res.status_code == 200:
         res = json.loads(res.text)
         if res['status'].lower() == 'ok':
