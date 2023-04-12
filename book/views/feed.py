@@ -13,6 +13,7 @@ blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
 
 
 @blueprint.route('/sync/user/add', methods=['POST'])
+@jwt_required()
 def user_add():
     """用户同步"""
     res = sync_post(request.path)

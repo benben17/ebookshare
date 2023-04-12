@@ -37,6 +37,10 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % (self.name)
 
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
+
 
 class Books(db.Model):
     __tablename__ = "books"
@@ -83,20 +87,23 @@ class UserPay(db.Model):
     __tablename__ = "user_pay"
     id = db.Column(db.Integer, primary_key=True, index=True)
     amount = db.Column(db.Float, nullable=False)
-    name = db.Column(db.String(300))  # 年费 月费
+    product_name = db.Column(db.String(100))  # 年费 月费
     description = db.Column(db.String(255), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     pay_type = db.Column(db.String(24))  # ali weixin
-    user_email = db.Column(db.String(120))
-    pay_time = db.Column(db.DateTime, default=datetime.now())
-    create_time = db.Column(db.DateTime, default=datetime.now())
+    user_name = db.Column(db.String(120))
+    pay_time = db.Column(db.DateTime)
+    pay_url = db.Column(db.String(500))  # 支付地址，未支付的时候直接调用
+    create_time = db.Column(db.DateTime, default=datetime.utcnow())
     currency = db.Column(db.String(3), nullable=False)
     status = db.Column(db.Enum(dicts.PaymentStatus), default=dicts.PaymentStatus.created)
     payment_id = db.Column(db.String(255), nullable=True)
-    payment_provider = db.Column(db.String(255), nullable=True)
     cancel_url = db.Column(db.String(255), nullable=True)
     canceled_by = db.Column(db.String(255), nullable=True)
     canceled_time = db.Column(db.DateTime, nullable=True)
+    refund_time = db.Column(db.DateTime, nullable=True)
+    refund_amount = db.Column(db.Float, nullable=True, default='0.00')
+    # refund_read_amount = db.Column(db.Float, nullable=False)
 
     def __repr__(self):
         return self.user_name
@@ -104,3 +111,4 @@ class UserPay(db.Model):
     @classmethod
     def get_by_id(cls, user_id):
         return cls.query.filter_by(id=user_id).first()
+

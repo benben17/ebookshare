@@ -41,6 +41,10 @@ class APIResponse:
         return APIResponse(data=data, msg=msg, code=CodeMap.created).to_json()
 
     @staticmethod
+    def created_failed(data=None, msg=''):
+        return APIResponse(data=data, msg=msg, code=CodeMap.created).to_json()
+
+    @staticmethod
     def bad_request(data=None, msg=''):
         return APIResponse(data=data, msg=msg, code=CodeMap.bad_request).to_json()
 

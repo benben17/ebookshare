@@ -235,6 +235,8 @@ def get_rss_host(user_id=1):
         return config.rss_host['second']
 
 
+def get_now():
+    return datetime.utcnow()
 
 
 

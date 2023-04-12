@@ -1,4 +1,5 @@
 # coding: utf-8
+from datetime import datetime, timedelta
 from enum import Enum
 
 
@@ -16,3 +17,22 @@ class PaymentStatus(Enum):
     approved = "approved"
     completed = "completed"
     canceled = "canceled"
+
+
+class Product:
+    def __init__(self, product):
+        self.product = product
+
+    def get_product(self):
+        if self.product == "month":
+            return {"name": "month", "amount": 2.99, "desc": "One month plus fee", "days": 31}
+        elif self.product == "year":
+            return {"name": "year", "amount": 19.99, "desc": "One year plus fee", "days": 366}
+        else:
+            return {"name": "test", "amount": 0.01, "desc": "for test", "days": 10}
+
+
+if __name__ == "__main__":
+    days = -10
+
+    print(datetime.utcnow() + timedelta(days=int(days)))
