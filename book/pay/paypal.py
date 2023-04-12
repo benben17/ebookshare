@@ -9,7 +9,8 @@ from book.dicts import PaymentStatus
 from book.models import UserPay
 
 from book.pay import create_order
-from book.utils import get_file_name, ApiResponse
+from book.utils import get_file_name
+from book.utils.ApiResponse import *
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
@@ -99,7 +100,7 @@ def refund_payment():
             print(refund.error)
     except Exception as e:
         logging.error(str(e))
-        return ApiResponse.bad_request(msg=str(e))
+        return APIResponse.bad_request(msg=str(e))
 
 
 @blueprint.route("/cancel", methods=['GET', 'POST'])
