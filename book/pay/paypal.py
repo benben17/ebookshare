@@ -9,7 +9,7 @@ from book.dicts import PaymentStatus
 from book.models import UserPay
 
 from book.pay import create_order
-from book.utils import get_file_name
+from book.utils import get_file_name, ApiResponse
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
@@ -85,18 +85,21 @@ def execute_payment():
 def refund_payment():
     payment_id = request.args.get("paymentId")
     # pay = UserPay.query.filter_by(payment_id=payment_id).first()
-
-    sale = Sale.find(payment_id)
-    refund = sale.refund({
-        "amount": {
-            "total": "1.00",
-            "currency": "USD"}})
-    # Check refund status
-    if refund.success():
-        print("Refund[%s] Success" % (refund.id))
-    else:
-        print("Unable to Refund")
-        print(refund.error)
+    try:
+        sale = Sale.find(payment_id)
+        refund = sale.refund({
+            "amount": {
+                "total": "1.00",
+                "currency": "USD"}})
+        # Check refund status
+        if refund.success():
+            print("Refund[%s] Success" % (refund.id))
+        else:
+            print("Unable to Refund")
+            print(refund.error)
+    except Exception as e:
+        logging.error(str(e))
+        return ApiResponse.bad_request(msg=str(e))
 
 
 @blueprint.route("/cancel", methods=['GET', 'POST'])
