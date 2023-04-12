@@ -6,7 +6,7 @@ import requests
 from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
-from book.dicts import RequestStatus, RoleFeedNum, UserRole
+from book.dicts import RequestStatus, UserRole
 from book.models import User, db
 from book.utils import get_file_name, get_rss_host
 from book.utils.ApiResponse import APIResponse
