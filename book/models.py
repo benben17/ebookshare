@@ -1,5 +1,5 @@
 # coding: utf-8
-from book import db
+from book import db, dicts
 from datetime import datetime
 
 
@@ -78,16 +78,25 @@ class Userlog(db.Model):
     wx_openid = db.Column(db.String(120))
 
 
+
 class UserPay(db.Model):
     __tablename__ = "user_pay"
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    amount = db.Column(db.Float, nullable=False)
     name = db.Column(db.String(300))  # 年费 月费
+    description = db.Column(db.String(255), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     pay_type = db.Column(db.String(24))  # ali weixin
     user_email = db.Column(db.String(120))
     pay_time = db.Column(db.DateTime, default=datetime.now())
     create_time = db.Column(db.DateTime, default=datetime.now())
-    status = db.Column(db.Integer)
+    currency = db.Column(db.String(3), nullable=False)
+    status = db.Column(db.Enum(dicts.PaymentStatus), default=dicts.PaymentStatus.created)
+    payment_id = db.Column(db.String(255), nullable=True)
+    payment_provider = db.Column(db.String(255), nullable=True)
+    cancel_url = db.Column(db.String(255), nullable=True)
+    canceled_by = db.Column(db.String(255), nullable=True)
+    canceled_time = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
         return self.user_name

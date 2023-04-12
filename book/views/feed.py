@@ -176,27 +176,22 @@ def sync_post(path):
 
 
 if __name__ == "__main__":
-        rss_list = [('Science / Latest Science News', 'https://www.sciencedaily.com/rss/top.xml', 'false', 'tech'),
-                ('Science / All Top News', 'https://www.sciencedaily.com/rss/top/science.xml', 'false', 'tech'),
-                ('Science / Health News', 'https://www.sciencedaily.com/rss/top/health.xml', 'false', 'tech'),
-                ('Science / Technology News', 'https://www.sciencedaily.com/rss/top/technology.xml', 'false', 'tech'),
-                ('Science / Environment News', 'https://www.sciencedaily.com/rss/top/environment.xml', 'false', 'tech'),
-                ('Science / Society News', 'https://www.sciencedaily.com/rss/top/society.xml', 'false', 'tech'),
-                (
-                'Science / Strange &amp; Offbeat News', 'https://www.sciencedaily.com/rss/strange_offbeat.xml', 'false',
-                'tech')]
-        for rss in rss_list:
-            path = '/api/v2/rss/share'
-            data = {'key': config.RSS2EBOOK_KEY,
-                    'user_name': 'admin',
-                    'creator': 'admin',
-                    "title": rss[0],
-                    "url": rss[1],
-                    "is_fulltext": rss[2],
-                    "category": rss[3]
-                    }
+    from book.rss import rss_list
 
-            # request_url = "http://127.0.0.1:8080"
-            res = requests.post(get_rss_host() + path, data=data, headers=headers, timeout=60)
-            print(rss)
-            print(res.text, res.status_code)
+    for rss in rss_list:
+
+        path = '/api/v2/rss/manager'
+        data = {'key': config.RSS2EBOOK_KEY,
+                'user_name': 'admin',
+                'creator': 'admin',
+                "title": rss[1],
+                "url": rss[2],
+                "is_fulltext": "flase",
+                "category": rss[0],
+                "librss_id" : 1
+                }
+        print(data)
+        # request_url = "http://127.0.0.1:8080"
+        res = requests.post(get_rss_host() + path, data=data, headers=headers, timeout=60)
+        # print(rss)
+        print(res.text, res.status_code)

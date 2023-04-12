@@ -14,6 +14,7 @@ from sqlalchemy import inspect
 import config
 
 
+
 def parse_xml(xml_str):
     """解析xml字符串"""
     root = ET.fromstring(xml_str)
@@ -234,10 +235,12 @@ def get_rss_host(user_id=1):
         return config.rss_host['second']
 
 
+
+
+
 if __name__ == '__main__':
     print(get_file_name(__file__))
-    user_id = 11
-    print(get_rss_host())
+
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)
