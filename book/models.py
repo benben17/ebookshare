@@ -97,7 +97,7 @@ class UserPay(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.utcnow())
     currency = db.Column(db.String(3), nullable=False)
     status = db.Column(db.Enum(dicts.PaymentStatus), default=dicts.PaymentStatus.created)
-    payment_id = db.Column(db.String(255), nullable=True)
+    payment_id = db.Column(db.String(255), nullable=True, index=True)
     cancel_url = db.Column(db.String(255), nullable=True)
     canceled_by = db.Column(db.String(255), nullable=True)
     canceled_time = db.Column(db.DateTime, nullable=True)
@@ -109,6 +109,6 @@ class UserPay(db.Model):
         return self.user_name
 
     @classmethod
-    def get_by_id(cls, user_id):
-        return cls.query.filter_by(id=user_id).first()
+    def get_payment_id(cls, payment_id):
+        return cls.query.filter_by(payment_id=payment_id).first()
 

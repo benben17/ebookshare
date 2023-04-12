@@ -1,15 +1,44 @@
 # -*-coding: utf-8-*-
 import json
+import logging
+
 import requests
 from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
+from book.dicts import RequestStatus, RoleFeedNum, UserRole
 from book.models import User, db
 from book.utils import get_file_name, get_rss_host
 from book.utils.ApiResponse import APIResponse
 
-headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
+
+
+def sync_post(path):
+    param = request.get_json()
+    user = get_jwt_identity()
+    if param:
+        param['key'] = config.RSS2EBOOK_KEY
+        param['user_name'] = user['name']
+        param['creator'] = user['name']
+    res = requests.post(get_rss_host() + path, data=param, headers=config.HEADERS, timeout=60)
+    if res.status_code == 200:
+        json_data = json.loads(res.text)
+        if json_data['status'] == RequestStatus.OK:
+            if RequestStatus.DATA not in json_data.keys():
+                json_data['data'] = ""
+            return json_data
+        return {"status": "failed", "msg": json_data[RequestStatus.MSG]}
+    else:
+        logging.error(str(path), res.text)
+        return {"status": "failed", "msg": res.text}
+
+
+def return_fun(res):
+    if res['status'].lower() == RequestStatus.OK:
+        return APIResponse.success(msg=res[RequestStatus.MSG], data=res[RequestStatus.DATA])
+    else:
+        return APIResponse.bad_request(msg=res[RequestStatus.MSG])
 
 
 @blueprint.route('/sync/user/add', methods=['POST'])
@@ -17,10 +46,7 @@ blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
 def user_add():
     """用户同步"""
     res = sync_post(request.path)
-    if res['status'].lower() == "ok":
-        return APIResponse.success(msg=res['msg'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
+    return return_fun(res)
 
 
 @blueprint.route('/sync/user/seting', methods=['POST'])
@@ -28,21 +54,14 @@ def user_add():
 def user_setting():
     """用户设置"""
     res = sync_post(request.path)
-    if res['status'].lower() == "ok":
-        return APIResponse.success(msg=res['msg'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
+    return return_fun()
 
 
 @blueprint.route('/sync/user/upgrade', methods=['POST'])
 @jwt_required()
 def user_upgrade():
     """订阅用户升级到付费用户"""
-    res = sync_post(request.path)
-    if res['status'].lower() == "ok":
-        return APIResponse.success(msg=res['msg'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
+    return return_fun(sync_post(request.path))
 
 
 @blueprint.route('/sync/user/info', methods=['POST'])
@@ -50,8 +69,7 @@ def user_upgrade():
 def rss_user_info():
     res = sync_post(request.path)
     if res['status'] == "ok":
-        user_info = res['data']
-        return APIResponse.success(data=user_info)
+        return APIResponse.success(data=res['data'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
 
@@ -70,11 +88,7 @@ def get_deliver_logs():
 @blueprint.route('/feed/book/deliver', methods=['POST'])
 @jwt_required()
 def get_my_feed_deliver():
-    res = sync_post(request.path)
-    if res['status'] == "ok":
-        return APIResponse.success(msg=res['msg'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
+    return return_fun(sync_post(request.path))
 
 
 @blueprint.route('/my/rss', methods=['POST'])
@@ -82,10 +96,7 @@ def get_my_feed_deliver():
 def my_rss():
     api_path = '/api/v2/rss/myrss'
     res = sync_post(api_path)
-    if res['status'].lower() == "ok":
-        return APIResponse.success(data=res['data'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
+    return return_fun(res)
 
 
 @blueprint.route('/my/rss/add', methods=['POST'])
@@ -96,10 +107,11 @@ def my_rss_add():
     if res['status'].lower() == 'ok':
         myuser = get_jwt_identity()
         user = User.query.get(myuser['id'])
-        if user.feed_count >= 5 and user.role == config.DEFAULT_USER_ROLE:
-            return APIResponse.bad_request(msg="已达到最大订阅数，请升级用户")
+        feed_num = UserRole.role_feed_num(user.role)
+        if user.feed_count >= 5 and user.role == UserRole.role_name():  # 默认为default
+            return APIResponse.bad_request(msg=f"已达到最大{feed_num}个订阅数，请升级用户")
         if user.feed_count >= 100:
-            return APIResponse.bad_request(msg="已达到最大订阅数")
+            return APIResponse.bad_request(msg=f"已达到最大{feed_num}个订阅,不能在订阅")
         user.feed_count = user.feed_count + 1
         db.session.add(user)
         db.session.commit()
@@ -114,10 +126,7 @@ def get_pub_rss():
     """公共订阅源"""
     api_path = '/api/v2/rss/pub'
     res = sync_post(api_path)
-    if res['status'] == "ok":
-        return APIResponse.success(data=res['data'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
+    return return_fun(res)
 
 
 @blueprint.route('/my/rss/del', methods=['POST'])
@@ -127,7 +136,7 @@ def my_rss_del():
     api_path = '/api/v2/rss/del'
     res = sync_post(api_path)
     user = get_jwt_identity()
-    if res['status'].lower() == 'ok':
+    if res['status'].lower() == RequestStatus.OK:
         user = User.query.get(user['id'])
         user.feed_count = user.feed_count - 1 if user.feed_count == 0 else 0
         db.session.add(user)
@@ -142,45 +151,20 @@ def my_rss_del():
 def rss_share():
     """订阅源共享"""
     res = sync_post(request.path)
-    if res['status'].lower() == "ok":
-        return APIResponse.success(msg=res['msg'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
+    return return_fun(res)
 
 
 @blueprint.route('/rss/invalid', methods=['POST'])
 @jwt_required()
 def rss_invalid():
     res = sync_post(request.path)
-    if res['status'].lower() == "ok":
-        return APIResponse.success(msg=res['msg'])
-    else:
-        return APIResponse.bad_request(msg=res['msg'])
-
-
-def sync_post(path):
-    data = request.get_json()
-    user = get_jwt_identity()
-    if data:
-        data['key'] = config.RSS2EBOOK_KEY
-        data['user_name'] = user['name']
-        data['creator'] = user['name']
-    res = requests.post(get_rss_host() + path, data=data, headers=headers, timeout=60)
-    if res.status_code == 200:
-        json_data = json.loads(res.text)
-        if json_data['status'] == "ok":
-            return json_data
-        return {"status": "failed", "msg": json_data['msg']}
-    else:
-        return {"status": "failed", "msg": res.text}
-
+    return return_fun(res)
 
 
 if __name__ == "__main__":
     from book.rss import rss_list
 
     for rss in rss_list:
-
         path = '/api/v2/rss/manager'
         data = {'key': config.RSS2EBOOK_KEY,
                 'user_name': 'admin',
@@ -189,10 +173,10 @@ if __name__ == "__main__":
                 "url": rss[2],
                 "is_fulltext": "flase",
                 "category": rss[0],
-                "librss_id" : 1
+                "librss_id": 1
                 }
         print(data)
         # request_url = "http://127.0.0.1:8080"
-        res = requests.post(get_rss_host() + path, data=data, headers=headers, timeout=60)
+        res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS, timeout=60)
         # print(rss)
         print(res.text, res.status_code)

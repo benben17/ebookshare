@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import config
 from book import db, app
 from book.dateUtil import get_days_later, dt_to_str, str_to_dt
-from book.dicts import Product, PaymentStatus
+from book.dicts import Product, PaymentStatus, UserRole
 from book.models import UserPay, User
 from book.utils import get_rss_host
 
@@ -43,7 +43,7 @@ def upgrade_user(user_name, days, pay_id, expires):
 
 def upgrade_user_thread(user, days):
     try:
-        user.role = 'plus'
+        user.role = UserRole.role_name('plus')
         user.expires = datetime.utcnow() + timedelta(days=days)
         db.session.add(user)
         p_name = "month"

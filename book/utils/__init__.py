@@ -10,7 +10,7 @@ import random
 import isbnlib
 import requests
 from requests.exceptions import RequestException
-from sqlalchemy import inspect
+from sqlalchemy import inspect, Enum
 import config
 
 
@@ -192,7 +192,7 @@ def model_to_dict(model):
         return None
     # get the attributes of the model instance
     attributes = inspect(model).attrs
-    filter_list = ["user_pay_log", "hash_pass"]
+    filter_list = ["user_pay_log", "hash_pass", "user"]
     data = {}
     for attribute in attributes:
         if attribute.key in filter_list:
@@ -201,6 +201,8 @@ def model_to_dict(model):
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
             value = value.isoformat() if value is not None else None
+        elif isinstance(value, Enum):
+            value = value.value
         data[attribute.key] = value
     return data
 

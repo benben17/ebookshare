@@ -11,10 +11,10 @@ from sqlalchemy.exc import SQLAlchemyError
 import config
 from book import db
 from book.dateUtil import get_days_later
-from book.dicts import PaymentStatus, Product
+from book.dicts import PaymentStatus, Product, UserRole
 from book.models import UserPay, User
 
-from book.pay import create_order
+from book.pay import paypal_order
 from book.upgradeUser import upgrade_user_by_paypal
 from book.utils import get_file_name, get_now, model_to_dict
 from book.utils.ApiResponse import *
@@ -55,9 +55,8 @@ def create_payment():
     p_desc = p_dict['desc']
 
     try:
-        order = create_order(cancel_url=cancel_url, return_url=return_url, amount=p_amount,
-                             description=p_desc,
-                             product_name=p_name)
+        order = paypal_order(cancel_url=cancel_url, return_url=return_url, amount=p_amount,
+                             description=p_desc,product_name=p_name)
         payment = paypalrestsdk.Payment(order)
         logging.error(payment.http_headers())
         # print(pay.create(cancel_url, return_url)
@@ -121,7 +120,7 @@ def execute_payment():
             print(expires)
             print("type",type(expires))
             if upgrade_user_by_paypal(user_name=user_pay.user_name, days=days, expires=expires):
-                user.role = 'plus'
+                user.role = UserRole.role_name('plus')
                 user.expires = expires
                 db.session.add(user)
                 db.session.commit()
@@ -177,7 +176,7 @@ def refund_payment():
                 if user:
                     user.expires = user.expires + timedelta(days=-days)
                     if user.expires < datetime.utcnow():
-                        user.role = config.DEFAULT_USER_ROLE
+                        user.role = UserRole.role_name()  # 设置为默认角色
                     if upgrade_user_by_paypal(user_name=user.name, days=-days, expires=user.expires):
                         db.session.add(user)
                         db.session.commit()

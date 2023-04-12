@@ -19,6 +19,31 @@ class PaymentStatus(Enum):
     canceled = "canceled"
 
 
+class RequestStatus:
+    OK = "ok"
+    MSG = "msg"
+    DATA = 'data'
+
+
+class UserRole(Enum):
+    DEFAULT = {"name": 'default', "feed_num": 5}
+    PLUS = {"name": 'plus', "feed_num": 100}
+
+    @staticmethod
+    def get_role(role='default'):
+        return UserRole[role.upper()].value if role.upper() in UserRole.__members__ else None
+
+    @staticmethod
+    def role_feed_num(role='default'):
+        return UserRole[role.upper()].value.get('feed_num', 0)
+
+    @staticmethod
+    def role_name(role='default'):
+        return UserRole[role.upper()].value.get('name', 'default')
+
+
+
+
 class Product:
     def __init__(self, product):
         self.product = product
@@ -34,5 +59,7 @@ class Product:
 
 if __name__ == "__main__":
     days = -10
-
     print(datetime.utcnow() + timedelta(days=int(days)))
+    day = 'Sunday'
+    print(day.split("|"))
+    print(UserRole.role_name())

@@ -79,7 +79,7 @@ def wechat():
 
                 hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
                 user_info = User(email=content, kindle_email=content, wx_openid=from_user, hash_pass=hash_pass,
-                                 role=config.DEFAULT_USER_ROLE)
+                                 role=UserRole.role_name())
                 db.session.add(user_info)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(content))

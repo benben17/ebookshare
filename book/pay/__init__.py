@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-def create_order(cancel_url, return_url, product_name, amount, description):
+def paypal_order(cancel_url, return_url, product_name, amount, description):
     return {
         "intent": "sale",
         "payer": {
@@ -29,6 +29,3 @@ def create_order(cancel_url, return_url, product_name, amount, description):
         }]
     }
 
-
-def format_time(time):
-    return datetime.strptime(time, "%Y-%m-%dT%H:%M:%SZ")
