@@ -14,21 +14,22 @@ from book.utils import get_file_name
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
 paypalrestsdk.set_config({
-    "mode": "sandbox", # sandbox or live
+    "mode": "sandbox",  # sandbox or live
     "client_id": "AZ_sKR0Z1DqfWvxxqMEuGp_eKbzpw6UxVY_eru3tMtVT6lynFpXtqnpBvEGgnnFezwUQqZ1ub4KP7yKU",
     "client_secret": 'EIV9UQUC768yB_Gvfxrw0NMvX2XQ4s8mCLj3snSGWPVNWUg32ehGJ1jFu1GRG54fKsfkM6BwFU4FJJLa'
 })
-
 
 ##sb-txxuw25469952@business.example.com
 
 
 # 定义路由
 host = 'https://rss2ebook.azurewebsites.net'
+
+
 @blueprint.route("/payment", methods=['GET', 'POST'])
 def create_payment():
-    cancel_url = host+"/api/v2/paypal/execute"
-    return_url = host+"/api/v2/paypal/cancel"
+    cancel_url = host + "/api/v2/paypal/execute"
+    return_url = host + "/api/v2/paypal/cancel"
     data = request.get_json()
     amount = data.get("amount")
     description = data.get("description")
@@ -37,7 +38,7 @@ def create_payment():
         return jsonify({"message": "Missing required fields"}), 400
 
     # Create pay in database
-    order = create_order(cancel_url, return_url, amount=amount, description=description,product_name="test product")
+    order = create_order(cancel_url, return_url, amount=amount, description=description, product_name="test product")
     print(order)
     try:
         payment = paypalrestsdk.Payment(order)
@@ -100,5 +101,4 @@ def refund_payment():
 
 @blueprint.route("/cancel", methods=['GET', 'POST'])
 def cancel_payment():
-    return jsonify({"status":200}),200
-
+    return jsonify({"status": 200}), 200
