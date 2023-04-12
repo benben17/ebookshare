@@ -6,8 +6,8 @@ def create_order(cancel_url, return_url, product_name, amount, description):
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "cancel_url": f'"{cancel_url}"',
-                "return_url": f'"{return_url}"'
+                "cancel_url": cancel_url,
+                "return_url": return_url
             },
             "transactions": [{
                 "item_list": {

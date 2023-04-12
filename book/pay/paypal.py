@@ -24,13 +24,14 @@ paypalrestsdk.set_config({
 
 
 # 定义路由
-host = 'https://rss2ebook.azurewebsites.net'
+# host = 'https://rss2ebook.azurewebsites.net'
+host = 'https://ebook.stararea.cn'
 
 
 @blueprint.route("/payment", methods=['GET', 'POST'])
 def create_payment():
-    cancel_url = host + "/api/v2/paypal/execute"
-    return_url = host + "/api/v2/paypal/cancel"
+    cancel_url = host + "/api/v2/paypal/cancel"
+    return_url = host + "/api/v2/paypal/execute"
     data = request.get_json()
     amount = data.get("amount")
     description = data.get("description")
@@ -39,11 +40,11 @@ def create_payment():
         return jsonify({"message": "Missing required fields"}), 400
 
     # Create pay in database
-    order = create_order(cancel_url, return_url, amount=amount, description=description, product_name="test product")
-    print(order)
+    order = create_order(cancel_url=cancel_url, return_url=return_url, amount=amount, description=description, product_name="test product")
+    logging.error(order)
     try:
         payment = paypalrestsdk.Payment(order)
-        print(payment.http_headers())
+        logging.error(payment.http_headers())
         print(payment)
         # print(pay.create(cancel_url, return_url)
         payment.create()
@@ -51,11 +52,11 @@ def create_payment():
         for link in payment.links:
             if link.rel == "approval_url":
                 approval_url = str(link.href)
-                print("Redirect for approval: %s" % (approval_url))
+                logging.error("Redirect for approval: %s" % (approval_url))
                 return redirect(approval_url)
     except Exception as e:
-        print(str(e))
-        print(payment.error)
+        logging.error(str(e))
+        logging.error(payment.error)
         return "Failed to create pay"
 
 
@@ -75,7 +76,7 @@ def execute_payment():
     try:
         payment = paypalrestsdk.Payment.find(paymentid)
         res = payment.execute({"payer_id": payerid})
-
+        logging.error(res.success())
         return jsonify({"message": "Payment successful"}), 200
     except Exception as e:
         logging.error(str(e))
