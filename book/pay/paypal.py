@@ -24,7 +24,7 @@ paypalrestsdk.set_config({
 
 
 # 定义路由
-host = 'http://rss2ebook.azurewebsites.net'
+host = 'https://rss2ebook.azurewebsites.net'
 @blueprint.route("/payment", methods=['GET', 'POST'])
 def create_payment():
     cancel_url = host+"/api/v2/paypal/execute"
