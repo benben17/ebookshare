@@ -47,8 +47,9 @@ def upgrade_user_thread(user_name, p_name):
         # 更新用户 为Plus用户
         user = User.query.filter_by(name=user_name).first()
         user.role = UserRole.role_name('plus')
-        if user.expires > datetime.now():
-            user.expires = user.expires + timedelta(days=p_days)
+        if user.expires:
+            if user.expires > datetime.now():
+                user.expires = user.expires + timedelta(days=p_days)
         else:
             user.expires = datetime.now() + timedelta(days=p_days)
         db.session.add(user)
