@@ -12,8 +12,7 @@ import config
 from book import db
 from book.dicts import PaymentStatus, Product, UserRole
 from book.models import UserPay, User
-
-from book.pay import paypal_order, sandbox_config, WEBHOOK_ID, WEBHOOK_URL, live_config
+from book.pay import paypal_order, sandbox_config, WEBHOOK_URL, live_config
 from book.upgradeUser import upgrade_user_by_paypal
 from book.utils import get_file_name, get_now
 from book.utils.ApiResponse import *
@@ -21,7 +20,11 @@ from book.utils.ApiResponse import *
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
 paypalrestsdk.set_config(sandbox_config)
-paypalrestsdk.set_config(live_config)
+
+
+# paypalrestsdk.set_config(live_config)
+
+
 # 定义路由
 # host = 'https://rss2ebook.azurewebsites.net'
 
@@ -32,7 +35,7 @@ def create_payment():
     return_url = config.MY_DOMAIN + "/api/v2/paypal/execute"
     data = request.get_json()
     product = data.get('product')
-    if str(product).lower() not in ("month", "year",'rss2ebook'):
+    if str(product).lower() not in ("month", "year", 'rss2ebook'):
         return APIResponse.bad_request(msg="Missing required product")
 
     p_dict = Product(str(product).lower()).get_product()
@@ -40,96 +43,90 @@ def create_payment():
 
     try:
         order = paypal_order(cancel_url=cancel_url, return_url=return_url, amount=p_amount,
-                             description=p_desc, product_name=p_name)
-        payment = paypalrestsdk.Payment(order)
-        logging.error(payment)
-        # print(pay.create(cancel_url, return_url)
-        payment.create()
-        # Create pay in database
-        print(payment.id)
-        if payment.state != "created" and payment.error is None:
-            return APIResponse.created_failed(msg="Payment create failed!")
+                             description=p_desc)
+        paypal_payment = paypalrestsdk.Payment(order)
+        logging.error(paypal_payment)
+        paypal_payment.create()
 
+        print(paypal_payment.id)
+        if paypal_payment.state != "created" or paypal_payment.error is not None:
+            return APIResponse.created_failed(msg="Payment create failed!")
+        # Create pay in database
         user_pay = UserPay(
             user_id=get_jwt_identity().get("id"), product_name=p_name, pay_type="paypal", amount=p_amount,
-            description=p_desc, create_time=get_now(), currency='USD', payment_id=payment.id,
+            description=p_desc, create_time=get_now(), currency='USD', payment_id=paypal_payment.id,
             status=PaymentStatus.created, user_name=get_jwt_identity().get("name")
         )
-
         # logging.info(model_to_dict(user_pay))
-        for link in payment.links:
+        for link in paypal_payment.links:
             if link.rel == "approval_url":
                 approval_url = str(link.href)
                 user_pay.pay_url = approval_url
                 db.session.add(user_pay)
                 db.session.commit()
                 logging.error("Redirect for approval: %s" % (approval_url))
-                return redirect(approval_url)
+                return APIResponse.success(data=approval_url)
     except Exception as e:
         logging.error(str(e))
         logging.error("-------")
-        logging.error(payment.error)
-        return "Failed to create pay"
+        logging.error(paypal_payment.error)
+        APIResponse.bad_request(msg="Failed, Change payment method ")
+
+
+main_host = "https://rss2ebook.com"
 
 
 @blueprint.route("/execute", methods=['GET', 'POST'])
 def execute_payment():
     paymentid = request.args.get("paymentId")  # 订单id
     payerid = request.args.get("PayerID")  # 支付者id
-    if not paymentid:
-        return jsonify({"message": "Missing pay ID"}), 400
+    if not (paymentid and payerid):
+        return redirect(main_host)
 
     # Get pay from database
     user_pay = UserPay.query.filter_by(payment_id=paymentid, status=PaymentStatus.created).first()
     if not user_pay:
-        return APIResponse.bad_request(msg="Invalid pay ID or pay has already been processed")
+        return redirect(main_host)
     # Capture PayPal order
     try:
         payment = paypalrestsdk.Payment.find(paymentid)
         res = payment.execute({"payer_id": payerid})
         logging.info(payment)
         if res:
+            # 更新订单状态和支付时间
             user_pay.status = payment.state
             user_pay.pay_time = datetime.strptime(payment.update_time, "%Y-%m-%dT%H:%M:%SZ")
             db.session.add(user_pay)
-            db.session.commit()
 
+            # 更新用户信息
             product = Product(user_pay.product_name).get_product()
             days = product['days']
             user = User.get_by_id(user_pay.user_id)
             if user.expires:
-                start_time = user.expires
+                expires = user.expires + timedelta(days=days)
             else:
-                start_time = datetime.utcnow()
-            expires = start_time + timedelta(days=days)
-            print(expires)
-            print("type", type(expires))
+                expires = datetime.utcnow() + timedelta(days=days)
             if upgrade_user_by_paypal(user_name=user_pay.user_name, days=days, expires=expires):
                 user.role = UserRole.role_name('plus')
                 user.expires = expires
                 db.session.add(user)
-                db.session.commit()
-                return APIResponse.success(msg="success")
-            else:
-                return APIResponse.internal_server_error(msg="server error")
-        else:
-            return APIResponse.bad_request(msg=payment.error)
-    except SQLAlchemyError as e:
-        logging.error(e)
-        db.session.rollback()
-        return APIResponse.internal_server_error(msg="error")
+            db.session.commit()
+
+    except paypalrestsdk.exceptions.ResourceNotFound:
+        logging.error("PayPal payment not found")
+    except paypalrestsdk.exceptions.MissingParam as e:
+        logging.error("Invalid PayPal payment parameters: %s" % str(e))
     except Exception as e:
-        logging.error(e)
-        return APIResponse.bad_request(msg=e)
+        logging.exception("Failed to execute PayPal payment: %s" % str(e))
+    return redirect(main_host)
 
 
-@blueprint.route("/refund", methods=['GET', 'POST'])
+@blueprint.route("/refund", methods=['GET'])
 def refund_payment():
     payment_id = request.args.get("paymentId")
     pay = UserPay.query.filter_by(payment_id=payment_id).first()
     if pay is None:
         return APIResponse.bad_request(msg="no payment")
-
     try:
         two_weeks_ago = datetime.utcnow() - timedelta(weeks=2)
         if not pay.pay_time < two_weeks_ago:
@@ -153,7 +150,6 @@ def refund_payment():
                 pay.refund_amount = pay.amount
                 db.session.add(pay)
                 db.session.commit()
-
                 p_dict = Product(pay.product_name).get_product()
                 days = p_dict['days']
                 # 退款退费 更新用户
@@ -185,19 +181,19 @@ def notify_event():
         paypalrestsdk.configure
         request_body = json.loads(request.body.decode("utf-8"))
         webhook_event = WebhookEvent(request_body)
-        webhook_id = webhook_event.get('id')
+
         webhook_event.verify(WEBHOOK_URL)
         print(webhook_event)
     except Exception as e:
         logging.error("event_error")
         logging.error(e)
-    return jsonify({'status': 'ok'}),200
+    return jsonify({'status': 'ok'}), 200
 
 
 if __name__ == '__main__':
-    payment = paypalrestsdk.Payment.find("PAYID-MQ3LZAQ9YU170557M3119926")
+    # payment = paypalrestsdk.Payment.find("PAYID-MQ3LZAQ9YU170557M3119926")
     # paypalrestsdk.Sale.find()
-    print(payment)
+    # print(payment)
     # order = paypalrestsdk.Order.find("O-1A134413LR267235M")
     # print(order)
     print(paypalrestsdk.WebhookEventType.all())
