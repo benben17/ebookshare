@@ -25,29 +25,27 @@ def upgrade_user(user_name, days, pay_id, expires):
         res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS)
         if res.status_code == 200:
             data = json.loads(res.text)
-            pay_log = UserPay.query.filter_by(id=pay_id).first()
-            if data['status'].lower() == "ok":
-                pay_log.status = PaymentStatus.completed
 
+            if data['status'].lower() == "ok":
+                pay_log = UserPay.query.filter_by(id=pay_id).first()
+                pay_log.status = PaymentStatus.completed
                 pay_log.pay_time = str_to_dt(expires)
                 db.session.add(pay_log)
-
-                # 更新用户 为Plus用户
-                user = User.query.filter_by(name=user_name).first()
-                user.role = UserRole.role_name('plus')
-                user.expires = expires
-                db.session.add(user)
-
                 db.session.commit()
         logging.error("upgrade User error:%s".format(str(res.text)))
     except Exception as e:
         logging.error(str(e))
 
 
-def upgrade_user_thread(user, p_name):
+def upgrade_user_thread(user_name, p_name):
     try:
         p_dict = Product(p_name).get_product()
         p_days, p_desc = p_dict.get("days"), p_dict.get("desc")
+        # 更新用户 为Plus用户
+        user = User.query.filter_by(name=user_name).first()
+        user.role = UserRole.role_name('plus')
+        user.expires = datetime.now() + timedelta(days=p_days)
+        db.session.add(user)
 
         user_pay = UserPay(user_id=user.id, user_name=user.name, currency='CNY', pay_type='ali',
                            product_name=p_name, description=p_desc, status=PaymentStatus.created)
@@ -94,4 +92,4 @@ if __name__ == "__main__":
         pay_log = User.get_by_id(1681116305)
         print(pay_log.name)
         product = Product('month').get_product()
-        print(product.get("days"), product.get("desc"))
+        print(datetime.now() + timedelta(days=3))
