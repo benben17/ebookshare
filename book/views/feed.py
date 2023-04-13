@@ -10,6 +10,7 @@ from book.dicts import RequestStatus, UserRole
 from book.models import User, db
 from book.utils import get_file_name, get_rss_host
 from book.utils.ApiResponse import APIResponse
+from book.utils.rssUtil import get_rss_latest_titles, is_rss_feed
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
 
@@ -161,22 +162,20 @@ def rss_invalid():
     return return_fun(res)
 
 
-if __name__ == "__main__":
-    from book.rss import rss_list
+@blueprint.route('/rss/review/title', methods=['POST'])
+@jwt_required()
+def rss_review():
+    data = request.get_json()
+    if not data.get('url'):
+        return APIResponse.bad_request(msg='params error')
+    if is_rss_feed(data.get('url')) is False:
+        return APIResponse.bad_request(msg='rss invalid,please declare invalid rss')
 
-    for rss in rss_list:
-        path = '/api/v2/rss/manager'
-        data = {'key': config.RSS2EBOOK_KEY,
-                'user_name': 'admin',
-                'creator': 'admin',
-                "title": rss[1],
-                "url": rss[2],
-                "is_fulltext": "flase",
-                "category": rss[0],
-                "librss_id": 1
-                }
-        print(data)
-        # request_url = "http://127.0.0.1:8080"
-        res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS, timeout=60)
-        # print(rss)
-        print(res.text, res.status_code)
+    titles = get_rss_latest_titles(data.get('url'), data.get('num', 10))
+    return APIResponse.success(data=titles)
+
+
+if __name__ == "__main__":
+    from book.utils.rssUtil import rss_list
+
+
