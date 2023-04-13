@@ -6,11 +6,12 @@ from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identi
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
-from book import cache, app
-from book.models import db, User
+from book import cache
+from book.dicts import UserRole
+from book.models import db, User, UserPay
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
-from book.utils import check_email, generate_code, model_to_dict, get_file_name
+from book.utils import check_email, generate_code, model_to_dict, get_file_name, get_rss_host
 from book.utils.mailUtil import send_email
 
 blueprint = Blueprint(
@@ -61,7 +62,7 @@ def sign_up():
     """
     data = request.get_json()
     if not data.get('email') or not data.get('passwd'):
-        return APIResponse.bad_request(msg="用户名密码为空！")
+        return APIResponse.bad_request(msg="邮箱或密码不允许为空！")
 
     email = data['email']
     passwd = data['passwd']
@@ -69,24 +70,21 @@ def sign_up():
         return APIResponse.bad_request(msg="无效的邮箱地址！")
 
     user = User.query.filter(or_(User.email == email, User.name == email)).first()
-
-    if user is None:
-        user = User()
-        user.id = int(time.time())
-        user.hash_pass = generate_password_hash(passwd)
-        user.email = email
-        user.name = user.email.split("@")[0]
-        user.kindle_email = email
-        user.role = config.DEFAULT_USER_ROLE
-        user.is_reg_rss = True
-    else:
+    if user:
         return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
+    user = User()
+    user.id = int(time.time())
+    user.hash_pass = generate_password_hash(passwd)
+    user.email = email
+    user.name = user.email.split("@")[0]
+    user.kindle_email = email
+    user.role = UserRole.role_name()
+    user.is_reg_rss = True
 
     if sync_user(user):
         db.session.add(user)
         db.session.commit()
         user_info = model_to_dict(user)
-        user_info['hash_pass'] = ""
         access_token = create_access_token(identity=user_info)
         data = {"user": user_info, "token": access_token}
         return APIResponse.success(data=data)
@@ -128,6 +126,7 @@ def user_info():
     data = {"user": user_json, "token": access_token}
     return APIResponse.success(data=data)
 
+
 @blueprint.route('/passwd/change', methods=['GET', 'POST'])
 @jwt_required()
 def user_passwd_change():
@@ -143,27 +142,38 @@ def user_passwd_change():
     return APIResponse.success(msg="密码修改成功！")
 
 
+@blueprint.route('/pay/log', methods=['GET'])
+@jwt_required()
+def user_pay_log():
+    user = get_jwt_identity()
+    pay_logs = UserPay.query.filter_by(user_id=user['id']).all()
+    user_pays = []
+    for log in pay_logs:
+        user_pays.append(model_to_dict(log))
+    return APIResponse.success(data=user_pays)
+
+
 def sync_user(user):
     path = '/api/v2/sync/user/add'
     data = {
         'key': config.RSS2EBOOK_KEY,
         'user_name': user.name,
-        'to_email': user.email,
-        'expiration_days': '360'
+        'to_email': user.email
     }
-    rss_host = config.rss_host['primary']
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    res = requests.post(rss_host + path, data=data, headers=headers)
+    res = requests.post(get_rss_host() + path, data=data, headers=config.headers)
     if res.status_code == 200:
         res = json.loads(res.text)
         if res['status'].lower() == 'ok':
             return True
     return False
 
+
 if __name__ == '__main__':
     print("a")
     # with app.app_context():
-    #     passwd=generate_password_hash('admin')
-    #     user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
-    #     db.session.add(user)
-    #     db.session.commit()
+        # passwd=generate_password_hash('admin')
+        # user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
+        # db.session.add(user)
+        # db.session.commit()
+        # log = UserPay.query.filter_by(status=PaymentStatus.completed).first()
+        # print(log.user.email)

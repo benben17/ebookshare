@@ -10,8 +10,9 @@ import random
 import isbnlib
 import requests
 from requests.exceptions import RequestException
-from sqlalchemy import inspect
+from sqlalchemy import inspect, Enum
 import config
+
 
 
 def parse_xml(xml_str):
@@ -115,7 +116,7 @@ def cache_book(books, wx_openid):
 
 
 def search_net_book(title=None, author=None, isbn=None, openid="", ):
-    search_url = 'https://zlib.knat.network/search?limit=15&query='
+    search_url = f'{config.BOOKSEARCH_URL}/search?limit=15&query='
     # print(search_url)
     if not any((title, author, isbn)):
         return None
@@ -144,8 +145,9 @@ def download_net_book(ipfs_cid, filename):
         'https://cloudflare-ipfs.com',
         'https://gateway.pinata.cloud',
         'https://gateway.ipfs.io',
-        'https://ipfs.jpu.jp',
-        'https://cf-ipfs.com'
+        'https://ipfs.joaoleitao.org',
+        'https://cf-ipfs.com',
+        'https://hardbin.com'
     ]
     for url in url_list:
         full_url = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
@@ -190,7 +192,7 @@ def model_to_dict(model):
         return None
     # get the attributes of the model instance
     attributes = inspect(model).attrs
-    filter_list = ["user_pay_log", "hash_pass"]
+    filter_list = ["user_pay_log", "hash_pass", "user"]
     data = {}
     for attribute in attributes:
         if attribute.key in filter_list:
@@ -199,6 +201,8 @@ def model_to_dict(model):
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
             value = value.isoformat() if value is not None else None
+        elif isinstance(value, Enum):
+            value = value.value
         data[attribute.key] = value
     return data
 
@@ -224,6 +228,18 @@ def create_app_dir():
         # print(os.path.join(config.basedir, dir))
         if not os.path.exists(os.path.join(config.basedir, dir)):
             os.mkdir(os.path.join(config.basedir, dir))
+
+
+def get_rss_host(user_id=1):
+    if user_id % 2 == 1:
+        return config.rss_host['primary']
+    else:
+        return config.rss_host['second']
+
+
+def get_now():
+    return datetime.utcnow()
+
 
 
 if __name__ == '__main__':
