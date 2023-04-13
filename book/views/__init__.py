@@ -2,7 +2,7 @@
 """
 Copyright (c) 2019 - present benben
 """
-from flask import render_template, request
+from flask import render_template, request, redirect
 
 from book import app
 
@@ -16,7 +16,7 @@ def page_404():
 @app.route("/")
 def home():
     # logging.error(app.template_folder)
-    return "欢迎关注公众号：sendtokindles 下载电子书"
+    return redirect('/404')
 
 
 @app.route("/no_att")
