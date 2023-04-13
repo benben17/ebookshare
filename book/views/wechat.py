@@ -96,7 +96,7 @@ def wechat():
                 if len(info) == 3:
                     upgrade_user = User.query.filter(or_(User.email == info[1], User.name == info[1])).first()
                     if upgrade_user:
-                        upgradeUser.upgrade_user_thread(user, days=int(info[2]))
+                        upgradeUser.upgrade_user_thread(user_name=upgrade_user.name, p_name=info[2])
                         return wx_reply_xml(from_user, to_user, f"{upgrade_user.name}:用户升级中")
                 return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
 
