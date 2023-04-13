@@ -122,7 +122,6 @@ def wechat():
                     db.session.commit()
                     if not user.email:
                         return wx_reply_xml(from_user, to_user, download_url(user_log))
-
                     return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email)+download_url(user_log))
 
                 else:

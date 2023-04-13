@@ -10,18 +10,18 @@ from sqlalchemy.exc import SQLAlchemyError
 
 import config
 from book import db
-from book.dateUtil import get_days_later
 from book.dicts import PaymentStatus, Product, UserRole
 from book.models import UserPay, User
 
-from book.pay import paypal_order, sandbox_config, WEBHOOK_ID, WEBHOOK_URL
+from book.pay import paypal_order, sandbox_config, WEBHOOK_ID, WEBHOOK_URL, live_config
 from book.upgradeUser import upgrade_user_by_paypal
-from book.utils import get_file_name, get_now, model_to_dict
+from book.utils import get_file_name, get_now
 from book.utils.ApiResponse import *
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
 paypalrestsdk.set_config(sandbox_config)
+paypalrestsdk.set_config(live_config)
 # 定义路由
 # host = 'https://rss2ebook.azurewebsites.net'
 
@@ -31,16 +31,12 @@ def create_payment():
     cancel_url = config.MY_DOMAIN + "/api/v2/paypal/cancel"
     return_url = config.MY_DOMAIN + "/api/v2/paypal/execute"
     data = request.get_json()
-    product = data.get("product")
-    print(str(product).lower())
-    if str(product).lower() not in ("month", "year"):
+    product = data.get('product')
+    if str(product).lower() not in ("month", "year",'rss2ebook'):
         return APIResponse.bad_request(msg="Missing required product")
-    user = get_jwt_identity()
 
     p_dict = Product(str(product).lower()).get_product()
-    p_name = p_dict['name']
-    p_amount = p_dict['amount']
-    p_desc = p_dict['desc']
+    p_name, p_amount, p_desc = p_dict['name'], p_dict['amount'], p_dict['desc']
 
     try:
         order = paypal_order(cancel_url=cancel_url, return_url=return_url, amount=p_amount,
@@ -54,10 +50,11 @@ def create_payment():
         if payment.state != "created" and payment.error is None:
             return APIResponse.created_failed(msg="Payment create failed!")
 
-        user_pay = UserPay(user_id=user['id'], product_name=p_name, pay_type="paypal", amount=p_amount,
-                           description=p_desc,
-                           create_time=get_now(), currency='USD', payment_id=payment.id, status=PaymentStatus.created,
-                           user_name=user['name'])
+        user_pay = UserPay(
+            user_id=get_jwt_identity().get("id"), product_name=p_name, pay_type="paypal", amount=p_amount,
+            description=p_desc, create_time=get_now(), currency='USD', payment_id=payment.id,
+            status=PaymentStatus.created, user_name=get_jwt_identity().get("name")
+        )
 
         # logging.info(model_to_dict(user_pay))
         for link in payment.links:
@@ -139,12 +136,12 @@ def refund_payment():
             payment = paypalrestsdk.Payment.find(payment_id)
             logging.error(payment.transactions)
             sale_info = payment.transactions[0]
-            order_id = sale_info.related_resources[0].order.id
-            if not order_id:
+            sale_id = sale_info.related_resources[0].sale.id
+            if not sale_id:
                 return APIResponse.bad_request(msg="not found sale")
-            order = paypalrestsdk.Order.find(order_id)
+            sale = paypalrestsdk.Sale.find(sale_id)
 
-            refund = order.refund({"amount": {"total": pay.amount, "currency": "USD"}})
+            refund = sale.refund({"amount": {"total": pay.amount, "currency": "USD"}})
             logging.error("paypal refund")
             logging.error(refund)
             if refund.success():  # Check refund status
@@ -189,9 +186,6 @@ def notify_event():
         request_body = json.loads(request.body.decode("utf-8"))
         webhook_event = WebhookEvent(request_body)
         webhook_id = webhook_event.get('id')
-        if webhook_id != WEBHOOK_ID:
-            logging.error('Invalid webhook id')
-            return jsonify({'status': 'failed'}), 200
         webhook_event.verify(WEBHOOK_URL)
         print(webhook_event)
     except Exception as e:
@@ -204,6 +198,6 @@ if __name__ == '__main__':
     payment = paypalrestsdk.Payment.find("PAYID-MQ3LZAQ9YU170557M3119926")
     # paypalrestsdk.Sale.find()
     print(payment)
-    order = paypalrestsdk.Order.find("O-1A134413LR267235M")
-    print(order)
+    # order = paypalrestsdk.Order.find("O-1A134413LR267235M")
+    # print(order)
     print(paypalrestsdk.WebhookEventType.all())

@@ -46,9 +46,9 @@ class UserRole(Enum):
 
 class Product:
     products = {
-        "month": {"name": "month", "amount": 2.9, "desc": "One month plus fee", "days": 31},
-        "year": {"name": "year", "amount": 19.9, "desc": "One year plus fee", "days": 366},
-        "test": {"name": "test", "amount": 0.01, "desc": "for test", "days": 2}
+        "month": {"name": "month", "amount": 2.9, "desc": "rss2Ebook One month plus fee", "days": 31},
+        "year": {"name": "year", "amount": 19.9, "desc": "rss2Ebook One year plus fee", "days": 366},
+        "rss2ebook": {"name": "rss2ebook", "amount": 0.01, "desc": "rss2Ebook for test", "days": 2}
     }
 
     def __init__(self, product=None):

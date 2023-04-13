@@ -124,7 +124,7 @@ def wx_reply_mail_msg(book_name, user_email):
 当文件大于20M的时候 发送下载地址到邮箱！
 文件发送有滞后，最好5分钟后查收，如无收到，请换一个编号重新申请发送！
 ------------------------------
-           <a href="{donate_url}">☆ 打赏 ☆</a>
+                <a href="{donate_url}">☆ 打赏 ☆</a>
 
 '''
 

@@ -1,10 +1,9 @@
 from datetime import datetime
 
-
-EventType =[
+EventType = [
     'PAYMENT-NETWORKS.ALTERNATIVE-PAYMENT.COMPLETED',
     'PAYMENT.CAPTURE.COMPLETED'
-    ]
+]
 
 WEBHOOK_ID = '3MM33169T1180223E'
 WEBHOOK_URL = "https://ebook.stararea.cn/api/v2/paypal/notification/event"
@@ -19,9 +18,11 @@ live_config = {
     "client_id": "AV80RXlauTbODxEXDTyqQZw2NFWKiltlAMT0LYpueV53-Wlv063OJSzQym1cCjOGPf0CAVz2tFnwDyJC",
     "client_secret": 'EAWMwD_L9LXCEMzOUBwLNdcta4gun77p19VWVKlzrPLsps4ThI3P017An6jFkta9hznvmfFKk2dSP3jl'
 }
+
+
 def paypal_order(cancel_url, return_url, product_name, amount, description):
     return {
-        "intent": "order",
+        "intent": "sale",
         "payer": {
             "payment_method": "paypal"
         },
