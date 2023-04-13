@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import paypalrestsdk
 from flask import request, Blueprint, redirect
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from paypalrestsdk import Sale
+from paypalrestsdk import Sale, WebhookEvent
 from sqlalchemy.exc import SQLAlchemyError
 
 import config
@@ -56,9 +56,9 @@ def create_payment():
 
     try:
         order = paypal_order(cancel_url=cancel_url, return_url=return_url, amount=p_amount,
-                             description=p_desc,product_name=p_name)
+                             description=p_desc, product_name=p_name)
         payment = paypalrestsdk.Payment(order)
-        logging.error(payment.http_headers())
+        logging.error(payment)
         # print(pay.create(cancel_url, return_url)
         payment.create()
         # Create pay in database
@@ -66,11 +66,11 @@ def create_payment():
         if payment.state != "created" and payment.error is None:
             return APIResponse.created_failed(msg="Payment create failed!")
 
-        user_pay = UserPay(user_id=user['id'], product_name=p_name, pay_type="paypal", amount=p_amount, description=p_desc,
+        user_pay = UserPay(user_id=user['id'], product_name=p_name, pay_type="paypal", amount=p_amount,
+                           description=p_desc,
                            create_time=get_now(), currency='USD', payment_id=payment.id, status=PaymentStatus.created,
-                           user_name = user['name'])
-        db.session.add(user_pay)
-        db.session.commit()
+                           user_name=user['name'])
+
         # logging.info(model_to_dict(user_pay))
         for link in payment.links:
             if link.rel == "approval_url":
@@ -104,7 +104,7 @@ def execute_payment():
         res = payment.execute({"payer_id": payerid})
         logging.info(payment)
         if res:
-            user_pay.status = PaymentStatus.completed
+            user_pay.status = payment.state
             user_pay.pay_time = datetime.strptime(payment.update_time, "%Y-%m-%dT%H:%M:%SZ")
             db.session.add(user_pay)
             db.session.commit()
@@ -118,7 +118,7 @@ def execute_payment():
                 start_time = datetime.utcnow()
             expires = start_time + timedelta(days=days)
             print(expires)
-            print("type",type(expires))
+            print("type", type(expires))
             if upgrade_user_by_paypal(user_name=user_pay.user_name, days=days, expires=expires):
                 user.role = UserRole.role_name('plus')
                 user.expires = expires
@@ -151,12 +151,12 @@ def refund_payment():
             payment = paypalrestsdk.Payment.find(payment_id)
             logging.error(payment.transactions)
             sale_info = payment.transactions[0]
-            sale_id = sale_info.related_resources[0].sale.id
-            if not sale_id:
+            order_id = sale_info.related_resources[0].order.id
+            if not order_id:
                 return APIResponse.bad_request(msg="not found sale")
-            sale = Sale.find(sale_id)
+            order = paypalrestsdk.Order.find(order_id)
 
-            refund = sale.refund({"amount": {"total": pay.amount, "currency": "USD"}})
+            refund = order.refund({"amount": {"total": pay.amount, "currency": "USD"}})
             logging.error("paypal refund")
             logging.error(refund)
             if refund.success():  # Check refund status
@@ -191,4 +191,26 @@ def refund_payment():
 
 @blueprint.route("/cancel", methods=['GET', 'POST'])
 def cancel_payment():
-    return jsonify({"status": 200}), 200
+    return redirect("/")
+
+
+WEBHOOK_URL = "https//ebook.stararea.cn/api/v2/paypal/notification/event"
+@blueprint.route("/notification/event")
+def notify_event():
+    try:
+        request_body = json.loads(request.body.decode("utf-8"))
+        hook_event = WebhookEvent(request_body)
+        hook_event.verify(WEBHOOK_URL)
+        print(hook_event)
+    except Exception as e:
+        logging.error("event_error")
+        logging.error(e)
+
+
+if __name__ == '__main__':
+    payment = paypalrestsdk.Payment.find("PAYID-MQ3LZAQ9YU170557M3119926")
+    # paypalrestsdk.Sale.find()
+    print(payment)
+    order = paypalrestsdk.Order.find("O-1A134413LR267235M")
+    print(order)
+    print(paypalrestsdk.WebhookEventType.all())

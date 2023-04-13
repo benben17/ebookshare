@@ -14,8 +14,10 @@ class SEND_STATUS:
 
 class PaymentStatus(Enum):
     created = "created"
+    pending = "pending"
     approved = "approved"
     completed = "completed"
+    failed = "failed"
     canceled = "canceled"
 
 
@@ -42,24 +44,23 @@ class UserRole(Enum):
         return UserRole[role.upper()].value.get('name', 'default')
 
 
-
-
 class Product:
-    def __init__(self, product):
-        self.product = product
+    products = {
+        "month": {"name": "month", "amount": 2.9, "desc": "One month plus fee", "days": 31},
+        "year": {"name": "year", "amount": 19.9, "desc": "One year plus fee", "days": 366},
+        "test": {"name": "test", "amount": 0.01, "desc": "for test", "days": 2}
+    }
+
+    def __init__(self, product=None):
+        self.product = str(product).lower() if str(product).lower() else 'test'
 
     def get_product(self):
-        if self.product == "month":
-            return {"name": "month", "amount": 2.99, "desc": "One month plus fee", "days": 31}
-        elif self.product == "year":
-            return {"name": "year", "amount": 19.99, "desc": "One year plus fee", "days": 366}
-        else:
-            return {"name": "test", "amount": 0.01, "desc": "for test", "days": 10}
+        return Product.products.get(self.product, {"name": "test", "amount": 0.01, "desc": "for test", "days": 10})
 
 
 if __name__ == "__main__":
     days = -10
     print(datetime.utcnow() + timedelta(days=int(days)))
     day = 'Sunday'
-    print(day.split("|"))
-    print(UserRole.role_name())
+    p_dict = Product().get_product()
+    print(p_dict)
