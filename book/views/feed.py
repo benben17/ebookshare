@@ -164,7 +164,7 @@ def rss_invalid():
 
 @blueprint.route('/rss/review/title', methods=['POST'])
 @jwt_required()
-def rss_review():
+def rss_view_title():
     data = request.get_json()
     if not data.get('url'):
         return APIResponse.bad_request(msg='params error')
@@ -173,7 +173,6 @@ def rss_review():
 
     titles = get_rss_latest_titles(data.get('url'), data.get('num', 10))
     return APIResponse.success(data=titles)
-
 
 if __name__ == "__main__":
     from book.utils.rssUtil import rss_list
