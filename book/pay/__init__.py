@@ -20,7 +20,7 @@ live_config = {
 }
 
 
-def paypal_order(cancel_url, return_url, product_name, amount, description):
+def paypal_order(cancel_url, return_url, amount, description):
     return {
         "intent": "sale",
         "payer": {

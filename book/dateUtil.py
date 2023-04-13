@@ -22,15 +22,32 @@ def get_days_later(days):
 
 
 def str_to_dt(time_str):
-    return datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
+    """
+    自动识别时间字符串格式，并转换为 datetime 类型
+    Args: time_str: 时间字符串，可以是各种格式
+    Returns: datetime 对象
+    """
+    try:
+        time_dt = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        try:
+            time_dt = datetime.strptime(time_str, '%Y-%m-%d')
+        except ValueError:
+            from dateutil import parser
+            time_dt = parser.parse(time_str)
+    return time_dt
 
 
 def dt_to_str(time_dt):
-    return time_dt.strftime('%Y-%m-%d %H:%M:%S')
+    if isinstance(time_dt, datetime):
+        return time_dt.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        return time_dt
 
 
 if __name__ == "__main__":
     days = -30
-
+    now = "2022-01"
+    print(str_to_dt(now))
     print(10+days)
 
