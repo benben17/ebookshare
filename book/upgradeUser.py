@@ -96,5 +96,8 @@ if __name__ == "__main__":
     with app.app_context():
         pay_log = User.get_by_id(1681116305)
         print(pay_log.name)
+        h ={"send_day":[11]}
         product = Product('month').get_product()
-        upgrade_user_thread('admin', 'month')
+        print(type(['type']))
+        r = h.get('send_day') if isinstance(h.get('send_day'), list) else ['Sunday']
+        print(r)
