@@ -14,34 +14,22 @@ from book.dateUtil import get_days_later
 from book.dicts import PaymentStatus, Product, UserRole
 from book.models import UserPay, User
 
-from book.pay import paypal_order
+from book.pay import paypal_order, sandbox_config, WEBHOOK_ID, WEBHOOK_URL
 from book.upgradeUser import upgrade_user_by_paypal
 from book.utils import get_file_name, get_now, model_to_dict
 from book.utils.ApiResponse import *
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
-paypalrestsdk.set_config({
-    "mode": "sandbox",  # sandbox or live
-    "client_id": "AZ_sKR0Z1DqfWvxxqMEuGp_eKbzpw6UxVY_eru3tMtVT6lynFpXtqnpBvEGgnnFezwUQqZ1ub4KP7yKU",
-    "client_secret": 'EIV9UQUC768yB_Gvfxrw0NMvX2XQ4s8mCLj3snSGWPVNWUg32ehGJ1jFu1GRG54fKsfkM6BwFU4FJJLa'
-})
-
-client_id = "AV80RXlauTbODxEXDTyqQZw2NFWKiltlAMT0LYpueV53-Wlv063OJSzQym1cCjOGPf0CAVz2tFnwDyJC"
-secret = "EAWMwD_L9LXCEMzOUBwLNdcta4gun77p19VWVKlzrPLsps4ThI3P017An6jFkta9hznvmfFKk2dSP3jl"
-##sb-txxuw25469952@business.example.com
-
-
+paypalrestsdk.set_config(sandbox_config)
 # 定义路由
 # host = 'https://rss2ebook.azurewebsites.net'
-host = 'https://ebook.stararea.cn'
-
 
 @blueprint.route("/payment", methods=['GET', 'POST'])
 @jwt_required()
 def create_payment():
-    cancel_url = host + "/api/v2/paypal/cancel"
-    return_url = host + "/api/v2/paypal/execute"
+    cancel_url = config.MY_DOMAIN + "/api/v2/paypal/cancel"
+    return_url = config.MY_DOMAIN + "/api/v2/paypal/execute"
     data = request.get_json()
     product = data.get("product")
     print(str(product).lower())
@@ -194,17 +182,22 @@ def cancel_payment():
     return redirect("/")
 
 
-WEBHOOK_URL = "https//ebook.stararea.cn/api/v2/paypal/notification/event"
 @blueprint.route("/notification/event")
 def notify_event():
     try:
+        paypalrestsdk.configure
         request_body = json.loads(request.body.decode("utf-8"))
-        hook_event = WebhookEvent(request_body)
-        hook_event.verify(WEBHOOK_URL)
-        print(hook_event)
+        webhook_event = WebhookEvent(request_body)
+        webhook_id = webhook_event.get('id')
+        if webhook_id != WEBHOOK_ID:
+            logging.error('Invalid webhook id')
+            return jsonify({'status': 'failed'}), 200
+        webhook_event.verify(WEBHOOK_URL)
+        print(webhook_event)
     except Exception as e:
         logging.error("event_error")
         logging.error(e)
+    return jsonify({'status': 'ok'}),200
 
 
 if __name__ == '__main__':
