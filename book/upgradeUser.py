@@ -27,11 +27,12 @@ def upgrade_user(user_name, days, pay_id, expires):
         print(res.text)
         if res.status_code == 200:
             data = json.loads(res.text)
+            logging.info(data)
             if data['status'].lower() == "ok":
                 with app.app_context():
                     pay_log = UserPay.query.filter_by(id=pay_id).first()
                     pay_log.status = PaymentStatus.completed
-                    pay_log.pay_time = expires
+                    pay_log.pay_time = datetime.now()
                     db.session.add(pay_log)
 
                     db.session.commit()
