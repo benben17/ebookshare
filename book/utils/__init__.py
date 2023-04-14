@@ -10,7 +10,8 @@ import random
 import isbnlib
 import requests
 from requests.exceptions import RequestException
-from sqlalchemy import inspect, Enum
+from sqlalchemy import inspect
+from enum import Enum
 import config
 
 
