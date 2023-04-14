@@ -175,10 +175,13 @@ if __name__ == '__main__':
     from book import app
     from sqlalchemy import Enum
     with app.app_context():
-        userpay  = UserPay.query.all()
-        for pay in userpay:
-            # model_to_dict()
-            print(isinstance(pay.status,Enum))
+        user = User()
+        if user is None:
+            print("ok")
+        # userpay  = UserPay.query.all()
+        # for pay in userpay:
+        #     # model_to_dict()
+        #     print(isinstance(pay.status,Enum))
         # passwd=generate_password_hash('admin')
         # user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
         # db.session.add(user)
