@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import logging
 import threading
 import requests
+from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 
 import config
@@ -43,11 +44,12 @@ def upgrade_user(user_name, days, pay_id, expires):
 
 def upgrade_user_thread(user_name, p_name):
     try:
+        user = User.query.filter(or_(User.name == user_name, User.email == user_name)).first()
+        if not user:
+            return False
         p_dict = Product(p_name).get_product()
         p_days, p_desc, p_cny = p_dict.get("days"), p_dict.get("desc"), p_dict.get("cny")
         # 更新用户 为Plus用户
-
-        user = User.query.filter_by(name=user_name).first()
         user.role = UserRole.role_name('plus')
         if user.expires:
             if user.expires > datetime.now():
@@ -62,13 +64,15 @@ def upgrade_user_thread(user_name, p_name):
         db.session.add(user_pay)
         db.session.commit()
         logging.info("开始升级用户-----")
-
         threading.Thread(target=upgrade_user, args=[user.name, p_days, user_pay.id, user.expires]).start()
+        return True
     except SQLAlchemyError as e:
         logging.error(e)
         db.session.rollback()
+        return False
     except Exception as e:
         logging.error(e)
+        return False
 
 
 def upgrade_user_by_paypal(user_name, days, expires):
@@ -100,7 +104,7 @@ if __name__ == "__main__":
     with app.app_context():
         pay_log = User.get_by_id(1681116305)
         print(pay_log.name)
-        h ={"send_day":[11]}
+        h = {"send_day": [11]}
         product = Product('test').get_product()
         print(product)
         # print(type(['type']))

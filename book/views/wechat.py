@@ -1,7 +1,6 @@
 import json
 from flask import redirect, send_from_directory, request, Blueprint
 from sqlalchemy import or_
-from werkzeug.security import generate_password_hash
 from book import cache, db, upgradeUser, User
 from book.dicts import SEND_STATUS
 from book.utils import *
@@ -37,45 +36,46 @@ def wechat():
         elif msg_type.strip() == 'text':
             content = content.strip()
             # 查询用户
-            if content.lower() in ['?', 'h', 'help', '帮助', '？']:
+            if content.lower() in help_msg:
                 return wx_reply_xml(from_user, to_user, reply_help_msg)
             elif content == '1002':
                 return wx_reply_news(from_user, to_user)
             # 查找用户信息
             user = User.query.filter(User.wx_openid == from_user).first()
             # 查询绑定的邮箱地址
-            if content.lower() == "email":
-                if not user.email:
+            if content.lower() in email_help:
+                if not user.kindle_email:
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
-                return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
+                return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
             # 解绑
             if content == '1001':
-                user_email = user.email
+                user_email = user.kindle_email
                 if not user_email:
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
-                user.email = ""
+                user.kindle_email = ""
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, unbind_email_msg(user_email))
             # 绑定邮箱
             if check_email(content):
-                if user and user.email:
-                    return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                elif user and user.email is None:
-                    user.email = content
-                    user.kindle_email = content
-                    db.session.add(user)
+                if user:
+                    if user.kindle_email:
+                        return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
+                    elif user.kindle_email is None:
+                        user.kindle_email = content
+                        db.session.add(user)
+                        db.session.commit()
                 elif not user:  # 通过openID 没有查询到用户
-                    user = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
-                    if user and not user.wx_openid:
-                        print(user.wx_openid)
-                        user.wx_openid = from_user
-                        db.session.add(user)
+                    user = User.query.filter(User.kindle_email == content).first()
+                    if user:
+                        if not user.wx_openid:
+                            user.wx_openid = from_user
+                            db.session.add(user)
                     elif not user:
-                        user = User(email=content, kindle_email=content, wx_openid="content",id=gen_userid())
+                        user = User(email=content, kindle_email=content, wx_openid=from_user, id=gen_userid())
                         db.session.add(user)
-                db.session.commit()
-                return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
+                    db.session.commit()
+                return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
             # 检查是不是 书籍ISBN
             if check_isbn(content):
                 msg_content, books_cache = search_net_book(isbn=content, openid=from_user)
@@ -86,14 +86,10 @@ def wechat():
             if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s' and content.startswith("upgrade"):
                 info = content.split(":")
                 if len(info) == 3:
-                    upgrade_user = User.query.filter(or_(User.email == info[1], User.name == info[1])).first()
-                    if upgrade_user:
-                        upgradeUser.upgrade_user_thread(user_name=upgrade_user.name, p_name=info[2])
-                        return wx_reply_xml(from_user, to_user, f"{upgrade_user.name}:用户升级中")
+                    if upgradeUser.upgrade_user_thread(user_name=info[1], p_name=info[2]):
+                        return wx_reply_xml(from_user, to_user, f"{info[1]}:用户升级中.....")
                 return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
 
-            # if content == "哈哈哈":
-            #     return wx_reply_news(from_user, to_user)
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 16:
                 # 每个用户每天最多下载5本书
@@ -105,16 +101,19 @@ def wechat():
                 book_info = cache.get(f'{from_user}_{content}')
                 if book_info is not None:
                     send_info = book_info.split(":")
-                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0], receive_email=user.email,
+
+                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0],
+                                       receive_email=user.kindle_email,
                                        user_id=user.id,
                                        operation_type='download', status=SEND_STATUS.WAITING, ipfs_cid=send_info[1],
                                        filesize=send_info[2])
+                    if not user.kindle_email:  # 只发送 下载地址，而不提交
+                        return wx_reply_xml(from_user, to_user, download_url(user_log))
+
                     db.session.add(user_log)
                     db.session.commit()
-                    if not user.email:
-                        return wx_reply_xml(from_user, to_user, download_url(user_log))
                     return wx_reply_xml(from_user, to_user,
-                                        wx_reply_mail_msg(send_info[0], user.email) + download_url(user_log))
+                                        wx_reply_mail_msg(send_info[0], user.kindle_email) + download_url(user_log))
 
                 else:
                     return wx_reply_xml(from_user, to_user, reply_help_msg)
