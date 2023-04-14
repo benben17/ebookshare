@@ -66,14 +66,14 @@ def wechat():
                     user.kindle_email = content
                     db.session.add(user)
                 elif not user:  # 通过openID 没有查询到用户
-                    user_info = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
-                    if user_info and not user_info.wx_openid:
-                        print(user_info.wx_openid)
-                        user_info.wx_openid = "content"
-                        db.session.add(user_info)
-                    elif not user_info:
-                        user_info = User(email=content, kindle_email=content, wx_openid="content")
-                        db.session.add(user_info)
+                    user = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
+                    if user and not user.wx_openid:
+                        print(user.wx_openid)
+                        user.wx_openid = from_user
+                        db.session.add(user)
+                    elif not user:
+                        user = User(email=content, kindle_email=content, wx_openid="content")
+                        db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
             # 检查是不是 书籍ISBN
