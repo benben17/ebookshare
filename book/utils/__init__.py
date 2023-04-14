@@ -18,7 +18,7 @@ import config
 def gen_userid():
     ymd = int(time.time())
     random_num = random.randint(100, 999)
-    return f'{ymd}{random_num}'
+    return int(f'{ymd}{random_num}')
 
 
 def parse_xml(xml_str):
