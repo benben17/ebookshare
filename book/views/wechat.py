@@ -66,6 +66,7 @@ def wechat():
                 else:
                     user.email = content
                     user.kindle_email = content
+                    user.wx_openid = from_user
                     db.session.add(user)
                     db.session.commit()
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
@@ -104,7 +105,6 @@ def wechat():
             #     return wx_reply_news(from_user, to_user)
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 16:
-
                 # 每个用户每天最多下载5本书
                 usersend = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
                                                 Userlog.create_time > get_now_date()).all()
