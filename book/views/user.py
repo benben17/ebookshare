@@ -1,5 +1,6 @@
 # encoding:utf-8
 import json
+import sys
 import time
 import requests
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
@@ -168,23 +169,27 @@ def sync_user(user):
     return False
 
 
-
-
 if __name__ == '__main__':
     print("a")
     from book import app
     from sqlalchemy import Enum
+
     with app.app_context():
-        user = User()
-        if user is None:
-            print("ok")
-        # userpay  = UserPay.query.all()
-        # for pay in userpay:
-        #     # model_to_dict()
-        #     print(isinstance(pay.status,Enum))
-        # passwd=generate_password_hash('admin')
-        # user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
-        # db.session.add(user)
-        # db.session.commit()
-        # log = UserPay.query.filter_by(status=PaymentStatus.completed).first()
-        # print(log.user.email)
+        content = '892100089@qq.com'
+
+        user = User().query.filter_by(wx_openid="content").first()
+        if user and user.email:
+            print(user.email)
+        elif user and user.email is None:
+            user.email = content
+            db.session.add(user)
+        elif not user:  # 通过openID 没有查询到用户
+            user_info = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
+            if user_info and not user_info.wx_openid:
+                print(user_info.wx_openid)
+                user_info.wx_openid = "content"
+                db.session.add(user_info)
+            elif not user_info:
+                user_info = User(email=content, kindle_email=content, wx_openid="content")
+                db.session.add(user_info)
+        db.session.commit()

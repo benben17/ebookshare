@@ -43,8 +43,6 @@ def wechat():
                 return wx_reply_news(from_user, to_user)
             # 查找用户信息
             user = User.query.filter(User.wx_openid == from_user).first()
-            if user is None:
-                user = User()
             # 查询绑定的邮箱地址
             if content.lower() == "email":
                 if not user.email:
@@ -61,18 +59,20 @@ def wechat():
                 return wx_reply_xml(from_user, to_user, unbind_email_msg(user_email))
             # 绑定邮箱
             if check_email(content):
-                if user is not None and user.email:
+                if user and user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                elif user is not None and user.email is None:
+                elif user and user.email is None:
                     user.email = content
+                    user.kindle_email = content
                     db.session.add(user)
-                elif user is None:  # 通过openID 没有查询到用户
-                    user_info = User.query.filter(or_(User.email == content, User.name == content)).first()
-                    if not user_info.wx_openid or user_info.wx_openid is None:
-                        user_info.wx_openid = from_user
+                elif not user:  # 通过openID 没有查询到用户
+                    user_info = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
+                    if user_info and not user_info.wx_openid:
+                        print(user_info.wx_openid)
+                        user_info.wx_openid = "content"
                         db.session.add(user_info)
-                    elif user is None:
-                        user_info = User(email=content, kindle_email=content, wx_openid=from_user)
+                    elif not user_info:
+                        user_info = User(email=content, kindle_email=content, wx_openid="content")
                         db.session.add(user_info)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
