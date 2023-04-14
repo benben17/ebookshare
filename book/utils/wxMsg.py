@@ -14,7 +14,7 @@ def unbind_email_msg(user_email):
 
 
 def bind_email_msg(user_email):
-    return f'''绑定邮箱:{user_email}\n 解除绑定回复:1001'''
+    return f'''绑定邮箱：{user_email}\n 解除绑定回复:1001'''
 
 
 no_book_content = "未找到书籍，在更新中！请换其他的书籍"

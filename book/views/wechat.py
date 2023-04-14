@@ -1,4 +1,6 @@
 import json
+import logging
+
 from flask import redirect, send_from_directory, request, Blueprint
 from sqlalchemy import or_
 from book import cache, db, upgradeUser, User
@@ -59,23 +61,26 @@ def wechat():
             # 绑定邮箱
             if check_email(content):
                 if user:
-                    if user.kindle_email:
-                        return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
-                    elif user.kindle_email is None:
+                    if not user.kindle_email:
+                        logging.info("if user.kindle_email:")
                         user.kindle_email = content
                         db.session.add(user)
                         db.session.commit()
-                elif not user:  # 通过openID 没有查询到用户
+                    return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
+                else:  # 通过openID 没有查询到用户
                     user = User.query.filter(User.kindle_email == content).first()
+                    logging.info("User.query.filter(User.kindle_email == content).first()")
                     if user:
                         if not user.wx_openid:
                             user.wx_openid = from_user
                             db.session.add(user)
-                    elif not user:
+                    else:
                         user = User(email=content, kindle_email=content, wx_openid=from_user, id=gen_userid())
                         db.session.add(user)
                     db.session.commit()
-                return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
+                    logging.info(user.kindle_email)
+                    logging.info("-------")
+                    return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
             # 检查是不是 书籍ISBN
             if check_isbn(content):
                 msg_content, books_cache = search_net_book(isbn=content, openid=from_user)
