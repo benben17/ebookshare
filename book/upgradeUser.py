@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 import config
 from book import db, app
-from book.dateUtil import dt_to_str, str_to_dt
+from book.dateUtil import dt_to_str
 from book.dicts import Product, PaymentStatus, UserRole
 from book.models import UserPay, User
 from book.utils import get_rss_host
@@ -45,6 +45,7 @@ def upgrade_user_thread(user_name, p_name):
         p_dict = Product(p_name).get_product()
         p_days, p_desc, p_cny = p_dict.get("days"), p_dict.get("desc"), p_dict.get("cny")
         # 更新用户 为Plus用户
+
         user = User.query.filter_by(name=user_name).first()
         user.role = UserRole.role_name('plus')
         if user.expires:
@@ -53,7 +54,8 @@ def upgrade_user_thread(user_name, p_name):
         else:
             user.expires = datetime.now() + timedelta(days=p_days)
         db.session.add(user)
-
+        if p_cny is None:
+            p_cny = 1
         user_pay = UserPay(user_id=user.id, user_name=user.name, currency='CNY', pay_type='ali', amount=p_cny,
                            product_name=p_name, description=p_desc, status=PaymentStatus.created)
         db.session.add(user_pay)
@@ -98,7 +100,8 @@ if __name__ == "__main__":
         pay_log = User.get_by_id(1681116305)
         print(pay_log.name)
         h ={"send_day":[11]}
-        product = Product('month').get_product()
-        print(type(['type']))
-        r = h.get('send_day') if isinstance(h.get('send_day'), list) else ['Sunday']
-        print(r)
+        product = Product('test').get_product()
+        print(product)
+        # print(type(['type']))
+        # r = h.get('send_day') if isinstance(h.get('send_day'), list) else ['Sunday']
+        # print(r)

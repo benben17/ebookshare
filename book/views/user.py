@@ -160,7 +160,7 @@ def sync_user(user):
         'user_name': user.name,
         'to_email': user.email
     }
-    res = requests.post(get_rss_host() + path, data=data, headers=config.headers)
+    res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS)
     if res.status_code == 200:
         res = json.loads(res.text)
         if res['status'].lower() == 'ok':
@@ -168,9 +168,17 @@ def sync_user(user):
     return False
 
 
+
+
 if __name__ == '__main__':
     print("a")
-    # with app.app_context():
+    from book import app
+    from sqlalchemy import Enum
+    with app.app_context():
+        userpay  = UserPay.query.all()
+        for pay in userpay:
+            # model_to_dict()
+            print(isinstance(pay.status,Enum))
         # passwd=generate_password_hash('admin')
         # user = User(name='admin',email='892100089@qq.com',hash_pass= passwd)
         # db.session.add(user)

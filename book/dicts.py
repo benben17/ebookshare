@@ -48,19 +48,19 @@ class Product:
     products = {
         "month": {"name": "month", "amount": 2.9, "desc": "rss2Ebook One month plus fee", "days": 31, 'cny': 20},
         "year": {"name": "year", "amount": 19.9, "desc": "rss2Ebook One year plus fee", "days": 366, "cny": 99},
-        "rss2ebook": {"name": "rss2ebook", "amount": 0.01, "desc": "rss2Ebook for test", "days": 2,'cny':1}
+        "rss2ebook": {"name": "rss2ebook", "amount": 0.9, "desc": "rss2Ebook for test", "days": 20, 'cny': 1}
     }
 
     def __init__(self, product=None):
-        self.product = str(product).lower() if str(product).lower() else 'test'
+        self.product = str(product).lower() if str(product).lower() else 'rss2ebook'
 
     def get_product(self):
-        return Product.products.get(self.product, {"name": "test", "amount": 0.01, "desc": "for test", "days": 10})
+        return Product.products.get(self.product) if Product.products.get(self.product) else Product.products.get("rss2ebook")
 
 
 if __name__ == "__main__":
     days = -10
     print(datetime.utcnow() + timedelta(days=int(days)))
     day = 'Sunday'
-    p_dict = Product().get_product()
+    p_dict = Product("hahha").get_product()
     print(p_dict)

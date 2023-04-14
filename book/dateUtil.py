@@ -47,7 +47,7 @@ def dt_to_str(time_dt):
 
 if __name__ == "__main__":
     days = -30
-    now = "2022-01"
+    now = "Fri, 31 Mar 2023 00:00:51 +0800"
     print(str_to_dt(now))
     print(10+days)
 

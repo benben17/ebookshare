@@ -1,4 +1,6 @@
 # coding: utf-8
+from sqlalchemy import Enum
+
 from book import db, dicts
 from datetime import datetime
 
@@ -96,7 +98,7 @@ class UserPay(db.Model):
     pay_url = db.Column(db.String(500))  # 支付地址，未支付的时候直接调用
     create_time = db.Column(db.DateTime, default=datetime.utcnow())
     currency = db.Column(db.String(3), nullable=False)
-    status = db.Column(db.Enum(dicts.PaymentStatus), default=dicts.PaymentStatus.created)
+    status = db.Column(Enum(dicts.PaymentStatus), default=dicts.PaymentStatus.created)
     payment_id = db.Column(db.String(255), nullable=True, index=True)
     cancel_url = db.Column(db.String(255), nullable=True)
     canceled_by = db.Column(db.String(255), nullable=True)
