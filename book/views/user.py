@@ -12,7 +12,7 @@ from book.dicts import UserRole
 from book.models import db, User, UserPay
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
-from book.utils import check_email, generate_code, model_to_dict, get_file_name, get_rss_host
+from book.utils import check_email, generate_code, model_to_dict, get_file_name, get_rss_host, gen_userid
 from book.utils.mailUtil import send_email
 
 blueprint = Blueprint(
@@ -74,7 +74,7 @@ def sign_up():
     if user:
         return APIResponse.bad_request(msg="此邮箱已注册！请直接登录")
     user = User()
-    user.id = int(time.time())
+    user.id = gen_userid()
     user.hash_pass = generate_password_hash(passwd)
     user.email = email
     user.name = user.email.split("@")[0]

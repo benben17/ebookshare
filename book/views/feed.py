@@ -1,11 +1,14 @@
 # -*-coding: utf-8-*-
 import json
 import logging
+from datetime import datetime, timedelta
+import time
 
 import requests
 from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
+from book.dateUtil import dt_to_str, str_to_dt
 from book.dicts import RequestStatus, UserRole
 from book.models import User, db
 from book.utils import get_file_name, get_rss_host
@@ -55,7 +58,7 @@ def user_add():
 def user_setting():
     """用户设置"""
     res = sync_post(request.path)
-    return return_fun()
+    return return_fun(res)
 
 
 @blueprint.route('/sync/user/upgrade', methods=['POST'])
@@ -88,7 +91,20 @@ def get_deliver_logs():
 
 @blueprint.route('/feed/book/deliver', methods=['POST'])
 @jwt_required()
-def get_my_feed_deliver():
+def my_feed_deliver():
+    DELIVER_TIMEOUT = 23 * 60 * 60
+    from book import cache
+    user = get_jwt_identity()
+    key = f'deliver:{user["name"]}'
+    last_delivery_time = str_to_dt(cache.get(key))
+
+    if last_delivery_time and user["name"] not in ["admin", "171720928"]:
+        elapsed_time = time.time() - last_delivery_time.timestamp()
+        if elapsed_time < DELIVER_TIMEOUT:
+            remaining_time = DELIVER_TIMEOUT - elapsed_time
+            return APIResponse.bad_request(msg=f"{last_delivery_time}已推送，请{remaining_time // 3600}小时后再做推送")
+
+    cache.set(key, dt_to_str(datetime.now()), timeout=DELIVER_TIMEOUT)
     return return_fun(sync_post(request.path))
 
 
@@ -109,11 +125,9 @@ def my_rss_add():
         myuser = get_jwt_identity()
         user = User.query.get(myuser['id'])
         feed_num = UserRole.role_feed_num(user.role)
-        if user.feed_count >= 5 and user.role == UserRole.role_name():  # 默认为default
-            return APIResponse.bad_request(msg=f"已达到最大{feed_num}个订阅数，请升级用户")
-        if user.feed_count >= 100:
+        if user.feed_count >= feed_num:
             return APIResponse.bad_request(msg=f"已达到最大{feed_num}个订阅,不能在订阅")
-        user.feed_count = user.feed_count + 1
+        user.feed_count += 1
         db.session.add(user)
         db.session.commit()
         return APIResponse.success(msg=res['msg'])
@@ -162,7 +176,7 @@ def rss_invalid():
     return return_fun(res)
 
 
-@blueprint.route('/rss/review/title', methods=['POST'])
+@blueprint.route('/rss/view/title', methods=['POST'])
 @jwt_required()
 def rss_view_title():
     data = request.get_json()
@@ -171,10 +185,13 @@ def rss_view_title():
     if is_rss_feed(data.get('url')) is False:
         return APIResponse.bad_request(msg='rss invalid,please declare invalid rss')
 
-    titles = get_rss_latest_titles(data.get('url'), data.get('num', 10))
-    return APIResponse.success(data=titles)
+    article = get_rss_latest_titles(data.get('url'), data.get('num', 10))
+    return APIResponse.success(data=article)
+
 
 if __name__ == "__main__":
     from book.utils.rssUtil import rss_list
+    from book import app, cache
 
-
+    timeout = 23 * 60 * 60
+    print(datetime.now() + timedelta(seconds=timeout))

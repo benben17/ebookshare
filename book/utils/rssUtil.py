@@ -4,7 +4,8 @@ import feedparser
 import requests
 
 import config
-from book.utils import get_rss_host
+from book.dateUtil import dt_to_str, str_to_dt
+from book.utils import get_rss_host, gen_userid
 
 
 def is_rss_feed(rss_url):
@@ -20,19 +21,22 @@ def is_rss_feed(rss_url):
 
 def get_rss_latest_titles(rss_url, num):
     """
-    获取一个 RSS 源的最新 n 篇文章的 title。
+    获取一个 RSS 源的最新 n 篇文章的 title n 篇文章的发布时间并且返回。
     """
     try:
-        titles = []
+        articles = []
         d = feedparser.parse(rss_url)
+        if not hasattr(d, 'entries'):
+            logging.warning(f"No entries found in feed: {rss_url}")
+            return []
         for entry in d.entries[:int(num)]:
-            if entry.title:
-                titles.append(entry.title)
-            # print(entry.title)
-        return titles
+            title = entry.get('title', '')
+            pub_date = entry.get('published', '') or entry.get('updated', '')
+            articles.append({"title": title, "pub_date": dt_to_str(str_to_dt(pub_date))})
+        return articles
     except Exception as e:
-        logging.error(e)
-
+        logging.error(f"Failed to parse feed {rss_url}: {e}")
+        return []
 
 
 rss_list = [
@@ -43,19 +47,27 @@ rss_list = [
     # ('News','FT - Markets', 'https://www.ft.com/markets?format=rss'),
     # ('News','FT - Opinion', 'https://www.ft.com/opinion?format=rss'),
     # ('News','FT - Life & Arts', 'https://www.ft.com/life-arts?format=rss'),
-    ('Business','FX Markets - Trading','https://rsshub.app/fx-markets/trading'),
-    ('Business','FX Markets - Infrastructure','https://rsshub.app/fx-markets/infrastructure'),
-    ('Business','FX Markets - Tech & Data','https://rsshub.app/fx-markets/tech-and-data'),
-    ('Business','FX Markets - Infrastructure','https://rsshub.app/fx-markets/Regulation')
+    #     ('News','Nature - Latest Research','https://rsshub.app/nature/research/nature'),
+    #     ('News','Nature - Biotechnology','https://rsshub.app/nature/research/nbt'),
+    # ('News','Nature - Neuroscience','https://rsshub.app/nature/research/neuro'),
+    # ('News','Nature - Genetics','https://rsshub.app/nature/research/ng'),
+    # ('News','Nature - Immunology','https://rsshub.app/nature/research/ni'),
+    # ('News','Nature - Method','https://rsshub.app/nature/research/nmeth'),
+    # ('News','Nature - Chemistry','https://rsshub.app/nature/research/nchem'),
+    # ('News','Nature - Materials','https://rsshub.app/nature/research/nmat'),
+    # ('News','Nature - Machine Intelligence','https://rsshub.app/nature/research/natmachintell'),
+    ('News', 'Nature - Latest News', 'https://rsshub.app/nature/news'),
 ]
 
-
-
 if __name__ == "__main__":
-    # print(get_rss_latest_titles('https://www.ft.com/world?format=rss', 10))
-    d = feedparser.parse("https://feedx.net/rss/economistp.xml")
-    # print(len(d))
-    print(d.entries[0])
+    import time
+    print(gen_userid())
+    print(gen_userid())
+
+    # print(get_rss_latest_titles('https://rsshub.app/nature/research/nature', 1))
+    # d = feedparser.parse("https://feedx.net/rss/economistp.xml")
+    # # print(len(d))
+    # print(d.entries[0])
     # for rss in rss_list:
     #     path = '/api/v2/rss/manager'
     #     data = {'key': config.RSS2EBOOK_KEY,
@@ -63,12 +75,12 @@ if __name__ == "__main__":
     #             'creator': 'admin',
     #             "title": rss[1],
     #             "url": rss[2],
-    #             "is_fulltext": "flase",
+    #             "is_fulltext": "True",
     #             "category": rss[0],
     #             "librss_id": 1
     #             }
     #     print(data)
-    # #     # request_url = "http://127.0.0.1:8080"
+    #     #     # request_url = "http://127.0.0.1:8080"
     #     res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS, timeout=60)
     #     # print(rss)
     #     print(res.text, res.status_code)
