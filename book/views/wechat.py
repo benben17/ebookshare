@@ -61,17 +61,17 @@ def wechat():
                 if user:
                     if user.kindle_email:
                         return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
-                    elif user.kindle_email is None:
+                    else:
                         user.kindle_email = content
                         db.session.add(user)
                         db.session.commit()
-                elif not user:  # 通过openID 没有查询到用户
+                else:  # 通过openID 没有查询到用户
                     user = User.query.filter(User.kindle_email == content).first()
                     if user:
                         if not user.wx_openid:
                             user.wx_openid = from_user
                             db.session.add(user)
-                    elif not user:
+                    else:
                         user = User(email=content, kindle_email=content, wx_openid=from_user, id=gen_userid())
                         db.session.add(user)
                     db.session.commit()
