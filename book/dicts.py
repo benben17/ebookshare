@@ -28,7 +28,7 @@ class RequestStatus:
 
 
 class UserRole(Enum):
-    DEFAULT = {"name": 'default', "feed_num": 5}
+    DEFAULT = {"name": 'default', "feed_num": 10}
     PLUS = {"name": 'plus', "feed_num": 100}
 
     @staticmethod

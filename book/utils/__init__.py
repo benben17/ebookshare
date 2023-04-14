@@ -15,6 +15,11 @@ from enum import Enum
 import config
 
 
+def gen_userid():
+    ymd = int(time.time())
+    random_num = random.randint(100, 999)
+    return f'{ymd}{random_num}'
+
 
 def parse_xml(xml_str):
     """解析xml字符串"""
@@ -240,7 +245,6 @@ def get_rss_host(user_id=1):
 
 def get_now():
     return datetime.utcnow()
-
 
 
 if __name__ == '__main__':

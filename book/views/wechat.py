@@ -72,7 +72,7 @@ def wechat():
                         user.wx_openid = from_user
                         db.session.add(user)
                     elif not user:
-                        user = User(email=content, kindle_email=content, wx_openid="content")
+                        user = User(email=content, kindle_email=content, wx_openid="content",id=gen_userid())
                         db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))

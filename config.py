@@ -33,7 +33,8 @@ CACHE_NO_NULL_WARNING = "warning"  # null类型时的警告消息
 CACHE_ARGS = []  # 在缓存类实例化过程中解包和传递的可选列表，用来配置相关后端的额外的参数
 CACHE_OPTIONS = {}  # 可选字典,在缓存类实例化期间传递，也是用来配置相关后端的额外的键值对参数
 CACHE_DEFAULT_TIMEOUT = 600  # 默认过期/超时时间，单位为秒
-CACHE_THRESHOLD = 100  # 缓存的最大条目数
+CACHE_IGNORE_ERRORS = True
+CACHE_THRESHOLD = 10000  # 缓存的最大条目数
 
 JSON_AS_ASCII = False
 
