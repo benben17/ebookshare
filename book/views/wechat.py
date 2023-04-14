@@ -61,30 +61,21 @@ def wechat():
                 return wx_reply_xml(from_user, to_user, unbind_email_msg(user_email))
             # 绑定邮箱
             if check_email(content):
-                if user.email:
+                if user is not None and user.email:
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                else:
+                elif user is not None and user.email is None:
                     user.email = content
-                    user.kindle_email = content
-                    user.wx_openid = from_user
                     db.session.add(user)
-                    db.session.commit()
-                    return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
-                user_info = User.query.filter(or_(User.email == content, User.name == content)).first()
-                if user_info:
+                elif user is None:  # 通过openID 没有查询到用户
+                    user_info = User.query.filter(or_(User.email == content, User.name == content)).first()
                     if not user_info.wx_openid or user_info.wx_openid is None:
                         user_info.wx_openid = from_user
                         db.session.add(user_info)
-                        db.session.commit()
-                    return wx_reply_xml(from_user, to_user, bind_email_msg(content))
-
-                hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
-                user_info = User(email=content, kindle_email=content, wx_openid=from_user, hash_pass=hash_pass,
-                                 role=UserRole.role_name())
-                db.session.add(user_info)
+                    elif user is None:
+                        user_info = User(email=content, kindle_email=content, wx_openid=from_user)
+                        db.session.add(user_info)
                 db.session.commit()
-                return wx_reply_xml(from_user, to_user, bind_email_msg(content))
-
+                return wx_reply_xml(from_user, to_user, bind_email_msg(user.email))
             # 检查是不是 书籍ISBN
             if check_isbn(content):
                 msg_content, books_cache = search_net_book(isbn=content, openid=from_user)
@@ -122,7 +113,8 @@ def wechat():
                     db.session.commit()
                     if not user.email:
                         return wx_reply_xml(from_user, to_user, download_url(user_log))
-                    return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.email)+download_url(user_log))
+                    return wx_reply_xml(from_user, to_user,
+                                        wx_reply_mail_msg(send_info[0], user.email) + download_url(user_log))
 
                 else:
                     return wx_reply_xml(from_user, to_user, reply_help_msg)
@@ -143,7 +135,3 @@ def dl_file(filename):
         return redirect("/404")
     return send_from_directory(config.DOWNLOAD_DIR, filename)
     # return APIResponse.success(data="欢迎关注 sendtokindles 公众号下载电子书")
-
-
-
-
