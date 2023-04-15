@@ -1,4 +1,5 @@
 from datetime import datetime
+from random import random
 
 EventType = [
     'PAYMENT-NETWORKS.ALTERNATIVE-PAYMENT.COMPLETED',
@@ -18,6 +19,9 @@ live_config = {
     "client_id": "AV80RXlauTbODxEXDTyqQZw2NFWKiltlAMT0LYpueV53-Wlv063OJSzQym1cCjOGPf0CAVz2tFnwDyJC",
     "client_secret": 'EAWMwD_L9LXCEMzOUBwLNdcta4gun77p19VWVKlzrPLsps4ThI3P017An6jFkta9hznvmfFKk2dSP3jl'
 }
+
+
+
 
 
 def paypal_order(cancel_url, return_url, amount, description):

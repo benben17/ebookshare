@@ -59,7 +59,8 @@ rss_list = [
     ('News', 'Nature - Latest News', 'https://rsshub.app/nature/news'),
 ]
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
+    print(int(-8))
     # print(get_rss_latest_titles('https://rsshub.app/nature/research/nature', 1))
     # d = feedparser.parse("https://feedx.net/rss/economistp.xml")
     # # print(len(d))

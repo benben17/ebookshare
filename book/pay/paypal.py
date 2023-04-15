@@ -5,9 +5,7 @@ from datetime import datetime, timedelta
 import paypalrestsdk
 from flask import request, Blueprint, redirect
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from paypalrestsdk import Sale, WebhookEvent
-from sqlalchemy.exc import SQLAlchemyError
-
+from paypalrestsdk import WebhookEvent
 import config
 from book import db
 from book.dicts import PaymentStatus, Product, UserRole
@@ -20,13 +18,8 @@ from book.utils.ApiResponse import *
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
 paypalrestsdk.set_config(sandbox_config)
-
-
 # paypalrestsdk.set_config(live_config)
 
-
-# 定义路由
-# host = 'https://rss2ebook.azurewebsites.net'
 
 @blueprint.route("/payment", methods=['GET', 'POST'])
 @jwt_required()
