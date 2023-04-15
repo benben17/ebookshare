@@ -63,6 +63,7 @@ def wechat():
                 if user:
                     if not user.kindle_email:
                         logging.info("if user.kindle_email:")
+                        user.email = content
                         user.kindle_email = content
                         db.session.add(user)
                         db.session.commit()

@@ -30,11 +30,13 @@ with app.app_context():
 
 from book.views import *
 
-modules = ['user', 'ebook', 'feed', 'wechat']
+modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook']
 for model_name in modules:
     model = import_module(f"{app.name}.views.{model_name}")
     app.register_blueprint(model.blueprint)
+
 from book.pay import paypal
+
 app.register_blueprint(paypal.blueprint)
 """
 Initialize logging
@@ -48,7 +50,6 @@ handler.setFormatter(formatter)
 logging.getLogger().addHandler(handler)
 
 
-
 @app.errorhandler(404)
 def error_date(error):
     return jsonify({'code': 404, 'msg': '404'}), 404
@@ -59,5 +60,3 @@ def error_date(error):
 @app.errorhandler(WrongTokenError)
 def handle_auth_error(e):
     return jsonify({'code': 10000, 'msg': str(e), "data": ""}), 200
-
-

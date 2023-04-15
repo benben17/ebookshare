@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 
 import pytz
@@ -45,9 +46,24 @@ def dt_to_str(time_dt):
         return time_dt
 
 
+def now_datetime() -> str:
+    return str(datetime.datetime.fromtimestamp(int(time.time())))
+
+
+def now_date() -> str:
+    return str(datetime.date.today())
+
+
+def timestamp() -> int:
+    return int(time.time())
+
+
+def long_timestamp() -> str:
+    return str(time.time()).replace(".", "")
+
+
 if __name__ == "__main__":
     days = -30
     now = "Fri, 31 Mar 2023 00:00:51 +0800"
     print(str_to_dt(now))
-    print(10+days)
-
+    print(10 + days)
