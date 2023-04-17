@@ -62,6 +62,7 @@ def wechat():
                 if user:
                     if not user.kindle_email:
                         logging.info("if user.kindle_email:")
+                        user.name = content.split("@")[0]
                         user.email = content
                         user.kindle_email = content
                         db.session.add(user)
@@ -79,7 +80,7 @@ def wechat():
                         db.session.add(user)
                     db.session.commit()
                     logging.info(user.kindle_email)
-                    logging.info("-------")
+                    # logging.info("-------")
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
             # 检查是不是 书籍ISBN
             if content.replace("-", "").isdigit() and is_isbn(content):
