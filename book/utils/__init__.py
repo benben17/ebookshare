@@ -35,36 +35,24 @@ def is_isbn(isbn):
     # ISBN 的长度为10或13
     if len(isbn) not in [10, 13]:
         return False
-
-    # 去除可能包含的连字符
-    isbn = isbn.replace('-', '')
-
-    # 10位ISBN必须由数字和短横线组成，最后一位可能是X
     if len(isbn) == 10:
         if not isbn[:-1].isdigit():
             return False
-        if isbn[-1] not in ['X', 'x'] and not isbn[-1].isdigit():
-            return False
         groups = [int(d) for d in isbn]
-        checksum = sum((i+1)*x for i, x in enumerate(groups[:-1])) % 11
+        checksum = sum((i + 1) * x for i, x in enumerate(groups[:-1])) % 11
         if checksum == 10 and isbn[-1] not in ['X', 'x']:
             return False
         if checksum != 10 and str(checksum) != isbn[-1]:
             return False
-
     # 13位ISBN必须由数字和短横线组成
     if len(isbn) == 13:
         if not isbn.isdigit():
             return False
         groups = [int(d) for d in isbn]
-        checksum = (10 - (sum(groups[::2]) + sum(groups[1::2])*3) % 10) % 10
+        checksum = (10 - (sum(groups[::2]) + sum(groups[1::2]) * 3) % 10) % 10
         if str(checksum) != str(isbn[-1]):
             return False
-
     return True
-
-
-
 
 
 def allowed_ebook_ext(filename):
@@ -274,7 +262,7 @@ def get_now():
 
 
 if __name__ == '__main__':
-    print(is_isbn('7547744048'))
+    print(is_isbn('1-63995-000-1'))
 
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))

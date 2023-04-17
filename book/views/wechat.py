@@ -82,7 +82,7 @@ def wechat():
                     logging.info("-------")
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
             # 检查是不是 书籍ISBN
-            if is_isbn(content):
+            if content.replace("-", "").isdigit() and is_isbn(content):
                 msg_content, books_cache = search_net_book(isbn=content, openid=from_user)
                 if books_cache is not None:
                     cache.set_many(books_cache)  # 存缓存
@@ -116,7 +116,8 @@ def wechat():
 
                     db.session.add(user_log)
                     db.session.commit()
-                    return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.kindle_email) + download_url(user_log))
+                    return wx_reply_xml(from_user, to_user,
+                                        wx_reply_mail_msg(send_info[0], user.kindle_email) + download_url(user_log))
                 else:
                     return wx_reply_xml(from_user, to_user, reply_help_msg)
 
