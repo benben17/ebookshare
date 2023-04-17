@@ -1,13 +1,13 @@
 # encoding:utf-8
+from datetime import datetime, timedelta
 import json
-import sys
-import time
 import requests
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
 from book import cache
+from book.dateUtil import format_time
 from book.dicts import UserRole
 from book.models import db, User, UserPay
 from flask import request, Blueprint
@@ -150,7 +150,15 @@ def user_pay_log():
     pay_logs = UserPay.query.filter_by(user_id=user['id']).all()
     user_pays = []
     for log in pay_logs:
-        user_pays.append(model_to_dict(log))
+        refund_flag = False
+        if log.pay_time:
+            refund_time = log.pay_time + timedelta(weeks=2)  # 2周后的日期
+            refund_flag = refund_time > datetime.utcnow()
+        log = model_to_dict(log)
+        log['pay_time'] = format_time(log['pay_time'])
+        log['create_time'] = format_time(log['create_time'])
+        log['refund_flag'] = refund_flag
+        user_pays.append(log)
     return APIResponse.success(data=user_pays)
 
 

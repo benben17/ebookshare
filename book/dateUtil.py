@@ -4,13 +4,11 @@ from datetime import datetime, timedelta
 import pytz
 
 
-def utc_to_local(utc_time):
-    # 获取本地时区信息
-    local_tz = pytz.timezone('Asia/Shanghai')
+def utc_to_local(utc_time, fmt='%Y-%m-%d %H:%M:%S', tz=8):
+    if not isinstance(utc_time, datetime):
+        utc_time = str_to_dt(utc_time)
     # 将UTC时间转换为本地时间
-    local_time = utc_time.replace(tzinfo=pytz.utc).astimezone(local_tz)
-    # 输出本地时间
-    return local_time.strftime('%Y-%m-%d %H:%M:%S')
+    return utc_time + timedelta(hours=tz)
 
 
 def get_days_later(days):
@@ -28,6 +26,8 @@ def str_to_dt(time_str):
     Args: time_str: 时间字符串，可以是各种格式
     Returns: datetime 对象
     """
+    if time_str is None:
+        return None
     try:
         time_dt = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
     except ValueError:
@@ -39,11 +39,20 @@ def str_to_dt(time_str):
     return time_dt
 
 
-def dt_to_str(time_dt):
+def dt_to_str(time_dt) -> str:
     if isinstance(time_dt, datetime):
         return time_dt.strftime('%Y-%m-%d %H:%M:%S')
     else:
         return time_dt
+
+
+def format_time(dt) -> str:
+    if dt is None:
+        return None
+    if isinstance(dt, datetime):
+        return dt_to_str(dt)
+    else:
+        return dt_to_str(str_to_dt(dt))
 
 
 def now_datetime() -> str:
@@ -65,5 +74,5 @@ def long_timestamp() -> str:
 if __name__ == "__main__":
     days = -30
     now = "Fri, 31 Mar 2023 00:00:51 +0800"
-    print(str_to_dt(now))
+    print(type(utc_to_local(now)))
     print(10 + days)

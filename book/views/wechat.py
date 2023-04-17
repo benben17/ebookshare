@@ -25,7 +25,6 @@ def wechat():
         timestamp = request.args.get('timestamp', '')
         nonce = request.args.get('nonce', '')
         return echostr if check_signature(token, signature, timestamp, nonce) else ''
-
     elif request.method == 'POST':
         from book.models import User, Userlog
         # 处理消息请求
@@ -109,8 +108,7 @@ def wechat():
                     send_info = book_info.split(":")
 
                     user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0],
-                                       receive_email=user.kindle_email,
-                                       user_id=user.id,
+                                       receive_email=user.kindle_email, user_id=user.id,
                                        operation_type='download', status=SEND_STATUS.WAITING, ipfs_cid=send_info[1],
                                        filesize=send_info[2])
                     if not user.kindle_email:  # 只发送 下载地址，而不提交
@@ -118,9 +116,7 @@ def wechat():
 
                     db.session.add(user_log)
                     db.session.commit()
-                    return wx_reply_xml(from_user, to_user,
-                                        wx_reply_mail_msg(send_info[0], user.kindle_email) + download_url(user_log))
-
+                    return wx_reply_xml(from_user, to_user, wx_reply_mail_msg(send_info[0], user.kindle_email) + download_url(user_log))
                 else:
                     return wx_reply_xml(from_user, to_user, reply_help_msg)
 
