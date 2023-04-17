@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import feedparser
 import requests
@@ -56,28 +57,37 @@ rss_list = [
     # ('News','Nature - Chemistry','https://rsshub.app/nature/research/nchem'),
     # ('News','Nature - Materials','https://rsshub.app/nature/research/nmat'),
     # ('News','Nature - Machine Intelligence','https://rsshub.app/nature/research/natmachintell'),
-    ('News', 'Nature - Latest News', 'https://rsshub.app/nature/news'),
+    # ('News', 'WSJ 中国 - 中文', 'https://rsshub.app/wsj/zh-cn/china'),
+    # ('News', 'WSJ 金融市场 - 中文', 'https://rsshub.app/wsj/zh-cn/markets'),
+    # ('News', 'WSJ 经济 - 中文', 'https://rsshub.app/wsj/zh-cn/economy'),
+    # ('News', 'WSJ 商业 - 中文', 'https://rsshub.app/wsj/zh-cn/business'),
+    # ('News', 'WSJ 科技 - 中文', 'https://rsshub.app/wsj/zh-cn/technology'),
+    # ('News', 'WSJ 专栏与观点 - 中文', 'https://rsshub.app/wsj/zh-cn/opinion'),
+    ('News', 'The Guardian - Editorial', 'https://rsshub.app/guardian/editorial')
+
 ]
 
 if __name__ == "__main__":
-    print(int(-8))
+    # print(int(-8))
     # print(get_rss_latest_titles('https://rsshub.app/nature/research/nature', 1))
     # d = feedparser.parse("https://feedx.net/rss/economistp.xml")
     # # print(len(d))
     # print(d.entries[0])
-    # for rss in rss_list:
-    #     path = '/api/v2/rss/manager'
-    #     data = {'key': config.RSS2EBOOK_KEY,
-    #             'user_name': 'admin',
-    #             'creator': 'admin',
-    #             "title": rss[1],
-    #             "url": rss[2],
-    #             "is_fulltext": "True",
-    #             "category": rss[0],
-    #             "librss_id": 1
-    #             }
-    #     print(data)
-    #     #     # request_url = "http://127.0.0.1:8080"
-    #     res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS, timeout=60)
-    #     # print(rss)
-    #     print(res.text, res.status_code)
+    print()
+    for rss in rss_list:
+        path = '/api/v2/rss/manager'
+        data = {'key': config.RSS2EBOOK_KEY,
+                'user_name': 'admin',
+                'creator': 'admin',
+                "title": rss[1],
+                "url": rss[2],
+                "is_fulltext": "Flase",
+                "category": rss[0],
+                "librss_id": 1
+                }
+
+        # print(data)
+        #     # request_url = "http://127.0.0.1:8080"
+        # res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS, timeout=60)
+        # print(rss)
+        # print(res.text, res.status_code)
