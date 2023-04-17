@@ -82,12 +82,12 @@ def wechat():
                     logging.info("-------")
                     return wx_reply_xml(from_user, to_user, bind_email_msg(user.kindle_email))
             # 检查是不是 书籍ISBN
-            if check_isbn(content):
+            if is_isbn(content):
                 msg_content, books_cache = search_net_book(isbn=content, openid=from_user)
                 if books_cache is not None:
                     cache.set_many(books_cache)  # 存缓存
                 return wx_reply_xml(from_user, to_user, msg_content)
-            # if content == 'next':
+
             if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s' and content.startswith("upgrade"):
                 info = content.split(":")
                 if len(info) == 3:

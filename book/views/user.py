@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import config
 from book import cache
 from book.dateUtil import format_time
-from book.dicts import UserRole
+from book.dicts import UserRole, PaymentStatus
 from book.models import db, User, UserPay
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
@@ -151,7 +151,7 @@ def user_pay_log():
     user_pays = []
     for log in pay_logs:
         refund_flag = False
-        if log.pay_time:
+        if log.pay_time and log.status == PaymentStatus.completed:
             refund_time = log.pay_time + timedelta(weeks=2)  # 2周后的日期
             refund_flag = refund_time > datetime.utcnow()
         log = model_to_dict(log)
