@@ -7,7 +7,6 @@ from datetime import datetime
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import random
-import isbnlib
 import requests
 from requests.exceptions import RequestException
 from sqlalchemy import inspect
@@ -32,13 +31,28 @@ def parse_xml(xml_str):
     return msg_type, from_user, to_user, content, event
 
 
-def check_isbn(str):
-    if len(str) == 13:
-        return isbnlib.is_isbn13(str)
-    elif len(str) == 10:
-        return isbnlib.is_isbn10(str)
-    else:
+def is_isbn(isbn):
+    # ISBN 的长度为10或13
+    if len(isbn) not in [10, 13]:
         return False
+    if len(isbn) == 10:
+        if not isbn[:-1].isdigit():
+            return False
+        groups = [int(d) for d in isbn]
+        checksum = sum((i + 1) * x for i, x in enumerate(groups[:-1])) % 11
+        if checksum == 10 and isbn[-1] not in ['X', 'x']:
+            return False
+        if checksum != 10 and str(checksum) != isbn[-1]:
+            return False
+    # 13位ISBN必须由数字和短横线组成
+    if len(isbn) == 13:
+        if not isbn.isdigit():
+            return False
+        groups = [int(d) for d in isbn]
+        checksum = (10 - (sum(groups[::2]) + sum(groups[1::2]) * 3) % 10) % 10
+        if str(checksum) != str(isbn[-1]):
+            return False
+    return True
 
 
 def allowed_ebook_ext(filename):
@@ -248,7 +262,7 @@ def get_now():
 
 
 if __name__ == '__main__':
-    print(get_file_name(__file__))
+    print(is_isbn('1-63995-000-1'))
 
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))

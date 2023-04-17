@@ -118,11 +118,10 @@ def execute_payment():
 def refund_payment():
     payment_id = request.args.get("paymentId")
     pay = UserPay.query.filter_by(payment_id=payment_id).first()
-    if pay is None:
-        return APIResponse.bad_request(msg="no payment")
+    if pay is None or pay.pay_time is None:
+        return APIResponse.bad_request(msg="not payment")
     try:
-        two_weeks_ago = datetime.utcnow() - timedelta(weeks=2)
-        if not pay.pay_time < two_weeks_ago:
+        if pay.pay_time + timedelta(weeks=2) > datetime.utcnow():
             payment = paypalrestsdk.Payment.find(payment_id)
             logging.error(payment.transactions)
             sale_info = payment.transactions[0]
