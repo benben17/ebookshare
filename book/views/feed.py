@@ -28,6 +28,9 @@ def user_add():
 def user_setting():
     """用户设置"""
     param = request.get_json()
+    if 'kindle_email' in param:
+        if check_email(param['kindle_email']) is False:
+            return APIResponse.bad_request(msg='email error')
     user = get_jwt_identity()
     res = sync_post(request.path, param, user)
     return return_fun(res)
@@ -48,9 +51,7 @@ def user_upgrade():
 def rss_user_info():
     param = request.get_json()
     user = get_jwt_identity()
-    if param['kindle_email']:
-        if check_email(param['kindle_email']) is False:
-            return APIResponse.bad_request(msg='email error')
+
     res = sync_post(request.path, param, user)
     return return_fun(res)
 
