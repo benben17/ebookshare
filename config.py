@@ -46,7 +46,7 @@ JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
 SCHEDULER_API_ENABLED = False  # 添加API
 
-MY_DOMAIN = 'https://ebook.stararea.cn'
+MY_DOMAIN = 'https://rss2ebook.com/prod-api'
 # 电子书 配置
 DOWNLOAD_DIR = os.path.join(basedir, 'ebooks/')   # 下载目录
 DOWNLOAD_URL = MY_DOMAIN+"/download/"  # 下载URL

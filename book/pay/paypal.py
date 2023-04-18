@@ -66,7 +66,7 @@ def create_payment():
         APIResponse.bad_request(msg="Failed, Change payment method ")
 
 
-main_host = "https://rss2ebook.com"
+main_host = "https://rss2ebook.com/user/upgrade"
 
 
 @blueprint.route("/execute", methods=['GET', 'POST'])

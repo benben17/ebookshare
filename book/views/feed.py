@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from book.dateUtil import dt_to_str, str_to_dt
 from book.dicts import RequestStatus, UserRole
 from book.models import User, db
-from book.utils import get_file_name, get_rss_host
+from book.utils import get_file_name, get_rss_host, check_email
 from book.utils.ApiResponse import APIResponse
 from book.utils.commUtil import return_fun, sync_post
 from book.utils.rssUtil import get_rss_latest_titles, is_rss_feed
@@ -48,6 +48,9 @@ def user_upgrade():
 def rss_user_info():
     param = request.get_json()
     user = get_jwt_identity()
+    if param['kindle_email']:
+        if check_email(param['kindle_email']) is False:
+            return APIResponse.bad_request(msg='email error')
     res = sync_post(request.path, param, user)
     return return_fun(res)
 
@@ -101,7 +104,7 @@ def my_rss_add():
     api_path = '/api/v2/rss/add'
     myuser = get_jwt_identity()
     data = request.get_json()
-    if data['custom'] and is_rss_feed(data['url']) is False:
+    if 'custom' in data and data['custom'] and is_rss_feed(data['url']) is False:
         return APIResponse.bad_request(msg='The url is not a correct rss, or cannot be connected')
 
     res = sync_post(api_path, data, myuser)

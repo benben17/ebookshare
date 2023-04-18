@@ -75,7 +75,9 @@ if __name__ == "__main__":
     # d = feedparser.parse("https://feedx.net/rss/economistp.xml")
     # # print(len(d))
     # print(d.entries[0])
-    print()
+    a = {'name': 'tom', 'age': 22}
+    if 'hahah' in a:
+        print("ok")
     for rss in rss_list:
         path = '/api/v2/rss/manager'
         data = {'key': config.RSS2EBOOK_KEY,
