@@ -1,12 +1,11 @@
 import os
 from datetime import timedelta
 
-DEBUG = False
+DEBUG = os.getenv('DEBUG',True)
 basedir = os.path.abspath(os.path.dirname(__file__))
 APPID = "wx0630c28def50cbfd"
 APPSECRET = "20764c0ae174a1e12c78e809a877c382"
 wechat_token = "kindlebooks"
-
 SECRET_KEY = os.getenv('SECRET_KEY', 'rss2ebook')
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'db/ebook.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -58,11 +57,8 @@ rss_host = {    # rss 源后台主机
 
 
 RSS2EBOOK_KEY = 'rss2Ebook.com.luck!'
-
 DEFAULT_USER_PASSWD = 'sendtokindles'
-
 HEADERS = {'Content-Type': 'application/x-www-form-urlencoded'}
-
 DELIVER_TIMEOUT = 4 * 60 * 60
 
 
