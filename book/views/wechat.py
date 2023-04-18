@@ -99,22 +99,20 @@ def wechat():
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 16:
                 # 每个用户每天最多下载5本书
+                if not user or not user.kindle_email:  # 必须绑定邮箱
+                    return wx_reply_xml(from_user, to_user, no_bind_email_msg)
                 usersend = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
                                                 Userlog.create_time > get_now_date()).all()
-                if len(usersend) > 5:
+                if len(usersend) > 6:
                     wx_reply_xml(from_user, to_user, "今天已经下载5本书，请明天在进行发送！")
-
                 book_info = cache.get(f'{from_user}_{content}')
                 if book_info is not None:
-                    send_info = book_info.split(":")
 
-                    user_log = Userlog(wx_openid=user.wx_openid, book_name=send_info[0],
+                    send_info = book_info.split(":")
+                    user_log = Userlog(wx_openid=from_user, book_name=send_info[0],
                                        receive_email=user.kindle_email, user_id=user.id,
                                        operation_type='download', status=SEND_STATUS.WAITING, ipfs_cid=send_info[1],
                                        filesize=send_info[2])
-                    if not user.kindle_email:  # 只发送 下载地址，而不提交
-                        return wx_reply_xml(from_user, to_user, download_url(user_log))
-
                     db.session.add(user_log)
                     db.session.commit()
                     return wx_reply_xml(from_user, to_user,

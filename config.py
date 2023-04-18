@@ -63,4 +63,6 @@ DEFAULT_USER_PASSWD = 'sendtokindles'
 
 HEADERS = {'Content-Type': 'application/x-www-form-urlencoded'}
 
+DELIVER_TIMEOUT = 4 * 60 * 60
+
 
