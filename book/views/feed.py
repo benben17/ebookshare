@@ -81,7 +81,7 @@ def my_feed_deliver():
 
     res = sync_post(request.path, request.get_json(), get_jwt_identity())
     if res['status'].lower() == RequestStatus.OK:
-        cache.set(key, dt_to_str(datetime.now()), timeout=cache.DELIVER_TIMEOUT)
+        cache.set(key, dt_to_str(datetime.now()), timeout=config.DELIVER_TIMEOUT)
         return APIResponse.success(msg='Add push task', data=res['data'])
     else:
         return APIResponse.bad_request(msg=res['msg'])

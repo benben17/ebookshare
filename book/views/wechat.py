@@ -102,12 +102,11 @@ def wechat():
                 if not user or not user.kindle_email:  # 必须绑定邮箱
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
                 usersend = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
-                                                Userlog.create_time > get_now_date()).all()
+                                                Userlog.create_time > get_ymd_dt()).all()
                 if len(usersend) > 6:
                     wx_reply_xml(from_user, to_user, "今天已经下载5本书，请明天在进行发送！")
                 book_info = cache.get(f'{from_user}_{content}')
                 if book_info is not None:
-
                     send_info = book_info.split(":")
                     user_log = Userlog(wx_openid=from_user, book_name=send_info[0],
                                        receive_email=user.kindle_email, user_id=user.id,
@@ -118,8 +117,7 @@ def wechat():
                     return wx_reply_xml(from_user, to_user,
                                         wx_reply_mail_msg(send_info[0], user.kindle_email) + download_url(user_log))
                 else:
-                    return wx_reply_xml(from_user, to_user, reply_help_msg)
-
+                    return wx_reply_xml(from_user, to_user, ''' 请重新搜索书籍 \n'''+reply_help_msg)
             # 搜索 图书
             msg_content, books_cache = search_net_book(title=content, openid=from_user)
             if books_cache is not None:
@@ -128,7 +126,6 @@ def wechat():
 
         else:  # 其他未知消息
             return wx_reply_xml(from_user, to_user, reply_help_msg)
-
 
 @blueprint.route('/download/<path:filename>')
 def dl_file(filename):
