@@ -17,8 +17,8 @@ from book.utils.ApiResponse import *
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
 
-paypalrestsdk.set_config(sandbox_config)
-# paypalrestsdk.set_config(live_config)
+# paypalrestsdk.set_config(sandbox_config)
+paypalrestsdk.set_config(live_config)
 
 
 @blueprint.route("/payment", methods=['GET', 'POST'])
