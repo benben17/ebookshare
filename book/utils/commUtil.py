@@ -13,7 +13,7 @@ def sync_post(path, param, user):
         param['user_name'] = user['name']
         param['creator'] = user['name']
         #get_rss_host()
-    res = requests.post('http://127.0.0.1:8080' + path, data=param, headers=config.HEADERS, timeout=60)
+    res = requests.post(get_rss_host() + path, data=param, headers=config.HEADERS, timeout=60)
     if res.status_code == 200:
         json_data = json.loads(res.text)
         if json_data['status'] == RequestStatus.OK:
