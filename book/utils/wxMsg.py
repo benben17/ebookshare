@@ -34,7 +34,7 @@ reply_help_msg = f'''<a href="{send_to_kindle_help_url}"> 发送到kindle手册 
 回复：email   查询邮箱
 回复：1001    解绑邮箱
 回复：1002    帮助手册
-回复：1008    <a href="">英文杂志订阅，即将上线</a>
+回复：1008    英文杂志订阅</a>
 '''
 
 reply_subscribe = f'''欢迎关注books，本书站收录图书超乎你的想象
@@ -163,3 +163,11 @@ def download_url(user_log):
         msg += f'<a href="{url}{user_log.ipfs_cid}?filename={user_log.book_name}">  点击下载{index}</a>\n'
     msg += '如地址无法下载，请绑定邮箱，会直接推送到邮箱，回复：help 查看帮助'
     return msg
+
+
+def news_feed():
+    return '''本服务为在线RSS订阅生成电子书服务，提供多种媒体的订阅电子书生成并推送到用户邮箱。
+
+我们提供的媒体包括但不限于：经济学人、卫报、时代周刊、大西洋月刊、纽约时报、新科学家、美国国家地理、科学美国人、哈佛商业评论、纽约客、自然、科学、彭博商业周刊、纽约时报书评、华盛顿邮报、基督教科学箴言报、金融时报、华尔街日报和科学家等知名媒体。
+https://rss2ebook.com
+'''
