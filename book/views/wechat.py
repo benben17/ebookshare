@@ -57,6 +57,8 @@ def wechat():
                 db.session.add(user)
                 db.session.commit()
                 return wx_reply_xml(from_user, to_user, unbind_email_msg(user_email))
+            if content == '1008':
+                return wx_reply_xml(from_user, to_user, news_feed())
             # 绑定邮箱
             if check_email(content):
                 if user:
