@@ -65,20 +65,25 @@ def get_deliver_logs():
 @blueprint.route('/deliver/push', methods=['POST'])
 @jwt_required()
 def my_feed_deliver():
-    DELIVER_TIMEOUT = 23 * 60 * 60
+    DELIVER_TIMEOUT = 4 * 60 * 60
     from book import cache
     user = get_jwt_identity()
+    param = request.get_json()
     key = f'deliver:{user["name"]}'
     last_delivery_time = str_to_dt(cache.get(key))
-
     if last_delivery_time and user["name"] not in ["admin", "171720928"]:
-        elapsed_time = time.time() - last_delivery_time.timestamp()
-        if elapsed_time < DELIVER_TIMEOUT:
+        elapsed_time = int(time.time()) - int(last_delivery_time.timestamp())
+        # feed_id is None 发送时间 在上次发送时间的 8小时内
+        if param['book_id'] is None and param['feed_id'] is None and elapsed_time < DELIVER_TIMEOUT:
             remaining_time = DELIVER_TIMEOUT - elapsed_time
             return APIResponse.bad_request(msg=f"{last_delivery_time}已推送，请{remaining_time // 3600}小时后再做推送")
 
-    cache.set(key, dt_to_str(datetime.now()), timeout=DELIVER_TIMEOUT)
-    return return_fun(sync_post(request.path, request.get_json(), get_jwt_identity()))
+    res = sync_post(request.path, request.get_json(), get_jwt_identity())
+    if res['status'].lower() == RequestStatus.OK:
+        cache.set(key, dt_to_str(datetime.now()), timeout=DELIVER_TIMEOUT)
+        return APIResponse.success(msg='Add push task')
+    else:
+        return APIResponse.bad_request(msg=res['msg'])
 
 
 @blueprint.route('/my/rss', methods=['POST'])
@@ -93,9 +98,13 @@ def my_rss():
 @jwt_required()
 def my_rss_add():
     api_path = '/api/v2/rss/add'
-    res = sync_post(api_path, request.get_json(), get_jwt_identity())
+    myuser = get_jwt_identity()
+    data = request.get_json()
+    if is_rss_feed(data['url']) is False:
+        return APIResponse.bad_request(msg='rss error')
+
+    res = sync_post(api_path, data, myuser)
     if res['status'].lower() == 'ok':
-        myuser = get_jwt_identity()
         user = User.query.get(myuser['id'])
         feed_num = UserRole.role_feed_num(user.role)
         if user.feed_count >= feed_num:
@@ -145,7 +154,7 @@ def rss_share():
 @blueprint.route('/rss/invalid', methods=['POST'])
 @jwt_required()
 def rss_invalid():
-    res = sync_post(request.path,request.get_json(), get_jwt_identity())
+    res = sync_post(request.path, request.get_json(), get_jwt_identity())
     return return_fun(res)
 
 
