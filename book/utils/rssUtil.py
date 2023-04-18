@@ -11,8 +11,10 @@ from book.utils import get_rss_host, gen_userid
 
 def is_rss_feed(rss_url):
     try:
+        if not rss_url.startswith('http'):
+            rss_url = 'http://'+rss_url
         feed = feedparser.parse(rss_url)
-        print(feed.get('version'))
+        # print(feed.get('version'))
         if feed.get('version'):
             return True
     except:

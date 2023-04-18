@@ -53,6 +53,13 @@ def book_del():
     return return_fun(res)
 
 
+@blueprint.route('/builtin', methods=['POST'])
+@jwt_required()
+def book_builtin_list():
+    res = sync_post(request.path, request.get_json(), get_jwt_identity())
+    return return_fun(res)
+
+
 @blueprint.route('/cover', methods=['POST'])
 @jwt_required()
 def book_cover():
@@ -60,21 +67,14 @@ def book_cover():
     coverfile = request.files['coverfile']
     book_id = request.form['book_id']
     user = get_jwt_identity()
-
-    boun = str(uuid.uuid4()).replace("-", "")
+    bound_str = str(uuid.uuid4()).replace("-", "").upper()
     data = MultipartEncoder(
-        fields={'coverfile': (coverfile.name,coverfile,coverfile.mimetype),
-                'user_name': 'admin',
+        fields={'coverfile': (coverfile.name, coverfile, coverfile.mimetype),
+                'user_name': user['name'],
                 'book_id': book_id,
-                'key': config.RSS2EBOOK_KEY
-                },
-        boundary=f'------{boun}'
+                'key': config.RSS2EBOOK_KEY},
+        boundary=f'------{bound_str}'
     )
-
-    print(data)
-    print(data.content_type)
     headers = {'Content-Type': data.content_type}
-    res = requests.post(url="http://127.0.0.1:8080/api/v2/book/cover", data=data, headers=headers)
-    with open('a.html','w+') as f:
-        f.write(res.text)
-    return APIResponse.success(data='json.loads(res.text)')
+    res = requests.post(url=get_rss_host(), data=data, headers=headers)
+    return return_fun(res)
