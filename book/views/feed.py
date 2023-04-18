@@ -76,16 +76,17 @@ def my_feed_deliver():
     param = request.get_json()
     key = f'deliver:{user["name"]}'
     last_delivery_time = str_to_dt(cache.get(key))
+    send_interval = int(UserRole.get_send_interval(user['role'])) * 60 * 60
     if last_delivery_time and user["name"] not in ["admin", "171720928"]:
         elapsed_time = int(time.time()) - int(last_delivery_time.timestamp())
         # feed_id is None 发送时间 在上次发送时间的 8小时内
-        if param['book_id'] is None and param['feed_id'] is None and elapsed_time < config.DELIVER_TIMEOUT:
-            remaining_time = config.DELIVER_TIMEOUT - elapsed_time
+        if param['book_id'] is None and param['feed_id'] is None and elapsed_time < send_interval:
+            remaining_time = send_interval - elapsed_time
             return APIResponse.bad_request(msg=f"{last_delivery_time}已推送，请{remaining_time // 3600}小时后再做推送")
 
     res = sync_post(request.path, request.get_json(), get_jwt_identity())
     if res['status'].lower() == RequestStatus.OK:
-        cache.set(key, dt_to_str(datetime.now()), timeout=config.DELIVER_TIMEOUT)
+        cache.set(key, dt_to_str(datetime.now()), timeout=send_interval)
         return APIResponse.success(msg='Add push task', data=res['data'])
     else:
         return APIResponse.bad_request(msg=res['msg'])

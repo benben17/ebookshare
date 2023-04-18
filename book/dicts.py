@@ -28,8 +28,8 @@ class RequestStatus:
 
 
 class UserRole(Enum):
-    DEFAULT = {"name": 'default', "feed_num": 10}
-    PLUS = {"name": 'plus', "feed_num": 100}
+    DEFAULT = {"name": 'default', "feed_num": 10, 'interval': 24}
+    PLUS = {"name": 'plus', "feed_num": 100, 'interval': 8}
 
     @staticmethod
     def get_role(role='default'):
@@ -37,7 +37,11 @@ class UserRole(Enum):
 
     @staticmethod
     def role_feed_num(role='default'):
-        return UserRole[role.upper()].value.get('feed_num', 0)
+        return UserRole[role.upper()].value.get('feed_num')
+
+    @staticmethod
+    def get_send_interval(role='default'):
+        return UserRole[role.upper()].value.get('interval')
 
     @staticmethod
     def role_name(role='default'):
@@ -63,4 +67,5 @@ if __name__ == "__main__":
     print(datetime.utcnow() + timedelta(days=int(days)))
     day = 'Sunday'
     p_dict = Product("hahha").get_product()
-    print(p_dict)
+    send_interval = int(UserRole.get_send_interval('default')) * 60 * 60
+    print(send_interval)

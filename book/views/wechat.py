@@ -78,7 +78,7 @@ def wechat():
                             user.wx_openid = from_user
                             db.session.add(user)
                     else:
-                        user = User(email=content, kindle_email=content, wx_openid=from_user, id=gen_userid())
+                        user = User(name=content.split("@")[0], email=content, kindle_email=content, wx_openid=from_user, id=gen_userid())
                         db.session.add(user)
                     db.session.commit()
                     logging.info(user.kindle_email)
