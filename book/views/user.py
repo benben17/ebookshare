@@ -147,7 +147,7 @@ def user_passwd_change():
 @jwt_required()
 def user_pay_log():
     user = get_jwt_identity()
-    pay_logs = UserPay.query.filter_by(user_id=user['id']).all()
+    pay_logs = UserPay.query.filter_by(user_id=user['id']).order_by(UserPay.create_time.desc()).all()
     user_pays = []
     for log in pay_logs:
         refund_flag = False
@@ -180,7 +180,7 @@ def sync_user(user):
 if __name__ == '__main__':
     print("a")
     from book import app
-    from sqlalchemy import Enum
+    from sqlalchemy import Enum, desc
 
     with app.app_context():
         content = '892100089@qq.com'
