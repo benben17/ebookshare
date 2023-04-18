@@ -194,7 +194,7 @@ def is_file_24_hours(file_path):
     return current_time - ctime > 24 * 60 * 60
 
 
-def get_now_date():
+def get_ymd_dt():
     return datetime.now().strftime('%Y-%m-%d 00:00:00')
 
 

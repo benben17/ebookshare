@@ -50,9 +50,7 @@ reply_subscribe = f'''欢迎关注books，本书站收录图书超乎你的想�
 建议先发送到自己邮箱，然后自己转发kindle设备
 '''
 
-donate_pic = 'http://mmbiz.qpic.cn/mmbiz' \
-             '/6J0PjZVpchMmMZleHFZicHdbAGY4jXdOQH8Dy16lER8Im0VxU0pXS5E2xJf7Jn6icibPZticH3icBTvjg5icFscsxFNg/640' \
-             '?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1 '
+donate_pic = 'https://rss2ebook.com/api/static/sendtokindles.jpeg'
 
 
 def mail_body(bookname):
