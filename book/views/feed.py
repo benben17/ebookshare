@@ -80,7 +80,7 @@ def my_feed_deliver():
     if last_delivery_time and user["name"] not in ["admin", "171720928"]:
         elapsed_time = int(time.time()) - int(last_delivery_time.timestamp())
         # feed_id is None 发送时间 在上次发送时间的 8小时内
-        if param['book_id'] is None and param['feed_id'] is None and elapsed_time < send_interval:
+        if elapsed_time < send_interval:
             remaining_time = send_interval - elapsed_time
             return APIResponse.bad_request(msg=f"{last_delivery_time}已推送，请{remaining_time // 3600}小时后再做推送")
 
