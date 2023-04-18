@@ -100,8 +100,8 @@ def my_rss_add():
     api_path = '/api/v2/rss/add'
     myuser = get_jwt_identity()
     data = request.get_json()
-    if is_rss_feed(data['url']) is False:
-        return APIResponse.bad_request(msg='rss error')
+    if data['custom'] and is_rss_feed(data['url']) is False:
+        return APIResponse.bad_request(msg='The url is not a correct rss, or cannot be connected')
 
     res = sync_post(api_path, data, myuser)
     if res['status'].lower() == 'ok':
