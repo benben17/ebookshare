@@ -131,7 +131,7 @@ def get_pub_rss():
 def my_rss_del():
     """删除我的订阅"""
     api_path = '/api/v2/rss/del'
-    res = sync_post(api_path)
+    res = sync_post(api_path,request.get_json(), get_jwt_identity())
     user = get_jwt_identity()
     if res['status'].lower() == RequestStatus.OK:
         user = User.query.get(user['id'])
