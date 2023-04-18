@@ -59,6 +59,6 @@ rss_host = {    # rss 源后台主机
 RSS2EBOOK_KEY = 'rss2Ebook.com.luck!'
 DEFAULT_USER_PASSWD = 'sendtokindles'
 HEADERS = {'Content-Type': 'application/x-www-form-urlencoded'}
-DELIVER_TIMEOUT = 4 * 60 * 60
+
 
 
