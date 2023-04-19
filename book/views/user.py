@@ -32,11 +32,11 @@ def login():
 
     if user is None:
         return APIResponse.bad_request(msg="用户不存在")
-    else: # 修复公众号用户
-        if user.hash_pass is None and not user.is_reg_rss:
+    else:  # 修复公众号用户
+        if not user.hash_pass and user.is_reg_rss is False:
             user.hash_pass = generate_password_hash(data.get["passwd"])
-            user.name = user.email.split("@")[0] if not user.name
-            send_email(f'{user.email} passwd',f'password:{data.get["passwd"]}',data['email'])
+            user.name = user.email.split("@")[0] if user.name is None else user.name
+            send_email(f'{user.email} passwd', f'password:{data.get["passwd"]}', data['email'])
             if sync_user(user):
                 db.session.add(user)
                 db.session.commit()
