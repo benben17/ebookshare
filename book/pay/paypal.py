@@ -24,7 +24,7 @@ paypalrestsdk.set_config(live_config)
 @blueprint.route("/payment", methods=['GET', 'POST'])
 @jwt_required()
 def create_payment():
-    cancel_url = config.MY_DOMAIN + "/api/v2/paypal/cancel"
+    cancel_url = "https://rss2ebook.com/user/upgrade"
     return_url = config.MY_DOMAIN + "/api/v2/paypal/execute"
     data = request.get_json()
     product = data.get('product')
