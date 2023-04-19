@@ -31,6 +31,13 @@ def user_setting():
     if 'kindle_email' in param:
         if check_email(param['kindle_email']) is False:
             return APIResponse.bad_request(msg='email error')
+
+    if 'timezone' in param:  # 同步更新用户的 timezone
+        userinfo = User.get_by_id(param['id'])
+        userinfo.timezone = param['timezone']
+        db.session.add(userinfo)
+        db.session.commit()
+
     user = get_jwt_identity()
     res = sync_post(request.path, param, user)
     return return_fun(res)
