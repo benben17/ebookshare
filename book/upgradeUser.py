@@ -14,18 +14,9 @@ from book.models import UserPay, User
 from book.utils import get_rss_host
 
 
-def upgrade_user(user, days, pay_id):
-    if user.expires:
-        user.expires = user.expires + datetime.timedelta(days)
-    else:
-        user.expires = datetime.now() + datetime.timedelta(days)
-    if user.expires > datetime.now():
-        user.role = UserRole.role_name('plus')
-    else:
-        user.role = UserRole.role_name('default')
-
-    data = {'key': config.RSS2EBOOK_KEY, 'user_name': user.name, 'expiration_days': days,
-            'expires': dt_to_str(user.expires)
+def upgrade_user(user_name, days, expires, pay_id):
+    data = {'key': config.RSS2EBOOK_KEY, 'user_name': user_name, 'expiration_days': days,
+            'expires': dt_to_str(expires)
             }
     try:
         res = requests.post(get_rss_host() + '/api/v2/sync/user/upgrade', data=data, headers=config.HEADERS)
@@ -35,17 +26,23 @@ def upgrade_user(user, days, pay_id):
             if data['status'].lower() == "ok":
                 with app.app_context():
                     pay_log = UserPay.query.filter_by(id=pay_id).first()
-                    if user.expires <= datetime.now():  # 退款用户
+                    if days <= 0:  # 退款用户
+                        print("refund")
+                        print(pay_log.status)
                         pay_log.status = PaymentStatus.refund
                         pay_log.refund_time = datetime.now()
+                        pay_log.refund_amount = pay_log.amount
+
                     else:
+                        print("charge")
                         pay_log.status = PaymentStatus.completed
                         pay_log.pay_time = datetime.now()
                     db.session.add(pay_log)
                     db.session.commit()
-        logging.info("upgrade User success:{}".format(user.name))
+                    # print(pay_log.refund_time)
+        logging.info("upgrade User success:{}".format(user_name))
     except Exception as e:
-        logging.error("upgrade User:{} failed:{}".format(user.name, str(e)))
+        logging.error("upgrade User:{} failed:{}".format(user_name, str(e)))
 
 
 def upgrade_user_thread(type, user_name, p_name):
@@ -66,10 +63,21 @@ def upgrade_user_thread(type, user_name, p_name):
         else:
             user_pay = UserPay.query.filter(UserPay.status == PaymentStatus.completed,
                                             UserPay.user_name == user.name).order_by(UserPay.pay_time.desc()).first()
-            p_dict = Product(user_pay.product_name).get_product()   # 退款用户直接从付款表里面获取
+            p_dict = Product(user_pay.product_name).get_product()  # 退款用户直接从付款表里面获取
             days = -int(p_dict.get("days"))
             logging.info("开始退款：-----{}".format(user.name))
-        threading.Thread(target=upgrade_user, args=[user, days, user_pay.id]).start()
+
+        if user.expires:
+            user.expires = user.expires + timedelta(days)
+        else:
+            user.expires = datetime.now() + timedelta(days)
+        if user.expires > datetime.now():
+            user.role = UserRole.role_name('plus')
+        else:
+            user.role = UserRole.role_name('default')
+        db.session.add(user)
+        db.session.commit()
+        threading.Thread(target=upgrade_user, args=[user.name, days, user.expires, user_pay.id]).start()
         return True
     except SQLAlchemyError as e:
         logging.error(e)
@@ -107,13 +115,14 @@ def upgrade_user_by_paypal(user_name, days, expires):
 
 if __name__ == "__main__":
     with app.app_context():
-        user_pay = UserPay.query.filter(UserPay.status == PaymentStatus.completed,
-                                        UserPay.user_name == 'admin').order_by(UserPay.pay_time.desc()).first()
-
-        print(user_pay.id)
-        # h = {"send_day": [11]}
-        # product = Product('test').get_product()
-        # print(product)
-        # print(type(['type']))
-        # r = h.get('send_day') if isinstance(h.get('send_day'), list) else ['Sunday']
-        # print(r)
+        upgrade_user_thread('refund', 'admin', 'month')
+    #     user_pay = UserPay.query.filter(UserPay.status == PaymentStatus.completed,
+    #                                     UserPay.user_name == 'admin').order_by(UserPay.pay_time.desc()).first()
+    #
+    #     print(user_pay.id)
+    # h = {"send_day": [11]}
+    # product = Product('test').get_product()
+    # print(product)
+    # print(type(['type']))
+    # r = h.get('send_day') if isinstance(h.get('send_day'), list) else ['Sunday']
+    # print(r)
