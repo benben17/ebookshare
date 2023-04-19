@@ -73,6 +73,10 @@ def my_feed_deliver():
     user = get_jwt_identity()
     param = request.get_json()
     key = f'deliver:{user["name"]}'
+    userinfo = User.get_by_id(int(user['id']))
+    if not userinfo.feed_count or userinfo.feed_count == 0:
+        cache.delete(key)
+        return APIResponse.bad_request(msg='No feed to deliver!')
     last_delivery_time = str_to_dt(cache.get(key))
     user_role = user['role'] if user['role'] else 'default'
     send_interval = int(UserRole.get_send_interval(user_role)) * 60 * 60
@@ -83,7 +87,7 @@ def my_feed_deliver():
             remaining_time = send_interval - elapsed_time
             return APIResponse.bad_request(msg=f"{last_delivery_time}已推送，请{remaining_time // 3600}小时后再做推送")
 
-    res = sync_post(request.path, request.get_json(), get_jwt_identity())
+    res = sync_post(request.path, param, get_jwt_identity())
     if res['status'].lower() == RequestStatus.OK:
         cache.set(key, dt_to_str(datetime.now()), timeout=send_interval)
         return APIResponse.success(msg='Add push task', data=res['data'])
