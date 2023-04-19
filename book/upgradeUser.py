@@ -117,7 +117,8 @@ def upgrade_user_by_paypal(user_name, days, expires):
 
 if __name__ == "__main__":
     with app.app_context():
-        upgrade_user_thread('refund', 'admin', 'month')
+        user = User.get_by_id(int(1))
+        print(user.name)
     #     user_pay = UserPay.query.filter(UserPay.status == PaymentStatus.completed,
     #                                     UserPay.user_name == 'admin').order_by(UserPay.pay_time.desc()).first()
     #
