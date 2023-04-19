@@ -195,7 +195,7 @@ def is_file_24_hours(file_path):
 
 
 def get_ymd_dt():
-    return datetime.now().strftime('%Y-%m-%d 00:00:00')
+    return datetime.utcow().strftime('%Y-%m-%d 00:00:00')
 
 
 def new_secret_key(length=8):
@@ -257,7 +257,7 @@ def get_rss_host(user_id=1):
         return config.rss_host['second']
 
 
-def get_now():
+def utc_now():
     return datetime.utcnow()
 
 

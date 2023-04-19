@@ -21,6 +21,7 @@ class User(db.Model):
     active = db.Column(db.Integer, default=0)
     expires = db.Column(db.DateTime)  # 超过了此日期后账号自动停止推送
     create_time = db.Column(db.DateTime, default=datetime.now())
+    timezone = db.Column(db.Integer, default=0)
     is_reg_rss = db.Column(db.Boolean, default=False)
     user_pay_log = db.relationship("UserPay", uselist=True, backref="user", lazy='dynamic')
 
@@ -42,6 +43,14 @@ class User(db.Model):
     @classmethod
     def get_by_id(cls, id):
         return cls.query.filter_by(id=id).first()
+
+    @classmethod
+    def get_tz(cls, id):
+        return cls.get_by_id(id).timezone if cls.get_by_id(id) else 0
+
+    @classmethod
+    def get_feed_count(cls, id):
+        return cls.get_by_id(id).feed_count if cls.get_by_id(id) else 0
 
 
 class Books(db.Model):
@@ -84,7 +93,6 @@ class Userlog(db.Model):
     wx_openid = db.Column(db.String(120))
 
 
-
 class UserPay(db.Model):
     __tablename__ = "user_pay"
     id = db.Column(db.Integer, primary_key=True, index=True)
@@ -105,6 +113,7 @@ class UserPay(db.Model):
     canceled_time = db.Column(db.DateTime, nullable=True)
     refund_time = db.Column(db.DateTime, nullable=True)
     refund_amount = db.Column(db.Float, nullable=True, default='0.00')
+
     # refund_read_amount = db.Column(db.Float, nullable=False)
 
     def __repr__(self):
@@ -114,3 +123,11 @@ class UserPay(db.Model):
     def get_payment_id(cls, payment_id):
         return cls.query.filter_by(payment_id=payment_id).first()
 
+
+class Advice(db.Model):
+    __tablename__ = "advice"
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    user_name = db.Column(db.String(100))
+    user_email = db.Column(db.String(100))
+    content = db.Column(db.String(512))
+    create_time = db.Column(db.DateTime, default=datetime.utcnow())

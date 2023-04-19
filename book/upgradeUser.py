@@ -30,12 +30,12 @@ def upgrade_user(user_name, days, expires, pay_id):
                         logging.info("refund")
                         logging.info(pay_log.status)
                         pay_log.status = PaymentStatus.refund
-                        pay_log.refund_time = datetime.now()
+                        pay_log.refund_time = datetime.utcnow()
                         pay_log.refund_amount = pay_log.amount
                     else:
                         logging.info("charge")
                         pay_log.status = PaymentStatus.completed
-                        pay_log.pay_time = datetime.now()
+                        pay_log.pay_time = datetime.utcnow()
                     db.session.add(pay_log)
                     db.session.commit()
                     # print(pay_log.refund_time)

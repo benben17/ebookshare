@@ -5,10 +5,12 @@ import pytz
 
 
 def utc_to_local(utc_time, fmt='%Y-%m-%d %H:%M:%S', tz=8):
+    if not utc_time:
+        return None
     if not isinstance(utc_time, datetime):
         utc_time = str_to_dt(utc_time)
     # 将UTC时间转换为本地时间
-    return utc_time + timedelta(hours=tz)
+    return dt_to_str(utc_time + timedelta(hours=int(tz)))
 
 
 def get_days_later(days):
@@ -20,7 +22,7 @@ def get_days_later(days):
     return after_days.strftime('%Y-%m-%d %H:%M:%S')
 
 
-def str_to_dt(time_str):
+def str_to_dt(time_str, fmt='%Y-%m-%d %H:%M:%S'):
     """
     自动识别时间字符串格式，并转换为 datetime 类型
     Args: time_str: 时间字符串，可以是各种格式
@@ -29,7 +31,7 @@ def str_to_dt(time_str):
     if time_str is None:
         return None
     try:
-        time_dt = datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S')
+        time_dt = datetime.strptime(time_str, fmt)
     except ValueError:
         try:
             time_dt = datetime.strptime(time_str, '%Y-%m-%d')
@@ -44,7 +46,6 @@ def dt_to_str(time_dt) -> str:
         return time_dt.strftime('%Y-%m-%d %H:%M:%S')
     else:
         return time_dt
-
 
 def format_time(dt) -> str:
     if dt is None:
