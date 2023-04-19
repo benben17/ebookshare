@@ -68,5 +68,5 @@ if __name__ == "__main__":
     print(datetime.utcnow() + timedelta(days=int(days)))
     day = 'Sunday'
     p_dict = Product("hahha").get_product()
-    send_interval = int(UserRole.get_send_interval('default')) * 60 * 60
-    print(send_interval)
+
+    print(UserRole.role_name('default'))

@@ -38,6 +38,7 @@ def login():
         user.name = user.email.split("@")[0] if not user.name else user.name
         send_email(f'{user.email} passwd', f'password:{data["passwd"]}', data['email'])
         if sync_user(user):
+            user.role = UserRole.role_name('default')
             user.is_reg_rss = True
             db.session.add(user)
             db.session.commit()
