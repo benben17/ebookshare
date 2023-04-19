@@ -167,6 +167,7 @@ def user_pay_log():
         log = model_to_dict(log)
         log['pay_time'] = format_time(log['pay_time'])
         log['create_time'] = format_time(log['create_time'])
+        log['refund_time'] = format_time(log['refund_time'])
         log['refund_flag'] = refund_flag
         user_pays.append(log)
     return APIResponse.success(data=user_pays)
