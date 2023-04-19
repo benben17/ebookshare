@@ -32,14 +32,15 @@ def login():
 
     if user is None:
         return APIResponse.bad_request(msg="用户不存在")
-    else:  # 修复公众号用户
-        if not user.hash_pass and user.is_reg_rss is False:
-            user.hash_pass = generate_password_hash(data.get["passwd"])
-            user.name = user.email.split("@")[0] if user.name is None else user.name
-            send_email(f'{user.email} passwd', f'password:{data.get["passwd"]}', data['email'])
-            if sync_user(user):
-                db.session.add(user)
-                db.session.commit()
+    # 修复公众号用户
+    if not user.hash_pass and  not user.is_reg_rss:
+        user.hash_pass = generate_password_hash(data["passwd"])
+        user.name = user.email.split("@")[0] if not user.name else user.name
+        send_email(f'{user.email} passwd', f'password:{data["passwd"]}', data['email'])
+        if sync_user(user):
+            user.is_reg_rss = True
+            db.session.add(user)
+            db.session.commit()
 
     if not check_password_hash(user.hash_pass, data['passwd']):
         return APIResponse.bad_request(msg="密码不正确")
