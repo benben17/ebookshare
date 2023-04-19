@@ -29,16 +29,24 @@ def login():
         return APIResponse.bad_request(msg="用户名密码为空！")
 
     user = User.query.filter(or_(User.name == data['email'], User.email == data['email'])).first()
+
     if user is None:
         return APIResponse.bad_request(msg="用户不存在")
+    else: # 修复公众号用户
+        if user.hash_pass is None and not user.is_reg_rss:
+            user.hash_pass = generate_password_hash(data.get["passwd"])
+            user.name = user.email.split("@")[0] if not user.name
+            send_email(f'{user.email} passwd',f'password:{data.get["passwd"]}',data['email'])
+            if sync_user(user):
+                db.session.add(user)
+                db.session.commit()
 
     if not check_password_hash(user.hash_pass, data['passwd']):
         return APIResponse.bad_request(msg="密码不正确")
 
-    user_info = model_to_dict(user)
-    # print(user_info)
-    access_token = create_access_token(identity=user_info)
-    data = {"user": user_info, "token": access_token}
+    userinfo = model_to_dict(user)
+    access_token = create_access_token(identity=userinfo)
+    data = {"user": userinfo, "token": access_token}
     return APIResponse.success(data=data)
 
 
