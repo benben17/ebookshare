@@ -51,8 +51,8 @@ class UserRole(Enum):
 
 class Product:
     products = {
-        "month": {"name": "month", "amount": 2.9, "desc": "rss2Ebook One month plus fee", "days": 31, 'cny': 20},
-        "year": {"name": "year", "amount": 19.9, "desc": "rss2Ebook One year plus fee", "days": 366, "cny": 99},
+        "month": {"name": "month", "amount": 2.9, "desc": "rss2Ebook One month plus fee", "days": 31, 'cny': 15},
+        "year": {"name": "year", "amount": 24.9, "desc": "rss2Ebook One year plus fee", "days": 366, "cny": 99},
         "rss2ebook": {"name": "rss2ebook", "amount": 0.9, "desc": "rss2Ebook for test", "days": 20, 'cny': 1}
     }
 
