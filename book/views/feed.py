@@ -70,13 +70,12 @@ def get_deliver_logs():
 @jwt_required()
 def my_feed_deliver():
     from book import cache
-    import config
-
     user = get_jwt_identity()
     param = request.get_json()
     key = f'deliver:{user["name"]}'
     last_delivery_time = str_to_dt(cache.get(key))
-    send_interval = int(UserRole.get_send_interval(user['role'])) * 60 * 60
+    user_role = user['role'] if user['role'] else 'default'
+    send_interval = int(UserRole.get_send_interval(user_role)) * 60 * 60
     if last_delivery_time and user["name"] not in ["admin", "171720928"]:
         elapsed_time = int(time.time()) - int(last_delivery_time.timestamp())
         # feed_id is None 发送时间 在上次发送时间的 8小时内
