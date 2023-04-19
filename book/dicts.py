@@ -19,6 +19,7 @@ class PaymentStatus(Enum):
     completed = "completed"
     failed = "failed"
     canceled = "canceled"
+    refund = "refund"
 
 
 class RequestStatus:

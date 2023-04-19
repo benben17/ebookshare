@@ -12,7 +12,6 @@ def del_file_out_24h():
     logging.info("delete_file_out_24_hours")
     for filename in os.listdir(config.DOWNLOAD_DIR):
         file_path = os.path.join(config.DOWNLOAD_DIR, filename)
-
         # 判断是否为文件
         if os.path.isfile(file_path) and allowed_ebook_ext(os.path.basename(file_path)):
             # 获取文件创建时间

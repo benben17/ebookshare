@@ -91,12 +91,13 @@ def wechat():
                     cache.set_many(books_cache)  # 存缓存
                 return wx_reply_xml(from_user, to_user, msg_content)
 
-            if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s' and content.startswith("upgrade"):
-                info = content.split(":")
-                if len(info) == 3:
-                    if upgradeUser.upgrade_user_thread(user_name=info[1], p_name=info[2]):
-                        return wx_reply_xml(from_user, to_user, f"{info[1]}:用户升级中.....")
-                return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
+            if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s':
+                if content.startswith("upgrade") or content.startswith("refund"):
+                    info = content.split(":")
+                    if len(info) == 3:
+                        if upgradeUser.upgrade_user_thread(type=info[0],user_name=info[1], p_name=info[2]):
+                            return wx_reply_xml(from_user, to_user, f"{info[1]}:用户升级中.....")
+                    return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
 
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 16:
