@@ -136,7 +136,7 @@ def my_rss_add():
     res = sync_post(api_path, data, myuser)
     if res['status'].lower() == RequestStatus.OK:
         user = User.get_by_id(myuser['id'])
-        feed_num = UserRole.role_feed_num(user.role)
+        feed_num = UserRole.role_feed_num(user.role if user.role else '')
         if user.feed_count >= feed_num:
             return APIResponse.bad_request(msg=f"已达到最大{feed_num}个订阅,不能在订阅")
         user.feed_count += 1
