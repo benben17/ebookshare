@@ -28,10 +28,6 @@ def user_add():
 def user_setting():
     """用户设置"""
     param = request.get_json()
-    if 'kindle_email' in param:
-        if check_email(param['kindle_email']) is False:
-            return APIResponse.bad_request(msg='email error')
-
     if 'timezone' in param:  # 同步更新用户的 timezone
         userinfo = User.get_by_id(param['id'])
         userinfo.timezone = param['timezone']

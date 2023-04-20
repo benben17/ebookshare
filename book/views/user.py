@@ -134,9 +134,10 @@ def logout():
 @jwt_required()
 def user_info():
     t_user = get_jwt_identity()
+    # print(t_user['id'])
     user = User.query.get(t_user['id'])
     user_json = model_to_dict(user)
-    access_token = create_access_token(identity=user_json)
+    access_token = ''  # create_access_token(identity=user_json)
     data = {"user": user_json, "token": access_token}
     return APIResponse.success(data=data)
 
@@ -159,19 +160,16 @@ def user_passwd_change():
 @blueprint.route('/pay/log', methods=['GET'])
 @jwt_required()
 def user_pay_log():
-    user = get_jwt_identity()
-    pay_logs = UserPay.query.filter_by(user_id=user['id']).order_by(UserPay.create_time.desc()).all()
+    u = get_jwt_identity()
+    pay_logs = UserPay.query.filter_by(user_id=u['id']).order_by(UserPay.create_time.desc()).all()
     user_pays = []
+    tz = User.get_tz(u['id'])
     for log in pay_logs:
         refund_flag = False
         if log.pay_time and log.status == PaymentStatus.completed:
             refund_time = log.pay_time + timedelta(weeks=2)  # 2周后的日期
             refund_flag = refund_time > datetime.utcnow()
-        log = model_to_dict(log)
-        tz = User.get_tz(user['id'])
-        log['pay_time'] = utc_to_local(log['pay_time'], tz=tz)
-        log['create_time'] = utc_to_local(log['create_time'], tz=tz)
-        log['refund_time'] = utc_to_local(log['refund_time'], tz=tz)
+        log = model_to_dict(log, tz=tz)
         log['refund_flag'] = refund_flag
         user_pays.append(log)
     return APIResponse.success(data=user_pays)

@@ -1,7 +1,7 @@
 # coding: utf-8
 from sqlalchemy import Enum
 
-from book import db, dicts
+from book import db, dicts, cache
 from datetime import datetime
 
 
@@ -46,7 +46,13 @@ class User(db.Model):
 
     @classmethod
     def get_tz(cls, id):
-        return cls.get_by_id(id).timezone if cls.get_by_id(id) else 0
+        tz_key = str(id)+'timezone'
+        tz = cache.get(tz_key)
+        if tz is not None:
+            return int(tz)
+        u = cls.get_by_id(id)
+        cache.set(tz_key, u.timezone if u else 0)
+        return u.timezone if u else 0
 
     @classmethod
     def get_feed_count(cls, id):
