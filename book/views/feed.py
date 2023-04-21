@@ -28,8 +28,9 @@ def user_add():
 def user_setting():
     """用户设置"""
     param = request.get_json()
+    user = get_jwt_identity()
     if 'timezone' in param:  # 同步更新用户的 timezone
-        userinfo = User.get_by_id(param['id'])
+        userinfo = User.get_by_id(user['id'])
         userinfo.timezone = param['timezone']
         db.session.add(userinfo)
         db.session.commit()
