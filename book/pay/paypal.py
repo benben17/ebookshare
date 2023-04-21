@@ -6,13 +6,15 @@ import paypalrestsdk
 from flask import request, Blueprint, redirect
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from paypalrestsdk import WebhookEvent
+
+import book.dicts
 import config
 from book import db
 from book.dicts import PaymentStatus, Product, UserRole
 from book.models import UserPay, User
 from book.pay import paypal_order, sandbox_config, WEBHOOK_URL, live_config
 from book.upgradeUser import upgrade_user_by_paypal
-from book.utils import get_file_name, get_now
+from book.utils import get_file_name, utc_now
 from book.utils.ApiResponse import *
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/paypal')
@@ -47,7 +49,7 @@ def create_payment():
         # Create pay in database
         user_pay = UserPay(
             user_id=get_jwt_identity().get("id"), product_name=p_name, pay_type="paypal", amount=p_amount,
-            description=p_desc, create_time=get_now(), currency='USD', payment_id=paypal_payment.id,
+            description=p_desc, create_time=utc_now(), currency='USD', payment_id=paypal_payment.id,
             status=PaymentStatus.created, user_name=get_jwt_identity().get("name")
         )
         # logging.info(model_to_dict(user_pay))
@@ -137,7 +139,7 @@ def refund_payment():
                 if refund.create_time:
                     refund_time = datetime.strptime(payment.update_time, "%Y-%m-%dT%H:%M:%SZ")
                 else:
-                    refund_time = get_now()
+                    refund_time = utc_now()
                 pay.refund_time = refund_time
                 pay.refund_amount = pay.amount
                 db.session.add(pay)
@@ -179,7 +181,7 @@ def notify_event():
     except Exception as e:
         logging.error("event_error")
         logging.error(e)
-    return jsonify({'status': 'ok'}), 200
+    return jsonify({'status': book.dicts.RequestStatus.OK}), 200
 
 
 if __name__ == '__main__':

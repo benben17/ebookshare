@@ -12,6 +12,7 @@ from requests.exceptions import RequestException
 from sqlalchemy import inspect
 from enum import Enum
 import config
+from book.dateUtil import utc_to_local
 
 
 def gen_userid():
@@ -195,7 +196,7 @@ def is_file_24_hours(file_path):
 
 
 def get_ymd_dt():
-    return datetime.now().strftime('%Y-%m-%d 00:00:00')
+    return datetime.utcow().strftime('%Y-%m-%d 00:00:00')
 
 
 def new_secret_key(length=8):
@@ -204,7 +205,7 @@ def new_secret_key(length=8):
     return ''.join([random.choice(allchars) for i in range(length)])
 
 
-def model_to_dict(model):
+def model_to_dict(model, tz = 0):
     """
     Convert a SQLAlchemy model instance into a JSON-serializable dict.
     """
@@ -220,7 +221,8 @@ def model_to_dict(model):
         value = getattr(model, attribute.key)
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
-            value = value.isoformat() if value is not None else None
+
+            value = utc_to_local(value,tz=tz) if value is not None else None
         elif isinstance(value, Enum):
             value = value.value
         data[attribute.key] = value
@@ -257,7 +259,7 @@ def get_rss_host(user_id=1):
         return config.rss_host['second']
 
 
-def get_now():
+def utc_now():
     return datetime.utcnow()
 
 

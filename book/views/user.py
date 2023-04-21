@@ -5,11 +5,13 @@ import requests
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
+
+import book.dicts
 import config
 from book import cache
-from book.dateUtil import format_time
+from book.dateUtil import format_time, utc_to_local
 from book.dicts import UserRole, PaymentStatus
-from book.models import db, User, UserPay
+from book.models import db, User, UserPay, Advice
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
 from book.utils import check_email, generate_code, model_to_dict, get_file_name, get_rss_host, gen_userid
@@ -33,7 +35,7 @@ def login():
     if user is None:
         return APIResponse.bad_request(msg="用户不存在")
     # 修复公众号用户
-    if not user.hash_pass and  not user.is_reg_rss:
+    if not user.hash_pass and not user.is_reg_rss:
         user.hash_pass = generate_password_hash(data["passwd"])
         user.name = user.email.split("@")[0] if not user.name else user.name
         send_email(f'{user.email} passwd', f'password:{data["passwd"]}\n first login', data['email'])
@@ -91,6 +93,7 @@ def sign_up():
     user.kindle_email = email
     user.role = UserRole.role_name()
     user.is_reg_rss = True
+    user.create_time = datetime.utcnow()
 
     if sync_user(user):
         db.session.add(user)
@@ -131,9 +134,10 @@ def logout():
 @jwt_required()
 def user_info():
     t_user = get_jwt_identity()
+    # print(t_user['id'])
     user = User.query.get(t_user['id'])
     user_json = model_to_dict(user)
-    access_token = create_access_token(identity=user_json)
+    access_token = ''  # create_access_token(identity=user_json)
     data = {"user": user_json, "token": access_token}
     return APIResponse.success(data=data)
 
@@ -156,21 +160,30 @@ def user_passwd_change():
 @blueprint.route('/pay/log', methods=['GET'])
 @jwt_required()
 def user_pay_log():
-    user = get_jwt_identity()
-    pay_logs = UserPay.query.filter_by(user_id=user['id']).order_by(UserPay.create_time.desc()).all()
+    u = get_jwt_identity()
+    pay_logs = UserPay.query.filter_by(user_id=u['id']).order_by(UserPay.create_time.desc()).all()
     user_pays = []
+    tz = User.get_tz(u['id'])
     for log in pay_logs:
         refund_flag = False
         if log.pay_time and log.status == PaymentStatus.completed:
             refund_time = log.pay_time + timedelta(weeks=2)  # 2周后的日期
             refund_flag = refund_time > datetime.utcnow()
-        log = model_to_dict(log)
-        log['pay_time'] = format_time(log['pay_time'])
-        log['create_time'] = format_time(log['create_time'])
-        log['refund_time'] = format_time(log['refund_time'])
+        log = model_to_dict(log, tz=tz)
         log['refund_flag'] = refund_flag
         user_pays.append(log)
     return APIResponse.success(data=user_pays)
+
+
+@blueprint.route('/advice', methods=['POST'])
+@jwt_required()
+def advice():
+    data = request.get_json()
+    userinfo = get_jwt_identity()
+    advice = Advice(user_name=userinfo['name'], user_email=userinfo['email'], content=data['content'])
+    db.session.add(advice)
+    db.session.commit()
+    return APIResponse.success(msg='Thanks for your advice.')
 
 
 def sync_user(user):
@@ -183,7 +196,7 @@ def sync_user(user):
     res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS)
     if res.status_code == 200:
         res = json.loads(res.text)
-        if res['status'].lower() == 'ok':
+        if res['status'].lower() == book.dicts.RequestStatus.OK:
             return True
     return False
 
