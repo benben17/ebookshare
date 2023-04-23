@@ -4,7 +4,7 @@ from sqlalchemy import or_
 from book.dicts import UserRole
 from book.utils import gen_userid, commUtil, model_to_dict, get_file_name
 from book.utils.ApiResponse import APIResponse
-from book import app, User, db
+from book import User, db
 import json
 import urllib
 from flask import request, redirect, url_for, Blueprint
