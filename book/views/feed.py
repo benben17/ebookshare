@@ -35,7 +35,6 @@ def user_setting():
         db.session.add(userinfo)
         db.session.commit()
 
-    user = get_jwt_identity()
     res = sync_post(request.path, param, user)
     return return_fun(res)
 

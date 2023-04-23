@@ -10,7 +10,7 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 
-import config
+# import config
 from .utils import create_app_dir
 
 app = Flask(__name__)
@@ -30,12 +30,13 @@ with app.app_context():
 
 from book.views import *
 
-modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook']
+modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook','googleUser']
 for model_name in modules:
     model = import_module(f"{app.name}.views.{model_name}")
     app.register_blueprint(model.blueprint)
 
 from book.pay import paypal
+
 
 app.register_blueprint(paypal.blueprint)
 """

@@ -31,3 +31,18 @@ def return_fun(res):
         return APIResponse.success(msg=res[RequestStatus.MSG], data=res[RequestStatus.DATA])
     else:
         return APIResponse.bad_request(msg=res[RequestStatus.MSG])
+
+
+def sync_user(user):
+    path = '/api/v2/sync/user/add'
+    data = {
+        'key': config.RSS2EBOOK_KEY,
+        'user_name': user.name,
+        'to_email': user.email
+    }
+    res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS)
+    if res.status_code == 200:
+        res = json.loads(res.text)
+        if res['status'].lower() == RequestStatus.OK:
+            return True
+    return False

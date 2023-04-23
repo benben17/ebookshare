@@ -3,6 +3,16 @@ import hashlib
 import time
 import config
 
+
+def check_signature(token, signature, timestamp, nonce):
+    """微信校验签名"""
+    temp_arr = [token, timestamp, nonce]
+    temp_arr.sort()
+    temp_str = ''.join(temp_arr)
+    hash_str = hashlib.sha1(temp_str.encode('utf-8')).hexdigest()
+    return hash_str == signature
+
+
 create_time = str(int(time.time()))
 
 email_help = ["email", "邮箱地址", "邮箱", "绑定"]
@@ -26,7 +36,6 @@ no_bind_email_msg = '''你还没有绑定邮箱！
 查看帮助请回复 ？'''
 
 send_to_kindle_help_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=2649877562&idx=1&sn=e3789377f9303432cb0a082ff81ad335&chksm=87c37ebdb0b4f7ab49168e70181efb9206434e0bb9b7620a8f17b258686f8faf70c696c9eb9d&token=305511071&lang=zh_CN#rd'
-
 reply_help_msg = f'''<a href="{send_to_kindle_help_url}"> 发送到kindle手册 </a>
 建议先发送到自己邮箱，然后自己转发kindle设备
 回复：图书名称 搜索书籍
@@ -50,15 +59,14 @@ reply_subscribe = f'''欢迎关注books，本书站收录图书超乎你的想�
 建议先发送到自己邮箱，然后自己转发kindle设备
 '''
 
-donate_pic = 'https://rss2ebook.com/api/static/sendtokindles.jpeg'
-
+wx_pic = 'https://rss2ebook.com/prod-api/static/sendtokindles.jpeg'
 
 def mail_body(bookname):
     return f'''
     请查收附件！<br/>
     《{bookname}》<br/>
     ---------------------------------------------------<br/>
-    <img src="{donate_pic}"  width="300" height="300" ><br/>
+    <img src="{wx_pic}"  width="300" height="300" ><br/>
     ---------------------------------------------------<br/>
     欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
     '''
@@ -70,7 +78,7 @@ def send_failed_body(bookname):
         <p style="color:red"> 书籍下载失败 </p>
         请重新传查询，选择其他格式的图书接收！<br/>
         ---------------------------------------------------<br/>
-        <img src="{donate_pic}"  width="300" height="300" ><br/>
+        <img src="{wx_pic}"  width="300" height="300" ><br/>
         ---------------------------------------------------<br/>
         欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
         '''
@@ -85,7 +93,7 @@ def mail_download_url_body(filename):
         |{filename}||<a href="{download_url}"> 下载地址 </a> <br/>
         下载链接地址有效期24个小时，请在有效期内下载。|<br/>
         ----------------------------------------------------------<br/>
-        <img src="{donate_pic}"  width="300" height="300" ><br/>
+        <img src="{wx_pic}"  width="300" height="300" ><br/>
         ----------------------------------------------------------<br/>
         欢迎你使用自助查询推送 kindle电子书 sendtokindles 公众号，我们竭诚为您服务。如果你有好的建议和意见，可以直接回复邮件！<br/>
         '''
@@ -110,17 +118,10 @@ def wx_reply_xml(from_user, to_user, msg_content):
         """
 
 
-def check_signature(token, signature, timestamp, nonce):
-    """微信校验签名"""
-    temp_arr = [token, timestamp, nonce]
-    temp_arr.sort()
-    temp_str = ''.join(temp_arr)
-    hash_str = hashlib.sha1(temp_str.encode('utf-8')).hexdigest()
-    return hash_str == signature
-
-
 def wx_reply_mail_msg(book_name, user_email):
-    donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn=9afeff751c06737c6c3c5de0faddc6a1#rd '
+    donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn' \
+                 '=9afeff751c06737c6c3c5de0faddc6a1#rd'
+
     return f'''《{book_name}》
 已发送邮箱：{user_email} 
 -------------注意-------------
@@ -166,8 +167,9 @@ def download_url(user_log):
 
 
 def news_feed():
-    return '''本服务为在线RSS订阅生成电子书服务，提供多种媒体的订阅电子书生成并推送到用户邮箱。
+    return '''在线RSS订阅生成电子书服务，提供多种媒体的订阅电子书生成并推送到用户邮箱。
 
-我们提供的媒体包括但不限于：经济学人、卫报、时代周刊、大西洋月刊、纽约时报、新科学家、美国国家地理、科学美国人、哈佛商业评论、纽约客、自然、科学、彭博商业周刊、纽约时报书评、华盛顿邮报、基督教科学箴言报、金融时报、华尔街日报和科学家等知名媒体。
+我们提供的媒体包括但不限于：《经济学人》、《卫报》、时代周刊、大西洋月刊、纽约时报、新科学家、美国国家地理、科学美国人、哈佛商业评论、纽约客、自然、科学、彭博商业周刊、纽约时报书评、华盛顿邮报、基督教科学箴言报、金融时报、华尔街日报和科学家等知名媒体。
 https://rss2ebook.com
 '''
+

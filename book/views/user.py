@@ -1,20 +1,15 @@
 # encoding:utf-8
 from datetime import datetime, timedelta
-import json
-import requests
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
-
-import book.dicts
 import config
 from book import cache
-from book.dateUtil import format_time, utc_to_local
 from book.dicts import UserRole, PaymentStatus
 from book.models import db, User, UserPay, Advice
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
-from book.utils import check_email, generate_code, model_to_dict, get_file_name, get_rss_host, gen_userid
+from book.utils import check_email, generate_code, model_to_dict, get_file_name, gen_userid, commUtil
 from book.utils.mailUtil import send_email
 
 blueprint = Blueprint(
@@ -95,7 +90,7 @@ def sign_up():
     user.is_reg_rss = True
     user.create_time = datetime.utcnow()
 
-    if sync_user(user):
+    if commUtil.sync_user(user):
         db.session.add(user)
         db.session.commit()
         user_info = model_to_dict(user)
@@ -128,7 +123,6 @@ def forget_passwd():
 @blueprint.route('/logout')
 def logout():
     return APIResponse.success()
-
 
 @blueprint.route('/info')
 @jwt_required()
@@ -186,19 +180,7 @@ def advice():
     return APIResponse.success(msg='Thanks for your advice.')
 
 
-def sync_user(user):
-    path = '/api/v2/sync/user/add'
-    data = {
-        'key': config.RSS2EBOOK_KEY,
-        'user_name': user.name,
-        'to_email': user.email
-    }
-    res = requests.post(get_rss_host() + path, data=data, headers=config.HEADERS)
-    if res.status_code == 200:
-        res = json.loads(res.text)
-        if res['status'].lower() == book.dicts.RequestStatus.OK:
-            return True
-    return False
+
 
 
 if __name__ == '__main__':
