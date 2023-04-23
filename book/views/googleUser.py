@@ -1,9 +1,7 @@
 from datetime import datetime
 from flask_jwt_extended import create_access_token
-from sqlalchemy import or_
 from book.dicts import UserRole
 from book.utils import gen_userid, commUtil, model_to_dict, get_file_name
-from book.utils.ApiResponse import APIResponse
 from book import User, db
 import json
 import urllib
@@ -34,7 +32,7 @@ class OAuthSignIn(object):
         pass
 
     def get_callback_url(self):
-        return url_for('oauth_callback', provider=self.provider_name, _external=True)
+        return url_for('googleUser.oauth_callback', provider=self.provider_name, _external=True)
 
     @classmethod
     def get_provider(self, provider_name):
@@ -93,9 +91,9 @@ def oauth_callback(provider):
     data = oauth.callback()
     if 'email' not in data or data['email'] is None:
         # I need a valid email address for my user identification
-        return APIResponse.bad_request(msg="get google account failed")
+        return redirect('https://rss2ebook.com/user/login')
     email = data['email']
-    user = User.query.filter_by(or_(email=email, name=email)).first()
+    user = User.query.filter_by(email=email).first()
     if not user:
         # Create the user. Try and use their name returned by Google,
         name = str(email).split('@')[0]
@@ -106,12 +104,11 @@ def oauth_callback(provider):
             db.session.commit()
             user_info = model_to_dict(user)
             access_token = create_access_token(identity=user_info)
-            data = {"user": user_info, "token": access_token}
-            return APIResponse.success(data=data)
+            # data = {"user": user_info, "token": access_token}
+            return redirect('https://rss2ebook.com/subscribe/my?token='+access_token)
         else:
-            return APIResponse.bad_request(msg="get google account failed")
+            return redirect('https://rss2ebook.com/user/login')
     else:
         user_info = model_to_dict(user)
         access_token = create_access_token(identity=user_info)
-        data = {"user": user_info, "token": access_token}
-        return APIResponse.success(data=data)
+        return redirect('https://rss2ebook.com/subscribe/my?token='+access_token)

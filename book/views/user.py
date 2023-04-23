@@ -10,6 +10,7 @@ from book.models import db, User, UserPay, Advice
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
 from book.utils import check_email, generate_code, model_to_dict, get_file_name, gen_userid, commUtil
+from book.utils.commUtil import sync_user
 from book.utils.mailUtil import send_email
 
 blueprint = Blueprint(
@@ -58,7 +59,7 @@ def email_verify_code(email):
         else:
             verification_code = generate_code()
             cache.set(email, verification_code, timeout=300)
-            send_email("RSS2EBOOK 验证码", verification_code, email)
+            send_email("RSS2EBOOK 注册验证码", 'RSS2EBOOK 注册验证码： '+ verification_code, email)
             return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
     else:
         return APIResponse.bad_request(msg="无效的邮箱地址！")
