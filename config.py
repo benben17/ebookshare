@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 
-DEBUG = os.getenv('DEBUG',True)
+DEBUG = os.getenv('DEBUG', True)
 basedir = os.path.abspath(os.path.dirname(__file__))
 APPID = "wx0630c28def50cbfd"
 APPSECRET = "20764c0ae174a1e12c78e809a877c382"
@@ -61,4 +61,13 @@ DEFAULT_USER_PASSWD = 'sendtokindles'
 HEADERS = {'Content-Type': 'application/x-www-form-urlencoded'}
 
 
+# 在Google Cloud Platform 中创建 OAuth 2.0 客户端 ID 时指定的值
+CLIENT_ID = '774931221812-vpnvivcrjosa9l7mcdbjjkdg1tsf19ca.apps.googleusercontent.com'
+CLIENT_SECRET = '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'
 
+OAUTH_CREDENTIALS = {
+    'google': {
+        'id': CLIENT_ID,
+        'secret': CLIENT_SECRET
+    }
+}

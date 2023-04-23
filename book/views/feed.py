@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from book.dateUtil import dt_to_str, str_to_dt
 from book.dicts import RequestStatus, UserRole
 from book.models import User, db
-from book.utils import get_file_name, get_rss_host, check_email
+from book.utils import get_file_name
 from book.utils.ApiResponse import APIResponse
 from book.utils.commUtil import return_fun, sync_post
 from book.utils.rssUtil import get_rss_latest_titles, is_rss_feed
@@ -35,7 +35,6 @@ def user_setting():
         db.session.add(userinfo)
         db.session.commit()
 
-    user = get_jwt_identity()
     res = sync_post(request.path, param, user)
     return return_fun(res)
 
@@ -110,7 +109,6 @@ def my_feed_deliver():
 
 
 @blueprint.route('/rss/pub', methods=['POST'])
-@jwt_required()
 def get_pub_rss():
     """公共订阅源"""
     api_path = '/api/v2/rss/pub'
