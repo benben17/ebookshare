@@ -112,7 +112,7 @@ def my_feed_deliver():
 def get_pub_rss():
     """公共订阅源"""
     api_path = '/api/v2/rss/pub'
-    res = sync_post(api_path, request.get_json(), get_jwt_identity())
+    res = sync_post(api_path, request.get_json())
     return return_fun(res)
 
 
