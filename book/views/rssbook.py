@@ -1,8 +1,6 @@
 # -*-coding: utf-8-*-
-import base64
-import json
+
 import uuid
-from io import BytesIO
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
 from flask import request, Blueprint

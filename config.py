@@ -72,3 +72,5 @@ OAUTH_CREDENTIALS = {
         'secret': CLIENT_SECRET
     }
 }
+
+UPGRADE_USER_URL = "https://rss2ebook.com/user/upgrade"
