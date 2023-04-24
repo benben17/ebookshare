@@ -4,6 +4,7 @@ import logging
 from flask import redirect, send_from_directory, request, Blueprint
 from sqlalchemy import or_
 from book import cache, db, upgradeUser, User
+from book.dateUtil import get_now
 from book.dicts import SEND_STATUS
 from book.utils import *
 from book.utils.wxMsg import *
@@ -105,7 +106,7 @@ def wechat():
                 if not user or not user.kindle_email:  # 必须绑定邮箱
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
                 usersend = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
-                                                Userlog.create_time > get_ymd_dt()).all()
+                                                Userlog.create_time > get_now()).all()
                 if len(usersend) > 6:
                     wx_reply_xml(from_user, to_user, "今天已经下载5本书，请明天在进行发送！")
                 book_info = cache.get(f'{from_user}_{content}')
