@@ -107,13 +107,13 @@ def sign_up():
 def forget_passwd():
     email = request.get_json().get('email')
     code = request.get_json().get('code')
-    print(code,email)
+    print(code, email)
     if not email or not code:
         return APIResponse.bad_request(msg="Email or Code is empty！")
     try:
-        sys_code = cache.get(f'{email}_forget')
+        sys_code = cache.get(f'{email}_reset')
         if sys_code is None or str(sys_code) != str(code):
-            return APIResponse.success(msg='验证码错误！')
+            return APIResponse.bad_request(msg='验证码错误！')
         user = User.query.filter(User.email == email).first()
         if not user:
             return APIResponse.bad_request(msg="user not exists！")
@@ -132,15 +132,19 @@ def forget_passwd():
 def email_forget_code():
     email = request.args.get('email')
     if check_email(email) is False:
-        return APIResponse.bad_request(msg="无效的邮箱地址！")
-
+        return APIResponse.bad_request(msg="Invalid email address！")
+    send_count = 0 if not cache.get(f'{email}_send_count') else int(cache.get(f'{email}_send_count'))
+    if send_count >= 6:
+        return APIResponse.bad_request(msg="Sent many times, please send it after 10 minutes")
+    send_count += 1
     user = User.query.filter(or_(User.email == email, User.name == email)).first()
     if not user:
         return APIResponse.bad_request(msg="user not exists or error")
     verification_code = generate_code()
-    cache.set(f'{email}_forget', verification_code, timeout=600)
+    cache.set(f'{email}_reset', verification_code, timeout=600)
+    cache.set(f'{email}_send_count', send_count, timeout=600)
     logging.info(f'code:{verification_code}')
-    send_email("RSS2EBOOK Password reset code", f'RSS2EBOOK Password reset code： {verification_code}', email)
+    send_email("RSS2EBOOK Password reset code", f'RSS2EBOOK password reset Code： {verification_code}', email)
     return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
 
 

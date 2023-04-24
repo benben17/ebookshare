@@ -80,10 +80,6 @@ def my_feed_deliver():
     # 设置缓存的 key 值
     key = f'deliver:{user["name"]}'
 
-    # 如果当前用户没有订阅源，删除缓存并返回错误信息
-    if User.get_feed_count(int(user['id'])) == 0:
-        cache.delete(key)
-        return APIResponse.bad_request(msg='No feed to deliver!')
     # 获取上一次推送的时间
     last_delivery_time = str_to_dt(cache.get(key))
     # 获取当前用户的角色
