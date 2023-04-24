@@ -58,4 +58,4 @@ def error_date(error):
 @app.errorhandler(InvalidHeaderError)
 @app.errorhandler(WrongTokenError)
 def handle_auth_error(e):
-    return jsonify({'code': 10000, 'msg': str(e), "data": ""}), 200
+    return jsonify({'code': 10000, 'msg': 'System error', "data": ""}), 200
