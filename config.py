@@ -1,12 +1,12 @@
 import os
 from datetime import timedelta
 
-DEBUG = os.getenv('DEBUG', True)
+DEBUG = os.getenv('DEBUG', False)
 basedir = os.path.abspath(os.path.dirname(__file__))
 APPID = "wx0630c28def50cbfd"
 APPSECRET = "20764c0ae174a1e12c78e809a877c382"
 wechat_token = "kindlebooks"
-SECRET_KEY = os.getenv('SECRET_KEY', 'rss2ebook')
+SECRET_KEY = os.getenv('SECRET_KEY', 'ae692a68e23d11ed91a60af4f90de0bb')
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'db/ebook.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = False
@@ -18,6 +18,7 @@ os.environ['TZ'] = 'Asia/Shanghai'
 # Flask-Mail settings
 MAIL_ON_OFF = 'ON'
 MAIL_SERVER = 'smtp.gmail.com'
+MAIL_DEBUG = False
 MAIL_PORT = 465
 # MAIL_USE_TLS = True
 MAIL_USE_SSL = True

@@ -29,16 +29,15 @@ with app.app_context():
     db.create_all()
 
 from book.views import *
-
 modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook','googleUser']
 for model_name in modules:
     model = import_module(f"{app.name}.views.{model_name}")
     app.register_blueprint(model.blueprint)
 
 from book.pay import paypal
-
-
 app.register_blueprint(paypal.blueprint)
+
+
 """
 Initialize logging
 """

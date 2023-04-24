@@ -22,7 +22,8 @@ def sync_post(path, param, user=None):
             return json_data
         return {"status": "failed", "msg": json_data[RequestStatus.MSG]}
     else:
-        logging.error(str(path), res.text)
+        logging.error("error:"+str(path))
+        logging.error(res.text)
         return {"status": "failed", "msg": res.text}
 
 
