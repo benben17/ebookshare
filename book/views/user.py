@@ -56,7 +56,7 @@ def email_verify_code(email):
     if check_email(email):
         user = User.query.filter(or_(User.email == email, User.name == email)).first()
         if user:
-            return APIResponse.bad_request(msg="该邮箱已注册，请直接登录。")
+            return APIResponse.bad_request(msg="该邮箱已注册，请直接登录。忘记密码请使用找回密码！")
         else:
             verification_code = generate_code()
             cache.set(email, verification_code, timeout=300)
@@ -107,47 +107,43 @@ def sign_up():
 def forget_passwd():
     data = request.get_json()
     email = data['email']
-    code = data['code']
-    if email:
+    code = int(data['code'])
+    if not email or not code:
+        return APIResponse.bad_request(msg="Email or Code is empty！")
+    try:
         sys_code = cache.get(f'{email}_forget')
-        if int(sys_code) != int(code):
+        if sys_code is None or int(sys_code) != code:
             return APIResponse.success(msg='验证码错误！')
-        try:
-            user = User.query.filter(or_(User.email == email, User.name == email)).first()
-            if user:
-                user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
-                db.session.add(user)
-                db.session.commit()
-                send_email(f'{email} Password Reset', f'{user.email}:New Password ：{config.DEFAULT_USER_PASSWD}', user.email)
-                cache.set(email, f'{email}: Password has been reset', timeout=600)
-                return APIResponse.success(msg="Password reset successful，New password sent to email!")
-            else:
-                return APIResponse.bad_request(msg="user not exists！")
-        except Exception as e:
-            logging.error(f'Password Reset error:{str(e)}')
-            return APIResponse.bad_request(msg="Password Reset error")
-    else:
-        return APIResponse.bad_request(msg="Email is empty！")
+        user = User.query.filter(User.email == email).first()
+        if not user:
+            return APIResponse.bad_request(msg="user not exists！")
+        user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
+        db.session.add(user)
+        db.session.commit()
+        send_email(f'{user.email} Password Reset', f'{user.email}:New Password ：{config.DEFAULT_USER_PASSWD}',
+                   user.email)
+        return APIResponse.success(msg="Password reset successful，New password sent to email!")
+    except Exception as e:
+        logging.error(f'Password Reset error:{str(e)}')
+        return APIResponse.bad_request(msg="Password Reset error")
 
 
-@blueprint.route("/email/forget/code", methods=['GET','POST'])
+@blueprint.route("/email/forget/code", methods=['GET', 'POST'])
 def email_forget_code():
     email = request.args.get('email')
-    if check_email(email):
-        user = User.query.filter(or_(User.email == email, User.name == email)).first()
-
-        try:
-            if user:
-                verification_code = generate_code()
-                cache.set(f'{email}_forget', verification_code, timeout=600)
-                print('code:'+verification_code)
-                send_email("RSS2EBOOK Password reset code", 'RSS2EBOOK Password reset code： {verification_code}', email)
-                return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
-        except Exception as e:
-            logging.error(e)
-            return APIResponse.bad_request(msg="user not exists or error")
-    else:
+    if check_email(email) is False:
         return APIResponse.bad_request(msg="无效的邮箱地址！")
+
+    user = User.query.filter(or_(User.email == email, User.name == email)).first()
+    if not user:
+        return APIResponse.bad_request(msg="user not exists or error")
+    verification_code = generate_code()
+    cache.set(f'{email}_forget', verification_code, timeout=600)
+    logging.info(f'code:{verification_code}')
+    send_email("RSS2EBOOK Password reset code", 'RSS2EBOOK Password reset code： {verification_code}', email)
+    return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
+
+
 
 @blueprint.route('/logout')
 def logout():
