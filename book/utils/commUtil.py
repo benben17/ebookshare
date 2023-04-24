@@ -12,8 +12,9 @@ def sync_post(path, param, user=None):
     if user is not None:
         param['user_name'] = user['name']
         param['creator'] = user['name']
-        # get_rss_host()
-    res = requests.post(get_rss_host() + path, data=param, headers=config.HEADERS, timeout=60)
+        request_host = get_rss_host()
+        # request_host = 'http://127.0.0.1:8080'
+    res = requests.post(request_host + path, data=param, headers=config.HEADERS, timeout=60)
     if res.status_code == 200:
         json_data = json.loads(res.text)
         if json_data['status'] == RequestStatus.OK:
@@ -22,7 +23,8 @@ def sync_post(path, param, user=None):
             return json_data
         return {"status": "failed", "msg": json_data[RequestStatus.MSG]}
     else:
-        logging.error(str(path), res.text)
+        logging.error("error:"+str(path))
+        logging.error(res.text)
         return {"status": "failed", "msg": res.text}
 
 

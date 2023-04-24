@@ -1,9 +1,9 @@
 # -*-coding: utf-8-*-
-
+import logging
 from datetime import datetime, timedelta
 import time
 from flask import request, Blueprint
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from book.dateUtil import dt_to_str, str_to_dt
 from book.dicts import RequestStatus, UserRole
 from book.models import User, db
@@ -111,17 +111,21 @@ def my_feed_deliver():
 @blueprint.route('/rss/pub', methods=['POST'])
 def get_pub_rss():
     """公共订阅源"""
-
-    pub_rss_key = 'pub_rss_key'
     from book import cache
-    if cache.get(pub_rss_key):
-        return APIResponse.success(data=cache.get(pub_rss_key))
-
-    res = sync_post(request.path, request.get_json())
-    if res['status'] == RequestStatus.OK:
-        cache.set(pub_rss_key, res['data'], timeout=86400)
-    return return_fun(res)
-
+    pub_rss_key = 'pub_rss_key'
+    try:
+        verify_jwt_in_request()
+        if get_jwt_identity():
+            res = sync_post(request.path, request.get_json(), get_jwt_identity())
+            return return_fun(res)
+    except Exception as e:
+        if cache.get(pub_rss_key):
+            return APIResponse.success(data=cache.get(pub_rss_key))
+        else:
+            res = sync_post(request.path, request.get_json(), None)
+            if res['status'] == RequestStatus.OK:
+                cache.set(pub_rss_key, res['data'], timeout=86400)
+            return return_fun(res)
 
 @blueprint.route('/my/rss', methods=['POST'])
 @jwt_required()
