@@ -23,3 +23,6 @@ def send_email(subject, body, receiver, attach=None):
     from book import app
     Thread(target=send_async_email, args=[app, msg]).start()
     return u'发送成功'
+
+
+
