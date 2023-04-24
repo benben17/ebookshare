@@ -105,13 +105,14 @@ def sign_up():
 
 @blueprint.route('/forget/passwd', methods=['POST'])
 def forget_passwd():
-    email = request.args.get('email')
-    code = int(request.args.get('code', 0))
+    email = request.get_json().get('email')
+    code = request.get_json().get('code')
+    print(code,email)
     if not email or not code:
         return APIResponse.bad_request(msg="Email or Code is empty！")
     try:
         sys_code = cache.get(f'{email}_forget')
-        if sys_code is None or int(sys_code) != code:
+        if sys_code is None or str(sys_code) != str(code):
             return APIResponse.success(msg='验证码错误！')
         user = User.query.filter(User.email == email).first()
         if not user:
