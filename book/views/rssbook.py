@@ -35,7 +35,7 @@ def book_add():
 def book_edit():
     """新闻书籍编辑"""
     data = request.get_json()
-    if not data['book_id']:
+    if not data.get('book_id'):
         return APIResponse.bad_request(msg="参数错误！")
     res = sync_post(request.path, request.get_json(), get_jwt_identity())
     return return_fun(res)

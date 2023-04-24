@@ -71,24 +71,24 @@ rss_list = [
 
 if __name__ == "__main__":
     # print(int(-8))
-    # print(get_rss_latest_titles('https://rsshub.app/nature/research/nature', 1))
+    print(get_rss_latest_titles('https://rsshub.app/economist/global-business-review/cn-en', 1))
     # d = feedparser.parse("https://feedx.net/rss/economistp.xml")
-    # # print(len(d))
+
     # print(d.entries[0])
-    a = {'name': 'tom', 'age': 22}
-    if 'hahah' in a:
-        print("ok")
-    for rss in rss_list:
-        path = '/api/v2/rss/manager'
-        data = {'key': config.RSS2EBOOK_KEY,
-                'user_name': 'admin',
-                'creator': 'admin',
-                "title": rss[1],
-                "url": rss[2],
-                "is_fulltext": "Flase",
-                "category": rss[0],
-                "librss_id": 1
-                }
+    # a = {'name': 'tom', 'age': 22}
+    # if 'hahah' in a:
+    #     print("ok")
+    # for rss in rss_list:
+    #     path = '/api/v2/rss/manager'
+    #     data = {'key': config.RSS2EBOOK_KEY,
+    #             'user_name': 'admin',
+    #             'creator': 'admin',
+    #             "title": rss[1],
+    #             "url": rss[2],
+    #             "is_fulltext": "Flase",
+    #             "category": rss[0],
+    #             "librss_id": 1
+    #             }
 
         # print(data)
         #     # request_url = "http://127.0.0.1:8080"
