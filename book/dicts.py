@@ -30,7 +30,7 @@ class RequestStatus:
 
 class UserRole(Enum):
     DEFAULT = {"name": 'default', "feed_num": 10, 'interval': 20}
-    PLUS = {"name": 'plus', "feed_num": 200, 'interval': 6}
+    PLUS = {"name": 'plus', "feed_num": 200, 'interval': 4}
 
     @staticmethod
     def get_role(role='default'):
