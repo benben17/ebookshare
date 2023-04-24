@@ -120,12 +120,13 @@ def get_pub_rss():
             return return_fun(res)
     except Exception as e:
         if cache.get(pub_rss_key):
+
             return APIResponse.success(data=cache.get(pub_rss_key))
-        else:
-            res = sync_post(request.path, request.get_json(), None)
-            if res['status'] == RequestStatus.OK:
-                cache.set(pub_rss_key, res['data'], timeout=86400)
-            return return_fun(res)
+
+        res = sync_post(request.path, request.get_json(), None)
+        if res['status'] == RequestStatus.OK:
+            cache.set(pub_rss_key, res['data'], timeout=86400)
+        return return_fun(res)
 
 
 @blueprint.route('/my/rss', methods=['POST'])
