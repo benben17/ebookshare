@@ -12,7 +12,7 @@ from requests.exceptions import RequestException
 from sqlalchemy import inspect
 from enum import Enum
 import config
-from book.dateUtil import utc_to_local
+from book.dateUtil import utc_to_local, get_now
 
 
 def gen_userid():
@@ -196,7 +196,7 @@ def is_file_24_hours(file_path):
 
 
 def get_ymd_dt():
-    return datetime.utcow().strftime('%Y-%m-%d 00:00:00')
+    return datetime.utcnow().strftime('%Y-%m-%d 00:00:00')
 
 
 def new_secret_key(length=8):
@@ -205,7 +205,7 @@ def new_secret_key(length=8):
     return ''.join([random.choice(allchars) for i in range(length)])
 
 
-def model_to_dict(model, tz = 0):
+def model_to_dict(model, tz=0):
     """
     Convert a SQLAlchemy model instance into a JSON-serializable dict.
     """
@@ -222,7 +222,7 @@ def model_to_dict(model, tz = 0):
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
 
-            value = utc_to_local(value,tz=tz) if value is not None else None
+            value = utc_to_local(value, tz=tz) if value is not None else None
         elif isinstance(value, Enum):
             value = value.value
         data[attribute.key] = value
@@ -263,11 +263,9 @@ def utc_now():
     return datetime.utcnow()
 
 
-
-
 if __name__ == '__main__':
     print(is_isbn('1-63995-000-1'))
-
+    print(get_now())
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)

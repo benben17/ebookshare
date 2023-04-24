@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 import pytz
 
 
+def get_now():
+    return datetime.now()
+
 def utc_to_local(utc_time, fmt='%Y-%m-%d %H:%M:%S', tz=8):
     if not utc_time:
         return None
