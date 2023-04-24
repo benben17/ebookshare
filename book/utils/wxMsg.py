@@ -19,15 +19,17 @@ email_help = ["email", "邮箱地址", "邮箱", "绑定"]
 help_msg = ['?', 'h', 'help', '帮助', '？']
 
 
+el_line = '---------------'
+
 def unbind_email_msg(user_email):
-    return f''' 已经解绑邮箱:{user_email}\n 绑定邮箱：回复 邮箱地址 即可自动绑定\n 例如：rss2ebook.com '''
+    return f''' 解绑邮箱成功！\n {el_line} \n 绑定邮箱：回复 邮箱地址 即可自动绑定  \n 例如：ebook@rss2ebook.com '''
 
 
 def bind_email_msg(user_email):
     if check_kindle_email(user_email):
-        return f''' 绑定邮箱：{user_email}\n 你绑定的邮箱为Kindle邮箱，支持的文件格式为:{kindle_support('a')} \n kindle.cn 不在支持直接邮件发送 \n 解除绑定邮箱回复:1001 '''
+        return f''' 绑定邮箱成功：\n {user_email}\n 你绑定的邮箱为Kindle邮箱，支持的文件格式为:{kindle_support('a')} \n kindle.cn 不在支持直接邮件发送 \n 解除绑定邮箱回复:1001 '''
     else:
-        return f''' 绑定邮箱：{user_email}\n ------------------------- \n 解除绑定邮箱回复:1001'''
+        return f''' 绑定邮箱成功： \n{user_email}\n {el_line} \n 解除绑定邮箱回复:1001'''
 
 
 def check_kindle_email(email):
@@ -137,7 +139,7 @@ def wx_reply_mail_msg(book_name, user_email):
 -------------注意-------------
 当文件大于20M的时候 发送下载地址到邮箱！
 文件发送有滞后，最好5分钟后查收，如无收到，请换一个编号重新申请发送！
-------------------------------
+{el_line}
                 <a href="{donate_url}">☆ 捐赠 ☆</a>
 '''
 

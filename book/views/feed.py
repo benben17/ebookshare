@@ -127,6 +127,7 @@ def get_pub_rss():
                 cache.set(pub_rss_key, res['data'], timeout=86400)
             return return_fun(res)
 
+
 @blueprint.route('/my/rss', methods=['POST'])
 @jwt_required()
 def my_rss():
@@ -139,16 +140,17 @@ def my_rss():
 @jwt_required()
 def my_rss_add():
     api_path = '/api/v2/rss/add'
-    myuser = get_jwt_identity()
+    user_info = get_jwt_identity()
     data = request.get_json()
     if 'custom' in data and data['custom'] and is_rss_feed(data['url']) is False:
         return APIResponse.bad_request(msg='The url is not a correct rss, or cannot be connected')
-    res = sync_post(api_path, data, myuser)
+
+    user = User.get_by_id(user_info['id'])
+    feed_num = UserRole.role_feed_num(user.role if user.role else '')
+    if user.feed_count >= feed_num:
+        return APIResponse.bad_request(msg=f"已达到最大 {feed_num} 个订阅,不能在订阅,请升级成Plus会员！")
+    res = sync_post(api_path, data, user_info)
     if res['status'].lower() == RequestStatus.OK:
-        user = User.get_by_id(myuser['id'])
-        feed_num = UserRole.role_feed_num(user.role if user.role else '')
-        if user.feed_count >= feed_num:
-            return APIResponse.bad_request(msg=f"已达到最大{feed_num}个订阅,不能在订阅")
         user.feed_count += 1
         db.session.add(user)
         db.session.commit()
@@ -206,5 +208,6 @@ if __name__ == "__main__":
     from book.utils.rssUtil import rss_list
     from book import app, cache
 
-    timeout = 23 * 60 * 60
+    timeout = 24 * 60 * 60
+    print(timeout)
     print(datetime.now() + timedelta(seconds=timeout))
