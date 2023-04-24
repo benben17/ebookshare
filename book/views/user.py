@@ -128,7 +128,7 @@ def forget_passwd():
         return APIResponse.bad_request(msg="Password Reset error")
 
 
-@blueprint.route("/email/forget/code", methods=['GET', 'POST'])
+@blueprint.route("/forget/code", methods=['GET', 'POST'])
 def email_forget_code():
     email = request.args.get('email')
     if check_email(email) is False:
