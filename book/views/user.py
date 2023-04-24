@@ -171,8 +171,8 @@ def user_passwd_change():
 
     new_pass = data.get('passwd')
     user = User.get_by_id(int(get_jwt_identity()['id']))
-    if not user:
-        return APIResponse.bad_request(msg="user not exists！")
+    if not user or not new_pass:
+        return APIResponse.bad_request(msg="user not exists or password is empty!")
 
     user.hash_pass = generate_password_hash(new_pass)
     db.session.add(user)
