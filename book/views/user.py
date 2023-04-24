@@ -113,7 +113,7 @@ def forget_passwd():
     try:
         sys_code = cache.get(f'{email}_reset')
         if sys_code is None or str(sys_code) != str(code):
-            return APIResponse.success(msg='验证码错误！')
+            return APIResponse.bad_request(msg='验证码错误！')
         user = User.query.filter(User.email == email).first()
         if not user:
             return APIResponse.bad_request(msg="user not exists！")
