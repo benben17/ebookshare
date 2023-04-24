@@ -111,8 +111,15 @@ def my_feed_deliver():
 @blueprint.route('/rss/pub', methods=['POST'])
 def get_pub_rss():
     """公共订阅源"""
-    api_path = '/api/v2/rss/pub'
-    res = sync_post(api_path, request.get_json())
+
+    pub_rss_key = 'pub_rss_key'
+    from book import cache
+    if cache.get(pub_rss_key):
+        return APIResponse.success(data=cache.get(pub_rss_key))
+
+    res = sync_post(request.path, request.get_json())
+    if res['status'] == RequestStatus.OK:
+        cache.set(pub_rss_key, res['data'], timeout=86400)
     return return_fun(res)
 
 
