@@ -1,6 +1,7 @@
 # encoding:utf-8
+import logging
 from datetime import datetime, timedelta
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
@@ -59,7 +60,7 @@ def email_verify_code(email):
         else:
             verification_code = generate_code()
             cache.set(email, verification_code, timeout=300)
-            send_email("RSS2EBOOK 注册验证码", 'RSS2EBOOK 注册验证码： '+ verification_code, email)
+            send_email("RSS2EBOOK 注册验证码", 'RSS2EBOOK 注册验证码： ' + verification_code, email)
             return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
     else:
         return APIResponse.bad_request(msg="无效的邮箱地址！")
@@ -103,33 +104,60 @@ def sign_up():
 
 
 @blueprint.route('/forget/passwd', methods=['POST'])
-@jwt_required()
 def forget_passwd():
     data = request.get_json()
-    user_name = data.get('email')
-    if user_name:
-        user = User.query.filter(or_(User.email == user_name, User.name == user_name)).first()
-        if user:
-            user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
-            db.session.add(user)
-            db.session.commit()
-            send_email(f'{user_name} 重置密码', f'{user.email}:新密码为：{config.DEFAULT_USER_PASSWD}', user.email)
-            return APIResponse.success(msg="密码重置成功，新密码发送至邮箱！")
-        else:
-            return APIResponse.bad_request(msg="用户不存在！")
+    email = data['email']
+    code = data['code']
+    if email:
+        sys_code = cache.get(f'{email}_forget')
+        if int(sys_code) != int(code):
+            return APIResponse.success(msg='验证码错误！')
+        try:
+            user = User.query.filter(or_(User.email == email, User.name == email)).first()
+            if user:
+                user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
+                db.session.add(user)
+                db.session.commit()
+                send_email(f'{email} Password Reset', f'{user.email}:New Password ：{config.DEFAULT_USER_PASSWD}', user.email)
+                cache.set(email, f'{email}: Password has been reset', timeout=600)
+                return APIResponse.success(msg="Password reset successful，New password sent to email!")
+            else:
+                return APIResponse.bad_request(msg="user not exists！")
+        except Exception as e:
+            logging.error(f'Password Reset error:{str(e)}')
+            return APIResponse.bad_request(msg="Password Reset error")
     else:
-        return APIResponse.bad_request(msg="用户名或邮箱地址为空！")
+        return APIResponse.bad_request(msg="Email is empty！")
 
+
+@blueprint.route("/email/forget/code", methods=['GET','POST'])
+def email_forget_code():
+    email = request.args.get('email')
+    if check_email(email):
+        user = User.query.filter(or_(User.email == email, User.name == email)).first()
+
+        try:
+            if user:
+                verification_code = generate_code()
+                cache.set(f'{email}_forget', verification_code, timeout=600)
+                print('code:'+verification_code)
+                send_email("RSS2EBOOK Password reset code", 'RSS2EBOOK Password reset code： {verification_code}', email)
+                return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
+        except Exception as e:
+            logging.error(e)
+            return APIResponse.bad_request(msg="user not exists or error")
+    else:
+        return APIResponse.bad_request(msg="无效的邮箱地址！")
 
 @blueprint.route('/logout')
 def logout():
     return APIResponse.success()
 
+
 @blueprint.route('/info')
 @jwt_required()
 def user_info():
     t_user = get_jwt_identity()
-    # print(t_user['id'])
     user = User.query.get(t_user['id'])
     user_json = model_to_dict(user)
     access_token = ''  # create_access_token(identity=user_json)
@@ -179,9 +207,6 @@ def advice():
     db.session.add(advice)
     db.session.commit()
     return APIResponse.success(msg='Thanks for your advice.')
-
-
-
 
 
 if __name__ == '__main__':

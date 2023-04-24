@@ -1,12 +1,10 @@
 import json
 import logging
 from datetime import datetime, timedelta
-
 import paypalrestsdk
 from flask import request, Blueprint, redirect
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from paypalrestsdk import WebhookEvent
-
 import book.dicts
 import config
 from book import db
@@ -42,7 +40,6 @@ def create_payment():
         paypal_payment = paypalrestsdk.Payment(order)
         logging.error(paypal_payment)
         paypal_payment.create()
-
         print(paypal_payment.id)
         if paypal_payment.state != "created" or paypal_payment.error is not None:
             return APIResponse.created_failed(msg="Payment create failed!")
@@ -68,20 +65,21 @@ def create_payment():
         APIResponse.bad_request(msg="Failed, Change payment method ")
 
 
-main_host = "https://rss2ebook.com/user/upgrade"
+
 
 
 @blueprint.route("/execute", methods=['GET', 'POST'])
 def execute_payment():
     paymentid = request.args.get("paymentId")  # 订单id
     payerid = request.args.get("PayerID")  # 支付者id
+
     if not (paymentid and payerid):
-        return redirect(main_host)
+        return redirect(config.UPGRADE_USER_URL)
 
     # Get pay from database
     user_pay = UserPay.query.filter_by(payment_id=paymentid, status=PaymentStatus.created).first()
     if not user_pay:
-        return redirect(main_host)
+        return redirect(config.UPGRADE_USER_URL)
     # Capture PayPal order
     try:
         payment = paypalrestsdk.Payment.find(paymentid)
@@ -113,7 +111,7 @@ def execute_payment():
         logging.error("Invalid PayPal payment parameters: %s" % str(e))
     except Exception as e:
         logging.exception("Failed to execute PayPal payment: %s" % str(e))
-    return redirect(main_host)
+    return redirect(config.UPGRADE_USER_URL)
 
 
 @blueprint.route("/refund", methods=['GET'])
@@ -166,7 +164,7 @@ def refund_payment():
 
 @blueprint.route("/cancel", methods=['GET', 'POST'])
 def cancel_payment():
-    return redirect("/")
+    return redirect(config.UPGRADE_USER_URL)
 
 
 @blueprint.route("/notification/event")
