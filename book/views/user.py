@@ -168,15 +168,16 @@ def user_info():
 @jwt_required()
 def user_passwd_change():
     data = request.get_json()
-    user = get_jwt_identity()
-    user_email = data['email']
-    if user.email != user_email:
-        return APIResponse.internal_server_error(msg="邮箱错误!")
-    new_pass = data['passwd']
+
+    new_pass = data.get('passwd')
+    user = User.get_by_id(int(get_jwt_identity()['id']))
+    if not user or not new_pass:
+        return APIResponse.bad_request(msg="user not exists or password is empty!")
+
     user.hash_pass = generate_password_hash(new_pass)
     db.session.add(user)
     db.session.commit()
-    return APIResponse.success(msg="密码修改成功！")
+    return APIResponse.success(msg="Change password successful")
 
 
 @blueprint.route('/pay/log', methods=['GET'])
