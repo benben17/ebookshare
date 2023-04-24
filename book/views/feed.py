@@ -120,7 +120,6 @@ def get_pub_rss():
             return return_fun(res)
     except Exception as e:
         if cache.get(pub_rss_key):
-
             return APIResponse.success(data=cache.get(pub_rss_key))
 
         res = sync_post(request.path, request.get_json(), None)
