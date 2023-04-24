@@ -19,7 +19,8 @@ blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/boo
 @jwt_required()
 def my_book():
     """获取我的新闻书籍"""
-    res = sync_post(request.path, request.get_json(), get_jwt_identity())
+    path = '/api/v2/book/my'
+    res = sync_post(path, request.get_json(), get_jwt_identity())
     return return_fun(res)
 
 
