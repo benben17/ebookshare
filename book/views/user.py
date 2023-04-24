@@ -103,7 +103,7 @@ def sign_up():
         return APIResponse.bad_request(msg="注册失败！")
 
 
-@blueprint.route('/forget/passwd', methods=['POST'])
+@blueprint.route('/reset/passwd', methods=['POST'])
 def forget_passwd():
     email = request.get_json().get('email')
     code = request.get_json().get('code')
@@ -128,7 +128,7 @@ def forget_passwd():
         return APIResponse.bad_request(msg="Password Reset error")
 
 
-@blueprint.route("/forget/code", methods=['GET', 'POST'])
+@blueprint.route("/forget/code", methods=['GET'])
 def email_forget_code():
     email = request.args.get('email')
     if check_email(email) is False:
@@ -140,7 +140,7 @@ def email_forget_code():
     verification_code = generate_code()
     cache.set(f'{email}_forget', verification_code, timeout=600)
     logging.info(f'code:{verification_code}')
-    send_email("RSS2EBOOK Password reset code", 'RSS2EBOOK Password reset code： {verification_code}', email)
+    send_email("RSS2EBOOK Password reset code", f'RSS2EBOOK Password reset code： {verification_code}', email)
     return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
 
 
