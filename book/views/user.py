@@ -11,7 +11,7 @@ from book.models import db, User, UserPay, Advice
 from flask import request, Blueprint
 from book.utils.ApiResponse import APIResponse
 from book.utils import check_email, generate_code, model_to_dict, get_file_name, gen_userid, commUtil
-from book.utils.commUtil import sync_user
+from book.utils.commUtil import sync_user, new_passwd
 from book.utils.mailUtil import send_email
 
 blueprint = Blueprint(
@@ -120,7 +120,7 @@ def forget_passwd():
         user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
         db.session.add(user)
         db.session.commit()
-        send_email(f'{user.email} Password Reset', f'{user.email}:New Password ：{config.DEFAULT_USER_PASSWD}',
+        send_email(f'{user.email} Password Reset', f'{user.email}:New Password ：{new_passwd()}',
                    user.email)
         return APIResponse.success(msg="Password reset successful，New password sent to email!")
     except Exception as e:
@@ -144,7 +144,7 @@ def email_forget_code():
     cache.set(f'{email}_reset', verification_code, timeout=600)
     cache.set(f'{email}_send_count', send_count, timeout=600)
     logging.info(f'code:{verification_code}')
-    send_email("RSS2EBOOK Password reset code", f'RSS2EBOOK password reset Code： {verification_code}', email)
+    send_email("RSS2EBOOK Password reset code", f'RSS2EBOOK \n Account: {email} reset \n password reset Code： {verification_code}', email)
     return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
 
 
