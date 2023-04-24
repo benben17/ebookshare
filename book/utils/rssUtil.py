@@ -7,6 +7,7 @@ import requests
 import config
 from book.dateUtil import dt_to_str, str_to_dt
 from book.utils import get_rss_host, gen_userid
+from book.utils.commUtil import new_passwd
 
 
 def is_rss_feed(rss_url):
@@ -42,6 +43,8 @@ def get_rss_latest_titles(rss_url, num):
         return []
 
 
+
+
 rss_list = [
     # ('News','FT - World', 'https://www.ft.com/world?format=rss'),
     # ('News','FT - US', 'https://www.ft.com/us?format=rss'),
@@ -71,6 +74,7 @@ rss_list = [
 
 if __name__ == "__main__":
     # print(int(-8))
+    print(new_passwd())
     print(get_rss_latest_titles('https://rsshub.app/economist/global-business-review/cn-en', 1))
     # d = feedparser.parse("https://feedx.net/rss/economistp.xml")
 

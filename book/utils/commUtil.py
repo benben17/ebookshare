@@ -1,4 +1,6 @@
 # -*-coding: utf-8-*-
+
+import random
 import requests
 import config, logging, json
 from book.dicts import RequestStatus
@@ -24,7 +26,7 @@ def sync_post(path, param, user=None):
             return json_data
         return {"status": "failed", "msg": json_data[RequestStatus.MSG]}
     else:
-        logging.error("error:"+str(path))
+        logging.error("error:" + str(path))
         logging.error(res.text)
         return {"status": "failed", "msg": res.text}
 
@@ -49,3 +51,20 @@ def sync_user(user):
         if res['status'].lower() == RequestStatus.OK:
             return True
     return False
+
+
+def new_passwd():
+    randomStr = ""
+    for i in range(8):
+        temp = random.randrange(0, 3)
+        if temp == 0:
+            ch = chr(random.randrange(ord('A'), ord('Z') + 1))
+            randomStr += ch
+        elif temp == 1:
+            ch = chr(random.randrange(ord('a'), ord('z') + 1))
+            randomStr += ch
+        else:
+            ch = str((random.randrange(0, 10)))
+            randomStr += ch
+
+    return randomStr
