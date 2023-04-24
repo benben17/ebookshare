@@ -105,9 +105,8 @@ def sign_up():
 
 @blueprint.route('/forget/passwd', methods=['POST'])
 def forget_passwd():
-    data = request.get_json()
-    email = data['email']
-    code = int(data['code'])
+    email = request.args.get('email')
+    code = int(request.args.get('code', 0))
     if not email or not code:
         return APIResponse.bad_request(msg="Email or Code is empty！")
     try:
@@ -142,7 +141,6 @@ def email_forget_code():
     logging.info(f'code:{verification_code}')
     send_email("RSS2EBOOK Password reset code", 'RSS2EBOOK Password reset code： {verification_code}', email)
     return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
-
 
 
 @blueprint.route('/logout')
