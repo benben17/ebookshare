@@ -6,6 +6,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 APPID = "wx0630c28def50cbfd"
 APPSECRET = "20764c0ae174a1e12c78e809a877c382"
 wechat_token = "kindlebooks"
+
+# sqllite
 SECRET_KEY = os.getenv('SECRET_KEY', 'ae692a68e23d11ed91a60af4f90de0bb')
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'db/ebook.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -14,7 +16,6 @@ CSRF_ENABLED = True
 
 os.environ['TZ'] = 'Asia/Shanghai'
 
-# flask mail
 # Flask-Mail settings
 MAIL_ON_OFF = 'ON'
 MAIL_SERVER = 'smtp.gmail.com'
@@ -24,7 +25,7 @@ MAIL_PORT = 465
 MAIL_USE_SSL = True
 MAIL_USERNAME = 'librz.link@gmail.com'
 MAIL_PASSWORD = 'hyqycxwwiwcwiswi'
-MAIL_DEFAULT_SENDER = '"ebookshare"<librz.link@gmail.com>'
+MAIL_DEFAULT_SENDER = '"rss2ebook"<librz.link@gmail.com>'
 MAIL_ATT_MAX_SIZE = 20  # 设置附件大小 单位M
 
 # 下面五个参数是所有的类型共有的
@@ -58,18 +59,14 @@ rss_host = {    # rss 源后台主机
 
 
 RSS2EBOOK_KEY = 'rss2Ebook.com.luck!'
-DEFAULT_USER_PASSWD = 'sendtokindles'
 HEADERS = {'Content-Type': 'application/x-www-form-urlencoded'}
 
 
 # 在Google Cloud Platform 中创建 OAuth 2.0 客户端 ID 时指定的值
-CLIENT_ID = '774931221812-vpnvivcrjosa9l7mcdbjjkdg1tsf19ca.apps.googleusercontent.com'
-CLIENT_SECRET = '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'
-
 OAUTH_CREDENTIALS = {
     'google': {
-        'id': CLIENT_ID,
-        'secret': CLIENT_SECRET
+        'id': '774931221812-vpnvivcrjosa9l7mcdbjjkdg1tsf19ca.apps.googleusercontent.com',
+        'secret': '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'
     }
 }
 

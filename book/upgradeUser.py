@@ -5,7 +5,6 @@ import threading
 import requests
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
-
 import config
 from book import db, app
 from book.dateUtil import dt_to_str
