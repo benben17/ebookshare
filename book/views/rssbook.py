@@ -6,9 +6,11 @@ import requests
 from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import config
+from book import cache
+from book.dicts import RequestStatus
 from book.utils import get_file_name, get_rss_host
 from book.utils.ApiResponse import APIResponse
-from book.utils.commUtil import sync_post, return_fun
+from book.utils.commUtil import sync_post, return_fun, CacheKey
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/book')
 
@@ -17,8 +19,15 @@ blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/boo
 @jwt_required()
 def my_book():
     """获取我的新闻书籍"""
-    path = '/api/v2/book/my'
-    res = sync_post(path, request.get_json(), get_jwt_identity())
+    user = get_jwt_identity()
+    cacheKey = CacheKey.mybook.format(user['name'])
+    my_books = cache.get(cacheKey)
+    if my_books:
+        return APIResponse.success(data=my_books)
+    res = sync_post(request.path, request.get_json(), user)
+    if res.get("status").lower() == RequestStatus.OK:
+        if res.get('data'):
+            cache.set(cacheKey, res.get('data'))
     return return_fun(res)
 
 
@@ -26,7 +35,9 @@ def my_book():
 @jwt_required()
 def book_add():
     """新闻书籍新增"""
-    res = sync_post(request.path, request.get_json(), get_jwt_identity())
+    user = get_jwt_identity()
+    res = sync_post(request.path, request.get_json(), user)
+    cache.delete(CacheKey.mybook.format(user['name']))
     return return_fun(res)
 
 
@@ -35,9 +46,11 @@ def book_add():
 def book_edit():
     """新闻书籍编辑"""
     data = request.get_json()
+    user = get_jwt_identity()
     if not data.get('book_id'):
         return APIResponse.bad_request(msg="参数错误！")
-    res = sync_post(request.path, request.get_json(), get_jwt_identity())
+    res = sync_post(request.path, request.get_json(), user)
+    cache.delete(CacheKey.mybook.format(user['name']))
     return return_fun(res)
 
 
@@ -46,9 +59,11 @@ def book_edit():
 def book_del():
     """新闻书籍删除"""
     data = request.get_json()
+    user = get_jwt_identity()
     if not data['book_id']:
         return APIResponse.bad_request(msg="参数错误！")
-    res = sync_post(request.path, request.get_json(), get_jwt_identity())
+    res = sync_post(request.path, request.get_json(), user)
+    cache.delete(CacheKey.mybook.format(user['name']))
     return return_fun(res)
 
 
