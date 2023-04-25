@@ -118,7 +118,7 @@ def get_pub_rss():
         if cache.get(pub_rss_key):
             return APIResponse.success(data=cache.get(pub_rss_key))
 
-        res = sync_post(request.path, request.get_json(), None)
+        res = sync_post(path=request.path, param=request.get_json(), user=None)
         if res['status'] == RequestStatus.OK:
             cache.set(pub_rss_key, res['data'], timeout=86400)
         return return_fun(res)

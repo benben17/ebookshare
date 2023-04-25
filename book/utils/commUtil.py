@@ -10,10 +10,13 @@ from book.utils.ApiResponse import APIResponse
 
 def sync_post(path, param, user=None):
     """远程服务器请求方法"""
-    param['key'] = config.RSS2EBOOK_KEY
-    if user is not None:
+
+    if user is None:
+        param = {}
+    else:
         param['user_name'] = user['name']
         param['creator'] = user['name']
+    param['key'] = config.RSS2EBOOK_KEY
 
     request_host = get_rss_host()
     # request_host = 'http://127.0.0.1:8080'
