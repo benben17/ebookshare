@@ -117,10 +117,11 @@ def forget_passwd():
         user = User.query.filter(User.email == email).first()
         if not user:
             return APIResponse.bad_request(msg="user not exists！")
-        user.hash_pass = generate_password_hash(config.DEFAULT_USER_PASSWD)
+        new_pass = new_passwd()
+        user.hash_pass = generate_password_hash(new_pass)
         db.session.add(user)
         db.session.commit()
-        send_email(f'{user.email} Password Reset', f'{user.email}:New Password ：{new_passwd()}',
+        send_email(f'{user.email} Password Reset', f'{user.email}:New Password ：{new_pass}',
                    user.email)
         return APIResponse.success(msg="Password reset successful，New password sent to email!")
     except Exception as e:
