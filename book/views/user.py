@@ -120,10 +120,12 @@ def forget_passwd():
             return APIResponse.bad_request(msg="user not exists！")
         new_pass = new_passwd()
         user.hash_pass = generate_password_hash(new_pass)
+        logging.info(f"passwd:{new_pass}")
         db.session.add(user)
         db.session.commit()
         send_email(f'{user.email} Password Reset', f'{user.email}:New Password ：{new_pass}',
                    user.email)
+        logging.info(f"111passwd:{new_pass}")
         return APIResponse.success(msg="Password reset successful，New password sent to email!")
     except Exception as e:
         logging.error(f'Password Reset error:{str(e)}')
@@ -218,7 +220,7 @@ def advice():
 if __name__ == '__main__':
     print("a")
 
-    print(CacheKey.sendCount.format('email'))
+    print(generate_password_hash("admin123"))
     # with app.app_context():
     #     content = '892100089@qq.com'
     #
