@@ -111,7 +111,8 @@ def forget_passwd():
     if not email or not code:
         return APIResponse.bad_request(msg="Email or Code is empty！")
     try:
-        sys_code = cache.get(CacheKey.resetKey.format(email))
+        cacheKey = CacheKey.resetKey.format(email)
+        sys_code = cache.get(cacheKey)
         if sys_code is None or str(sys_code) != str(code):
             return APIResponse.bad_request(msg='验证码错误！')
         user = User.query.filter(User.email == email).first()
@@ -145,7 +146,7 @@ def email_forget_code():
     if not user:
         return APIResponse.bad_request(msg="user not exists or error")
     verification_code = generate_code()
-    cache.set(cacheKey, verification_code, timeout=600)
+    cache.set(CacheKey.resetKey.format(email), verification_code, timeout=600)
     cache.set(cacheKey, send_count, timeout=600)
     logging.info(f'code:{verification_code}')
     send_email("RSS2EBOOK Password reset code",

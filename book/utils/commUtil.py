@@ -83,6 +83,7 @@ class CacheKey:
     pub_rss_key = 'pub_rss_key'
     deliverKey = 'deliver:{}'
     rss_user_info = 'user_info:{}'
+    my_rss = 'my_rss:{}'
 
 
 
