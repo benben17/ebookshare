@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
-import config
+from book.utils.commUtil import CacheKey
 from book import cache
 from book.dicts import UserRole, PaymentStatus
 from book.models import db, User, UserPay, Advice
@@ -107,11 +107,11 @@ def sign_up():
 def forget_passwd():
     email = request.get_json().get('email')
     code = request.get_json().get('code')
-    print(code, email)
+
     if not email or not code:
         return APIResponse.bad_request(msg="Email or Code is empty！")
     try:
-        sys_code = cache.get(f'{email}_reset')
+        sys_code = cache.get(CacheKey.resetKey.format(email))
         if sys_code is None or str(sys_code) != str(code):
             return APIResponse.bad_request(msg='验证码错误！')
         user = User.query.filter(User.email == email).first()
@@ -134,7 +134,10 @@ def email_forget_code():
     email = request.args.get('email')
     if check_email(email) is False:
         return APIResponse.bad_request(msg="Invalid email address！")
-    send_count = 0 if not cache.get(f'{email}_send_count') else int(cache.get(f'{email}_send_count'))
+
+    cacheKey = CacheKey.sendCount.format(email)
+
+    send_count = 0 if not cache.get(cacheKey) else int(cache.get(cacheKey))
     if send_count >= 6:
         return APIResponse.bad_request(msg="Sent many times, please send it after 10 minutes")
     send_count += 1
@@ -142,10 +145,11 @@ def email_forget_code():
     if not user:
         return APIResponse.bad_request(msg="user not exists or error")
     verification_code = generate_code()
-    cache.set(f'{email}_reset', verification_code, timeout=600)
-    cache.set(f'{email}_send_count', send_count, timeout=600)
+    cache.set(cacheKey, verification_code, timeout=600)
+    cache.set(cacheKey, send_count, timeout=600)
     logging.info(f'code:{verification_code}')
-    send_email("RSS2EBOOK Password reset code", f'RSS2EBOOK \n Account: {email} reset \n password reset Code： {verification_code}', email)
+    send_email("RSS2EBOOK Password reset code",
+               f'RSS2EBOOK \n Account: {email} reset \n password reset Code： {verification_code}', email)
     return APIResponse.success(msg="验证码已发送至您的邮箱，请查收。")
 
 
@@ -212,25 +216,24 @@ def advice():
 
 if __name__ == '__main__':
     print("a")
-    from book import app
-    from sqlalchemy import Enum, desc
 
-    with app.app_context():
-        content = '892100089@qq.com'
-
-        user = User().query.filter_by(wx_openid="content").first()
-        if user and user.email:
-            print(user.email)
-        elif user and user.email is None:
-            user.email = content
-            db.session.add(user)
-        elif not user:  # 通过openID 没有查询到用户
-            user_info = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
-            if user_info and not user_info.wx_openid:
-                print(user_info.wx_openid)
-                user_info.wx_openid = "content"
-                db.session.add(user_info)
-            elif not user_info:
-                user_info = User(email=content, kindle_email=content, wx_openid="content")
-                db.session.add(user_info)
-        db.session.commit()
+    print(CacheKey.sendCount.format('email'))
+    # with app.app_context():
+    #     content = '892100089@qq.com'
+    #
+    #     user = User().query.filter_by(wx_openid="content").first()
+    #     if user and user.email:
+    #         print(user.email)
+    #     elif user and user.email is None:
+    #         user.email = content
+    #         db.session.add(user)
+    #     elif not user:  # 通过openID 没有查询到用户
+    #         user_info = User.query.filter(or_(User.email == content, User.kindle_email == content)).first()
+    #         if user_info and not user_info.wx_openid:
+    #             print(user_info.wx_openid)
+    #             user_info.wx_openid = "content"
+    #             db.session.add(user_info)
+    #         elif not user_info:
+    #             user_info = User(email=content, kindle_email=content, wx_openid="content")
+    #             db.session.add(user_info)
+    #     db.session.commit()
