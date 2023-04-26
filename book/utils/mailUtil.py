@@ -7,7 +7,11 @@ from book.utils.wxMsg import mail_body
 
 def send_async_email(app, msg):
     with app.app_context():
-        mail.send(msg)
+        try:
+            mail.send(msg)
+        except Exception as e:
+            logging.error("send email failed")
+            logging.error(str(e))
 
 
 def send_email(subject, body, receiver, attach=None):

@@ -12,6 +12,7 @@ from book.utils.ApiResponse import APIResponse
 from book.utils.commUtil import return_fun, sync_post, CacheKey
 from book.utils.rssUtil import get_rss_latest_titles, is_rss_feed
 from book import cache as cacheUtil
+
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2')
 
 
@@ -38,8 +39,8 @@ def user_setting():
 
     res = sync_post(request.path, param, user)
     if res.get("status").lower() == RequestStatus.OK:
-        cacheKey = CacheKey.rss_user_info.format(user['name'])
-        cacheUtil.set(cacheKey, res.get("data"), timeout=86400)
+        user_info_key = CacheKey(user['name']).rss_user_info
+        cacheUtil.set(user_info_key, res.get("data"), timeout=86400)
     return return_fun(res)
 
 
@@ -58,10 +59,10 @@ def user_upgrade():
 def rss_user_info():
     param = request.get_json()
     user = get_jwt_identity()
-    cacheKey = CacheKey.rss_user_info.format(user['name'])
+    user_info_cache = cacheUtil.get(CacheKey(user['name']).rss_user_info)
 
-    if cacheUtil.get(cacheKey):
-        return APIResponse.success(data=cacheUtil.get(cacheKey))
+    if user_info_cache:
+        return APIResponse.success(data=user_info_cache)
     res = sync_post(request.path, param, user)
     return return_fun(res)
 
@@ -79,14 +80,13 @@ def get_deliver_logs():
 @blueprint.route('/deliver/push', methods=['POST'])
 @jwt_required()
 def my_feed_deliver():
-
     # 获取当前登录用户的身份信息
     user = get_jwt_identity()
     # 获取请求中的参数
     param = request.get_json()
-    cacheKey = CacheKey.deliverKey.format(user['name'])
+    deliver_key = CacheKey(user['name']).deliverKey
     # 获取上一次推送的时间
-    last_delivery_time = str_to_dt(cacheUtil.get(cacheKey))
+    last_delivery_time = str_to_dt(cacheUtil.get(deliver_key))
     # 获取当前用户的角色
     user_role = user['role'] if user['role'] else 'default'
     # 获取发送间隔时间，转换成秒
@@ -103,7 +103,7 @@ def my_feed_deliver():
     res = sync_post(request.path, param, user)
     # 如果发送成功，设置缓存的过期时间为发送间隔时间，返回成功信息和结果数据
     if res['status'].lower() == RequestStatus.OK:
-        cacheUtil.set(cacheKey, dt_to_str(datetime.now()), timeout=send_interval)
+        cacheUtil.set(deliver_key, dt_to_str(datetime.now()), timeout=send_interval)
         return APIResponse.success(msg='Add push task', data=res['data'])
     else:  # 如果发送失败，返回错误信息
         return APIResponse.bad_request(msg=res['msg'])
@@ -114,16 +114,22 @@ def get_pub_rss():
     """公共订阅源"""
     try:
         verify_jwt_in_request()
-        if get_jwt_identity():
-            res = sync_post(request.path, request.get_json(), get_jwt_identity())
+        user = get_jwt_identity()
+        if user:
+            cache_pub_rss_key = CacheKey(user['name']).pub_rss_key
+            pub_rss = cacheUtil.get(cache_pub_rss_key)
+            if pub_rss:
+                return APIResponse.success(data=pub_rss)
+            res = sync_post(request.path, request.get_json(), user)
+            if res.get("status").lower() == RequestStatus.OK:
+                cacheUtil.set(cache_pub_rss_key, res.get('data'), timeout=86400)
             return return_fun(res)
     except Exception as e:
-        if cacheUtil.get(CacheKey.pub_rss_key):
-            return APIResponse.success(data=cacheUtil.get(CacheKey.pub_rss_key))
-
+        if cacheUtil.get(CacheKey().pub_rss_key):
+            return APIResponse.success(data=cacheUtil.get(CacheKey().pub_rss_key))
         res = sync_post(path=request.path, param=request.get_json(), user=None)
         if res['status'] == RequestStatus.OK:
-            cacheUtil.set(CacheKey.pub_rss_key, res['data'], timeout=86400)
+            cacheUtil.set(CacheKey().pub_rss_key, res['data'], timeout=86400)
         return return_fun(res)
 
 
@@ -132,13 +138,13 @@ def get_pub_rss():
 def my_rss():
     api_path = '/api/v2/rss/myrss'
     user = get_jwt_identity()
-    cacheKey = CacheKey.my_rss.format(user['name'])
-    if cacheUtil.get(cacheKey):
-        return APIResponse.success(data=cacheUtil.get(cacheKey))
+    my_rss_cache = cacheUtil.get(CacheKey(user['name']).my_rss)
+    if my_rss_cache:
+        return APIResponse.success(data=my_rss_cache)
 
     res = sync_post(api_path, request.get_json(), user)
     if res.get("status").lower() == RequestStatus.OK:
-        cacheUtil.set(cacheKey, res.get("data"), timeout=86400)
+        cacheUtil.set(CacheKey(user['name']).my_rss, res.get("data"), timeout=86400)
 
     return return_fun(res)
 
@@ -153,7 +159,7 @@ def my_rss_add():
         return APIResponse.bad_request(msg='The url is not a correct rss, or cannot be connected')
 
     user = User.get_by_id(user_info['id'])
-    feed_num = UserRole.role_feed_num(user.role if user.role else '')
+    feed_num = UserRole.role_feed_num(user.role)
     if user.feed_count >= feed_num:
         return APIResponse.bad_request(msg=f"已达到最大 {feed_num} 个订阅,不能在订阅,请升级成Plus会员！")
     res = sync_post(api_path, data, user_info)
@@ -161,8 +167,8 @@ def my_rss_add():
         user.feed_count += 1
         db.session.add(user)
         db.session.commit()
-
-        cacheUtil.delete(CacheKey.my_rss.format(user['name']))
+        cacheUtil.delete(CacheKey(user.name).pub_rss_key)
+        cacheUtil.delete(CacheKey(user.name).my_rss)
         return APIResponse.success(msg=res['msg'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
@@ -181,7 +187,8 @@ def my_rss_del():
         db.session.add(user)
         db.session.commit()
 
-        cacheUtil.delete(CacheKey.my_rss.format(user['name']))
+        cacheUtil.delete(CacheKey(user['name']).pub_rss_key)
+        cacheUtil.delete(CacheKey(user['name']).my_rss)
         return APIResponse.success(msg=res['msg'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
@@ -219,6 +226,7 @@ if __name__ == "__main__":
     from book.utils.rssUtil import rss_list
     from book import app, cache
 
+    print(CacheKey().pub_rss_key)
     timeout = 24 * 60 * 60
     print(timeout)
     print(datetime.now() + timedelta(seconds=timeout))
