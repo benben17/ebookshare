@@ -179,16 +179,17 @@ def my_rss_add():
 def my_rss_del():
     """删除我的订阅"""
     api_path = '/api/v2/rss/del'
-    res = sync_post(api_path, request.get_json(), get_jwt_identity())
-    user = get_jwt_identity()
+    user_info = get_jwt_identity()
+    res = sync_post(api_path, request.get_json(), user_info)
+
     if res['status'].lower() == RequestStatus.OK:
-        user = User.query.get(user['id'])
+        user = User.query.get(user_info['id'])
         user.feed_count = user.feed_count - 1 if user.feed_count == 0 else 0
         db.session.add(user)
         db.session.commit()
 
-        cacheUtil.delete(CacheKey(user['name']).pub_rss_key)
-        cacheUtil.delete(CacheKey(user['name']).my_rss)
+        cacheUtil.delete(CacheKey(user_info['name']).pub_rss_key)
+        cacheUtil.delete(CacheKey(user_info['name']).my_rss)
         return APIResponse.success(msg=res['msg'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
