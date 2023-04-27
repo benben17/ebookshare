@@ -33,6 +33,7 @@ def sync_post(path, param, user=None):
             logging.error(res.text)
             return {"status": "failed", "msg": res.text}
     except Exception as e:
+        print(e)
         return {"status": "failed", "msg": "system error"}
 
 
@@ -76,15 +77,12 @@ def new_passwd():
 
 
 class CacheKey:
+    def __init__(self, param=""):
 
-    mybook = 'books:{}'
-    resetKey = 'passwd_reset:{}'
-    sendCount = 'email_send_count:{}'
-    pub_rss_key = 'pub_rss_key'
-    deliverKey = 'deliver:{}'
-    rss_user_info = 'user_info:{}'
-    my_rss = 'my_rss:{}'
-
-
-
-
+        self.mybook = 'books:{}'.format(param)
+        self.resetKey = 'passwd_reset:{}'.format(param)
+        self.sendCount = 'email_send_count:{}'.format(param)
+        self.pub_rss_key = 'pub_rss_key:{}'.format(param)
+        self.deliverKey = 'deliver:{}'.format(param)
+        self.rss_user_info = 'user_info:{}'.format(param)
+        self.my_rss = 'my_rss:{}'.format(param)

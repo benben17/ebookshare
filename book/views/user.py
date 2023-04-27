@@ -25,12 +25,11 @@ blueprint = Blueprint(
 def login():
     data = request.get_json()
     if not all(key in data for key in ['email', 'passwd']):
-        return APIResponse.bad_request(msg="用户名密码为空！")
+        return APIResponse.bad_request(msg="Username or Password is empty！")
 
-    user = User.query.filter(or_(User.name == data['email'], User.email == data['email'])).first()
-
+    user = User.query.filter(or_(User.email == data['email'], User.name == data['email'])).first()
     if user is None:
-        return APIResponse.bad_request(msg="用户不存在")
+        return APIResponse.bad_request(msg=f"User :{data['email']} is not exists!")
     # 修复公众号用户
     if not user.hash_pass and not user.is_reg_rss:
         user.hash_pass = generate_password_hash(data["passwd"])
@@ -43,7 +42,7 @@ def login():
             db.session.commit()
 
     if not check_password_hash(user.hash_pass, data['passwd']):
-        return APIResponse.bad_request(msg="密码不正确")
+        return APIResponse.bad_request(msg="Incorrect password!")
 
     userinfo = model_to_dict(user)
     access_token = create_access_token(identity=userinfo)
@@ -120,7 +119,7 @@ def forget_passwd():
             return APIResponse.bad_request(msg="user not exists！")
         new_pass = new_passwd()
         user.hash_pass = generate_password_hash(new_pass)
-        logging.info(f"passwd:{new_pass}")
+        logging.info(f"passwd:{new_pass}:{user.hash_pass}")
         db.session.add(user)
         db.session.commit()
         send_email(f'{user.email} Password Reset', f'{user.email}:New Password ：{new_pass}',
@@ -219,8 +218,10 @@ def advice():
 
 if __name__ == '__main__':
     print("a")
-
-    print(generate_password_hash("admin123"))
+    "pbkdf2:sha256:260000$18OgiuayUI0qk0NZ$c0c08f9505e4d296146a9a4e25404f3ef075c16737f3efd1ddf979e19344b2de"
+    hash_pass = "pbkdf2:sha256:260000$8aQWKgTw7XFUFVsq$9dfa2bc7ea608f1c1f4b1e1d5af1fca6ce970e3aac7dc6678aa2b9b34ef5913c"
+    pa = "uJ4eA3s4"
+    print(check_password_hash(hash_pass, pa))
     # with app.app_context():
     #     content = '892100089@qq.com'
     #
