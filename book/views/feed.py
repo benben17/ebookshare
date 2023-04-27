@@ -169,6 +169,7 @@ def my_rss_add():
         db.session.commit()
         cacheUtil.delete(CacheKey(user.name).pub_rss_key)
         cacheUtil.delete(CacheKey(user.name).my_rss)
+        cacheUtil.delete(CacheKey(user.name).mybook)
         return APIResponse.success(msg=res['msg'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
@@ -190,6 +191,7 @@ def my_rss_del():
 
         cacheUtil.delete(CacheKey(user_info['name']).pub_rss_key)
         cacheUtil.delete(CacheKey(user_info['name']).my_rss)
+        cacheUtil.delete(CacheKey(user_info['name']).mybook)
         return APIResponse.success(msg=res['msg'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
