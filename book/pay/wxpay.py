@@ -103,4 +103,9 @@ class WXPay:
         }
         response = requests.request(url=url, method=method, data=data, headers=headers)
         return response
+
+    def get_sign(self, sign_str):
+        pass
+
+
 wx = WXPay

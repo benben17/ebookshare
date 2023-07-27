@@ -228,8 +228,9 @@ def rss_view_title():
 if __name__ == "__main__":
     from book.utils.rssUtil import rss_list
     from book import app, cache
-
-    print(CacheKey().pub_rss_key)
-    timeout = 24 * 60 * 60
-    print(timeout)
-    print(datetime.now() + timedelta(seconds=timeout))
+    a = "//aaa"
+    print("http:".join(a))
+    # print(CacheKey().pub_rss_key)
+    # timeout = 24 * 60 * 60
+    # print(timeout)
+    # print(datetime.now() + timedelta(seconds=timeout))

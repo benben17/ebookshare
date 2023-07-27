@@ -1,11 +1,10 @@
 import time
 from datetime import datetime, timedelta
-
-import pytz
-
+import datetime as dt
 
 def get_now():
     return datetime.now()
+
 
 def utc_to_local(utc_time, fmt='%Y-%m-%d %H:%M:%S', tz=8):
     if not utc_time:
@@ -50,17 +49,18 @@ def dt_to_str(time_dt) -> str:
     else:
         return time_dt
 
-def format_time(dt) -> str:
-    if dt is None:
+
+def format_time(d_t) -> str:
+    if d_t is None:
         return None
-    if isinstance(dt, datetime):
-        return dt_to_str(dt)
+    if isinstance(d_t, datetime):
+        return dt_to_str(d_t)
     else:
-        return dt_to_str(str_to_dt(dt))
+        return dt_to_str(str_to_dt(d_t))
 
 
 def now_datetime() -> str:
-    return str(datetime.datetime.fromtimestamp(int(time.time())))
+    return str(dt.datetime.fromtimestamp(int(time.time())))
 
 
 def now_date() -> str:

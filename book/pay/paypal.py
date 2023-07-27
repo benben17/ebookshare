@@ -56,16 +56,13 @@ def create_payment():
                 user_pay.pay_url = approval_url
                 db.session.add(user_pay)
                 db.session.commit()
-                logging.error("Redirect for approval: %s" % (approval_url))
+                logging.error(f"Redirect for approval: {approval_url}")
                 return APIResponse.success(data=approval_url)
     except Exception as e:
         logging.error(str(e))
         logging.error("-------")
-        logging.error(paypal_payment.error)
+        # logging.error(paypal_payment.error)
         APIResponse.bad_request(msg="Failed, Change payment method ")
-
-
-
 
 
 @blueprint.route("/execute", methods=['GET', 'POST'])
@@ -131,7 +128,7 @@ def refund_payment():
             sale = paypalrestsdk.Sale.find(sale_id)
 
             refund = sale.refund({"amount": {"total": pay.amount, "currency": "USD"}})
-            logging.error("paypal refund")
+            # logging.error("paypal refund")
             logging.error(refund)
             if refund.success():  # Check refund status
                 if refund.create_time:
