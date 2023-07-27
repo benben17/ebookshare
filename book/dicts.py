@@ -64,11 +64,13 @@ class Product:
 
 
 if __name__ == "__main__":
-    days = -10
     print(UserRole.get_role())
-    # print(datetime.utcnow() + timedelta(days=int(days)))
-    # day = 'Sunday'
-    # p_dict = Product("hahha").get_product()
-    # user = {"role": None}
-    # user_role = user['role'] if user['role'] else 'default'
-    # print(UserRole.get_send_interval(user_role))
+    new_list = UserRole.get_role()
+    match new_list:
+        case {'name': "default"}:
+            print("ok")
+        case 1:
+            print("1")
+        case _:
+            print("jajja")
+

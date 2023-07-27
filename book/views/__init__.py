@@ -2,8 +2,9 @@
 """
 Copyright (c) 2019 - present benben
 """
-from flask import render_template, request, redirect
+from importlib import import_module
 
+from flask import render_template, redirect
 from book import app
 
 
@@ -24,3 +25,9 @@ def kindle_no_att():
     # print(request.url)
     # logging.error(app.template_folder)
     return render_template("kindle_no_att.html")
+
+
+modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook', 'googleUser']
+for model_name in modules:
+    model = import_module(f"{app.name}.views.{model_name}")
+    app.register_blueprint(model.blueprint)

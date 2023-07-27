@@ -3,7 +3,7 @@ import os
 import logging
 from importlib import import_module
 from logging.handlers import RotatingFileHandler
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_caching import Cache
 from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderError, WrongTokenError
 from flask_mail import Mail
@@ -26,11 +26,6 @@ from book.models import *
 
 with app.app_context():
     db.create_all()
-
-modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook', 'googleUser']
-for model_name in modules:
-    model = import_module(f"{app.name}.views.{model_name}")
-    app.register_blueprint(model.blueprint)
 
 from book.views import *
 from book.pay import paypal
