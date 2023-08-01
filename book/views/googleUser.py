@@ -12,7 +12,7 @@ import config
 blueprint = Blueprint(
     get_file_name(__file__),
     __name__,
-    url_prefix='/user'
+    url_prefix='/user/google'
 )
 
 

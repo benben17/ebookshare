@@ -1,5 +1,4 @@
-import json
-import logging
+# encoding:utf-8
 
 from flask import redirect, send_from_directory, request, Blueprint
 from sqlalchemy import or_

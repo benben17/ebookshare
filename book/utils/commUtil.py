@@ -76,7 +76,7 @@ def new_passwd():
     return randomStr
 
 
-class CacheKey:
+class cacheKey:
     def __init__(self, param=""):
 
         self.mybook = 'books:{}'.format(param)

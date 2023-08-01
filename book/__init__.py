@@ -1,8 +1,5 @@
 # -*-coding: utf-8-*-
-import os
-import logging
-from importlib import import_module
-from logging.handlers import RotatingFileHandler
+
 from flask import Flask, jsonify, request
 from flask_caching import Cache
 from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderError, WrongTokenError
@@ -10,6 +7,8 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, get_jwt_identity
 from .dateUtil import utc_to_local
+from .logger_config import init_logging
+from .schedule import init_scheduler
 from .utils import create_app_dir
 
 app = Flask(__name__)
@@ -22,43 +21,18 @@ jwt = JWTManager(app)
 
 create_app_dir()
 
-from book.models import *
-
 with app.app_context():
+    from book.models import *
+
     db.create_all()
 
 from book.views import *
-from book.pay import paypal
 
-app.register_blueprint(paypal.blueprint)
-
-"""
-Initialize logging
-"""
-logfile = f"{os.path.dirname(app.root_path)}/logs/books.log"
-logging.basicConfig(level=logging.INFO)
-handler = RotatingFileHandler(logfile, maxBytes=1024 * 1024 * 100, backupCount=5)  # 最大100M
-"""Time, log level, log file, line number, message"""
-formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(filename)s-%(funcName)s-%(lineno)s-%(message)s')
-handler.setFormatter(formatter)
-logging.getLogger().addHandler(handler)
-
-
-@app.errorhandler(404)
-def error_date(error):
-    return jsonify({'code': 404, 'msg': '404'}), 404
-
-
-@app.errorhandler(NoAuthorizationError)
-@app.errorhandler(InvalidHeaderError)
-@app.errorhandler(WrongTokenError)
-def handle_auth_error(e):
-    return jsonify({'code': 10000, 'msg': 'System error', "data": ""}), 200
-
+init_logging(app)
+#  初始化定时器
+init_scheduler(app)
 
 from book.logger_config import *
-
-from book.schedule import *
 
 
 # @app.after_request
@@ -83,3 +57,15 @@ def after_request(response):
         # "response_body": response.json
     })
     return response
+
+
+@app.errorhandler(404)
+def error_date(error):
+    return jsonify({'code': 404, 'msg': '404'}), 404
+
+
+@app.errorhandler(NoAuthorizationError)
+@app.errorhandler(InvalidHeaderError)
+@app.errorhandler(WrongTokenError)
+def handle_auth_error(e):
+    return jsonify({'code': 10000, 'msg': 'System error', "data": ""}), 200

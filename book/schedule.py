@@ -1,11 +1,11 @@
 # encoding:utf-8
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from flask_apscheduler import APScheduler
-from book import app
-from book.utils.wxMsg import mail_body, send_failed_body, mail_download_url_body
-from book.utils.mailUtil import send_email
-from book.utils import *
+from apscheduler.schedulers.background import BackgroundScheduler
 from book.dicts import SEND_STATUS
+from book.utils import *
+from book.utils.mailUtil import send_email
+from book.utils.wxMsg import mail_body, send_failed_body, mail_download_url_body
 
 
 def del_file_out_24h():
@@ -26,6 +26,7 @@ def del_file_out_24h():
 
 def book_send(send_status):
     from book.models import Userlog, db
+    from book import app
     with app.app_context():
         userlogs = Userlog.query.filter(Userlog.status == send_status).all()
         if not userlogs:  # 无数据直接返回
@@ -51,20 +52,33 @@ def book_send(send_status):
             elif file_path is None:
                 send_email(userlog.book_name + "-下载文件失败", send_failed_body(userlog.book_name),
                            userlog.receive_email)
-                if int(send_status) == SEND_STATUS.UNKONOW:
+                if int(send_status) == SEND_STATUS.UNKNOWN:
                     userlog.status = SEND_STATUS.FAILED
                 else:
-                    userlog.status = SEND_STATUS.UNKONOW
+                    userlog.status = SEND_STATUS.UNKNOWN
                 db.session.add(userlog)
                 db.session.commit()
 
 
-scheduler = APScheduler(BackgroundScheduler())
-scheduler.init_app(app)
-scheduler.add_job(id="delete_file", func=del_file_out_24h, trigger="cron", day="*", hour='02', replace_existing=False)
-scheduler.add_job(id="send_file", func=book_send, args=(str(SEND_STATUS.WAITING)), trigger="interval", seconds=180,
-                  replace_existing=False, max_instances=3)
-scheduler.add_job(id="retry_send_file", func=book_send, args=(str(SEND_STATUS.UNKONOW)), trigger="cron", day="*",
-                  hour="01",
-                  replace_existing=False)
-scheduler.start()
+def init_scheduler(appName):
+    executors = {
+        'default': ThreadPoolExecutor(10),
+        'processpool': ProcessPoolExecutor(5)
+    }
+    job_defaults = {
+        'coalesce': True,
+        'max_instances': 3
+    }
+    scheduler = BackgroundScheduler(executors=executors, job_defaults=job_defaults)
+
+    scheduler.add_job(id="delete_file", func=del_file_out_24h, trigger="cron", day="*", hour='02',
+                      replace_existing=False)
+    scheduler.add_job(id="send_file", func=book_send, args=(str(SEND_STATUS.WAITING),), trigger="interval", seconds=180,
+                      replace_existing=False, max_instances=3)
+    scheduler.add_job(id="retry_send_file", func=book_send, args=(str(SEND_STATUS.UNKNOWN),), trigger="cron", day="*",
+                      hour="01",
+                      replace_existing=False)
+
+    flask_scheduler = APScheduler(scheduler)
+    flask_scheduler.init_app(appName)
+    flask_scheduler.start()

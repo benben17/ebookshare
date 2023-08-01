@@ -1,11 +1,16 @@
 import os
 from datetime import timedelta
 
-DEBUG = os.getenv('DEBUG', False)
+from dotenv import load_dotenv
+
 basedir = os.path.abspath(os.path.dirname(__file__))
-APPID = "wx0630c28def50cbfd"
-APPSECRET = "20764c0ae174a1e12c78e809a877c382"
+load_dotenv()
+DEBUG = os.getenv('DEBUG', False)
+APPID = os.getenv("APPID")
+APPSECRET = os.getenv("APPSECRET")
 wechat_token = "kindlebooks"
+
+
 
 # sqllite
 SECRET_KEY = os.getenv('SECRET_KEY', 'ae692a68e23d11ed91a60af4f90de0bb')
