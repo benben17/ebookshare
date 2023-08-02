@@ -1,13 +1,14 @@
 # 导入支付基类
-from datetime import datetime
-from random import random
+import datetime
+import hashlib
+import json
 import logging
 import os
-import json
-import hashlib
-import base64
-import datetime
+from datetime import datetime
+from random import random
 from urllib import parse
+
+from book.utils.commUtil import cacheKey
 
 
 # from Crypto.PublicKey import RSA
@@ -226,6 +227,7 @@ def param_diff(param: [dict, list], _in: [dict, list]):
 
 
 def get_res(code=0, msg='success', data=None) -> dict:
+
     return dict(code=code, msg=msg, data=data)
 
 

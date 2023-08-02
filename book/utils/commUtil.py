@@ -1,6 +1,8 @@
 # -*-coding: utf-8-*-
 
 import random
+from enum import Enum
+
 import requests
 import config, logging, json
 from book.dicts import RequestStatus
@@ -76,13 +78,16 @@ def new_passwd():
     return randomStr
 
 
-class cacheKey:
-    def __init__(self, param=""):
+class cacheKey(Enum):
 
-        self.mybook = 'books:{}'.format(param)
-        self.resetKey = 'passwd_reset:{}'.format(param)
-        self.sendCount = 'email_send_count:{}'.format(param)
-        self.pub_rss_key = 'pub_rss_key:{}'.format(param)
-        self.deliverKey = 'deliver:{}'.format(param)
-        self.rss_user_info = 'user_info:{}'.format(param)
-        self.my_rss = 'my_rss:{}'.format(param)
+    mybook = 'books:{}'
+    reset_key = 'passwd_reset:{}'
+    send_count = 'email_send_count:{}'
+    pub_rss_key = 'pub_rss_key:{}'
+    deliver_key = 'deliver:{}'
+    rss_user_info = 'user_info:{}'
+    my_rss = 'my_rss:{}'
+
+    @staticmethod
+    def get_key(key_name,key_str=""):
+        return cacheKey[key_name.lower()].value.format(key_str)

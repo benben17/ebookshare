@@ -20,7 +20,7 @@ blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/boo
 def my_book():
     """获取我的新闻书籍"""
     user = get_jwt_identity()
-    my_bk_key = cacheKey(user['name']).mybook
+    my_bk_key = cacheKey.get_key('mybook',user['name'])
     my_books = cache.get(my_bk_key)
     if my_books:
         return APIResponse.success(data=my_books)
@@ -37,7 +37,7 @@ def book_add():
     """新闻书籍新增"""
     user = get_jwt_identity()
     res = sync_post(request.path, request.get_json(), user)
-    cache.delete(cacheKey(user['name']).mybook)
+    cache.delete(cacheKey.get_key('mybook',user['name']))
     return return_fun(res)
 
 
@@ -50,7 +50,7 @@ def book_edit():
     if not data.get('book_id'):
         return APIResponse.bad_request(msg="参数错误！")
     res = sync_post(request.path, request.get_json(), user)
-    cache.delete(cacheKey(user['name']).mybook)
+    cache.delete(cacheKey.get_key('mybook',user['name']))
     return return_fun(res)
 
 
@@ -63,7 +63,7 @@ def book_del():
     if not data['book_id']:
         return APIResponse.bad_request(msg="参数错误！")
     res = sync_post(request.path, request.get_json(), user)
-    cache.delete(cacheKey(user['name']).mybook)
+    cache.delete(cacheKey.get_key('mybook',user['name']))
     return return_fun(res)
 
 

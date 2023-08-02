@@ -1,19 +1,13 @@
-import json
+# -*-coding: utf-8-*-
 import logging
-import string
-import time
-from random import random
 
-import requests
 from flask import Blueprint
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request as flask_request
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 from book.dicts import Product
 from book.utils import get_file_name
 from book.utils.ApiResponse import APIResponse
-from base64 import b64encode
-from urllib.parse import urlparse
-
 
 blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/alipay')
 logger = logging.getLogger()

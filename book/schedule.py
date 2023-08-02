@@ -9,6 +9,10 @@ from book.utils.wxMsg import mail_body, send_failed_body, mail_download_url_body
 
 
 def del_file_out_24h():
+    """
+    删除24小时之前的文件
+    :return:
+    """
     logging.info("delete_file_out_24_hours")
     for filename in os.listdir(config.DOWNLOAD_DIR):
         file_path = os.path.join(config.DOWNLOAD_DIR, filename)

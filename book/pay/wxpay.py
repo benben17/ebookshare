@@ -24,6 +24,7 @@ blueprint = Blueprint(get_file_name(__file__), __name__, url_prefix='/api/v2/wxp
 @blueprint.route("/payment", methods=['GET', 'POST'])
 @jwt_required()
 def create_payment():
+    wx = WXPay()
     notify_url = config.MY_DOMAIN + "/api/v2/wxpay/notify_url"
     data = request.get_json()
     product = data.get('product')
@@ -48,6 +49,7 @@ def create_payment():
 
 
 def refund(transaction_id, out_refund_no, refund, reason):
+    wx = WXPay()
     data = {
             "transaction_id": transaction_id,  # 微信支付订单号(交易单号)
             "out_refund_no": out_refund_no,  # 商户退款单号(商户单号)
@@ -108,4 +110,3 @@ class WXPay:
         pass
 
 
-wx = WXPay

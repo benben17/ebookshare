@@ -26,7 +26,6 @@ def upgrade_user(user_name, days, expires, pay_id):
                 with app.app_context():
                     pay_log = UserPay.query.filter_by(id=pay_id).first()
                     if days <= 0:  # 退款用户
-                        logging.info("refund")
                         logging.info(pay_log.status)
                         pay_log.status = PaymentStatus.refund
                         pay_log.refund_time = datetime.utcnow()
@@ -59,9 +58,10 @@ def upgrade_user_thread(type, user_name, p_name):
             days = int(p_dict.get("days"))
             logging.info("开始升级用户-----{}".format(user.name))
         else:
-            user_pay = UserPay.query.filter(UserPay.status == PaymentStatus.completed,
-                                            UserPay.user_name == user.name,
-                                            UserPay.pay_type == 'alipay').order_by(UserPay.pay_time.desc()).first()
+            user_pay = UserPay.query.filter(
+                UserPay.status == PaymentStatus.completed,
+                UserPay.user_name == user.name,
+                UserPay.pay_type == 'alipay').order_by(UserPay.pay_time.desc()).first()
             if not user_pay:
                 return False
             p_dict = Product(user_pay.product_name).get_product()  # 退款用户直接从付款表里面获取

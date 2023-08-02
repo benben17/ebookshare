@@ -1,8 +1,6 @@
-import os
-from logging.config import dictConfig
-from logging.handlers import RotatingFileHandler
-
 import logging
+import os
+from logging.handlers import RotatingFileHandler
 
 # Import Log Base Path From Config File
 # The output should be something like this
