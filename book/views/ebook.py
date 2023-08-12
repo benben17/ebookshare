@@ -47,7 +47,7 @@ def ebook_send_log():
     data = []
     for log in send_logs:
         data.append(model_to_dict(log))
-    APIResponse.success(data=data)
+    return APIResponse.success(data=data)
 
 
 @blueprint.route("/ebook/search", methods=["GET"])
