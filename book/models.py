@@ -23,7 +23,8 @@ class User(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.now())
     timezone = db.Column(db.Integer, default=0)
     is_reg_rss = db.Column(db.Boolean, default=False)
-    user_pay_log = db.relationship("UserPay", uselist=True, backref="user", lazy='dynamic')
+    user_pay_log = db.relationship(
+        "UserPay", uselist=True, backref="user", lazy='dynamic')
 
     def is_authenticated(self):
         return False
@@ -58,6 +59,10 @@ class User(db.Model):
     def get_feed_count(cls, id):
         return cls.get_by_id(id).feed_count if cls.get_by_id(id) else 0
 
+    @classmethod
+    def get_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
+
 
 class Books(db.Model):
     __tablename__ = "books"
@@ -74,7 +79,8 @@ class Books(db.Model):
     isbn = db.Column(db.String(30))
     tags = db.Column(db.String(128))
     db.UniqueConstraint('title', 'extension', name='idx_col1_col2')
-    bookext = db.relationship('Bookurl', backref=db.backref('books'), uselist=False)
+    bookext = db.relationship(
+        'Bookurl', backref=db.backref('books'), uselist=False)
 
 
 class Bookurl(db.Model):
@@ -112,7 +118,8 @@ class UserPay(db.Model):
     pay_url = db.Column(db.String(500))  # 支付地址，未支付的时候直接调用
     create_time = db.Column(db.DateTime, default=datetime.utcnow())
     currency = db.Column(db.String(3), nullable=False)
-    status = db.Column(Enum(dicts.PaymentStatus), default=dicts.PaymentStatus.created)
+    status = db.Column(Enum(dicts.PaymentStatus),
+                       default=dicts.PaymentStatus.created)
     payment_id = db.Column(db.String(255), nullable=True, index=True)
     cancel_url = db.Column(db.String(255), nullable=True)
     canceled_by = db.Column(db.String(255), nullable=True)

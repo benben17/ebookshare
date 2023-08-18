@@ -7,7 +7,7 @@ from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 import config
 from book import db, app
-from book.dateUtil import dt_to_str
+from book.utils.date_util import dt_to_str
 from book.dicts import Product, PaymentStatus, UserRole
 from book.models import UserPay, User
 from book.utils import get_rss_host
