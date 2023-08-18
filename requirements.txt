@@ -25,7 +25,7 @@ Genshi==0.7.7
 gevent==23.7.0
 greenlet==2.0.2
 gunicorn==21.2.0
-html5-parser==0.4.11
+# html5-parser==0.4.11
 html5lib==1.1
 httplib2==0.22.0
 idna==3.4
