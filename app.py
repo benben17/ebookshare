@@ -3,8 +3,9 @@ import os
 
 from book import app
 from book.schedule import *
-
+from gevent.pywsgi import WSGIServer
 
 if __name__ == '__main__':
     # print(app.url_map)
-    app.run(debug=True, port=os.getenv("PORT", default=5000), host='0.0.0.0')
+    http_server = WSGIServer(('', os.getenv("PORT")), app)
+    http_server.serve_forever()
