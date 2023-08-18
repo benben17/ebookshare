@@ -1,4 +1,5 @@
 # -*-coding: utf-8-*-
+
 import logging
 from datetime import datetime, timedelta
 import time
@@ -9,7 +10,7 @@ from book.dicts import RequestStatus, UserRole
 from book.models import User, db
 from book.utils import get_file_name
 from book.utils.ApiResponse import APIResponse
-from book.utils.commUtil import return_fun, sync_post, CacheKey
+from book.utils.commUtil import return_fun, sync_post, cacheKey
 from book.utils.rssUtil import get_rss_latest_titles, is_rss_feed
 from book import cache as cacheUtil
 
@@ -39,7 +40,7 @@ def user_setting():
 
     res = sync_post(request.path, param, user)
     if res.get("status").lower() == RequestStatus.OK:
-        user_info_key = CacheKey(user['name']).rss_user_info
+        user_info_key = cacheKey.get_key('rss_user_info',user['name'])
         cacheUtil.set(user_info_key, res.get("data"), timeout=86400)
     return return_fun(res)
 
@@ -59,7 +60,7 @@ def user_upgrade():
 def rss_user_info():
     param = request.get_json()
     user = get_jwt_identity()
-    user_info_cache = cacheUtil.get(CacheKey(user['name']).rss_user_info)
+    user_info_cache = cacheUtil.get(cacheKey.get_key('rss_user_info',user['name']))
 
     if user_info_cache:
         return APIResponse.success(data=user_info_cache)
@@ -84,7 +85,7 @@ def my_feed_deliver():
     user = get_jwt_identity()
     # 获取请求中的参数
     param = request.get_json()
-    deliver_key = CacheKey(user['name']).deliverKey
+    deliver_key = cacheKey.get_key('deliver_key', user['name'])
     # 获取上一次推送的时间
     last_delivery_time = str_to_dt(cacheUtil.get(deliver_key))
     # 获取当前用户的角色
@@ -116,7 +117,7 @@ def get_pub_rss():
         verify_jwt_in_request()
         user = get_jwt_identity()
         if user:
-            cache_pub_rss_key = CacheKey(user['name']).pub_rss_key
+            cache_pub_rss_key = cacheKey.get_key('pub_rss_key', user['name'])
             pub_rss = cacheUtil.get(cache_pub_rss_key)
             if pub_rss:
                 return APIResponse.success(data=pub_rss)
@@ -125,11 +126,12 @@ def get_pub_rss():
                 cacheUtil.set(cache_pub_rss_key, res.get('data'), timeout=86400)
             return return_fun(res)
     except Exception as e:
-        if cacheUtil.get(CacheKey().pub_rss_key):
-            return APIResponse.success(data=cacheUtil.get(CacheKey().pub_rss_key))
+        logging.error(f"获取失败：{e.args}")
+        if cacheUtil.get(cacheKey.get_key('pub_rss_key')):
+            return APIResponse.success(data=cacheUtil.get(cacheKey.get_key('pub_rss_key')))
         res = sync_post(path=request.path, param=request.get_json(), user=None)
         if res['status'] == RequestStatus.OK:
-            cacheUtil.set(CacheKey().pub_rss_key, res['data'], timeout=86400)
+            cacheUtil.set(cacheKey.get_key('pub_rss_key'), res['data'], timeout=86400)
         return return_fun(res)
 
 
@@ -138,13 +140,14 @@ def get_pub_rss():
 def my_rss():
     api_path = '/api/v2/rss/myrss'
     user = get_jwt_identity()
-    my_rss_cache = cacheUtil.get(CacheKey(user['name']).my_rss)
+    cache_key = cacheKey('my_rss',user['name'])
+    my_rss_cache = cacheUtil.getcache_key()
     if my_rss_cache:
         return APIResponse.success(data=my_rss_cache)
 
     res = sync_post(api_path, request.get_json(), user)
     if res.get("status").lower() == RequestStatus.OK:
-        cacheUtil.set(CacheKey(user['name']).my_rss, res.get("data"), timeout=86400)
+        cacheUtil.set(cache_key, res.get("data"), timeout=86400)
 
     return return_fun(res)
 
@@ -167,9 +170,9 @@ def my_rss_add():
         user.feed_count += 1
         db.session.add(user)
         db.session.commit()
-        cacheUtil.delete(CacheKey(user.name).pub_rss_key)
-        cacheUtil.delete(CacheKey(user.name).my_rss)
-        cacheUtil.delete(CacheKey(user.name).mybook)
+        cacheUtil.delete(cacheKey.get_key('pub_rss_key',user.name))
+        cacheUtil.delete(cacheKey.get_key('my_rss',user.name))
+        cacheUtil.delete(cacheKey.get_key('mybook',user.name))
         return APIResponse.success(msg=res['msg'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
@@ -189,9 +192,9 @@ def my_rss_del():
         db.session.add(user)
         db.session.commit()
 
-        cacheUtil.delete(CacheKey(user_info['name']).pub_rss_key)
-        cacheUtil.delete(CacheKey(user_info['name']).my_rss)
-        cacheUtil.delete(CacheKey(user_info['name']).mybook)
+        cacheUtil.delete(cacheKey.get_key('pub_rss_key',user_info['name']))
+        cacheUtil.delete(cacheKey.get_key('my_rss',user_info['name']))
+        cacheUtil.delete(cacheKey.get_key('mybook',user_info['name']))
         return APIResponse.success(msg=res['msg'])
     else:
         return APIResponse.bad_request(msg=res['msg'])
@@ -226,10 +229,11 @@ def rss_view_title():
 
 
 if __name__ == "__main__":
-    from book.utils.rssUtil import rss_list
-    from book import app, cache
 
-    print(CacheKey().pub_rss_key)
-    timeout = 24 * 60 * 60
-    print(timeout)
-    print(datetime.now() + timedelta(seconds=timeout))
+    a = "//aaa"
+    print("http:".join(a))
+    print(cacheKey.get_key('pub_rss_key',"a"))
+    print(''.lower())
+    # timeout = 24 * 60 * 60
+    # print(timeout)
+    # print(datetime.now() + timedelta(seconds=timeout))

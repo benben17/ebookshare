@@ -1,13 +1,16 @@
 # 导入支付基类
-from datetime import datetime
-from random import random
+import datetime
+import hashlib
+import json
 import logging
 import os
-import json
-import hashlib
-import base64
-import datetime
+from datetime import datetime
+from random import random
 from urllib import parse
+
+from book.utils.commUtil import cacheKey
+
+
 # from Crypto.PublicKey import RSA
 # from Crypto.Signature import PKCS1_v1_5
 # from Crypto.Hash import SHA256
@@ -20,21 +23,21 @@ def get_order_no():
 
 
 # def rsa_verify_sign(data_str, sign, secret_key, key_is_file=False, need_import=False):
-    """
-    :param data_str: 等待验签的数据
-    :param sign: 数据的签名
-    :param secret_key: 秘钥
-    :param key_is_file: 秘钥是否是一个文件目录
-    :param need_import: 是否需要预导入秘钥
-    :return:
-    """
-    # secret_key = get_secret(secret_key, key_is_file, need_import)
-    # signer = PKCS1_v1_5.new(secret_key)
-    # digest = SHA256.new()
-    # digest.update(data_str.encode("utf8"))
-    # if signer.verify(digest, base64.decodebytes(sign.encode("utf8"))):
-    #     return True
-    # return False
+#     """
+#     :param data_str: 等待验签的数据
+#     :param sign: 数据的签名
+#     :param secret_key: 秘钥
+#     :param key_is_file: 秘钥是否是一个文件目录
+#     :param need_import: 是否需要预导入秘钥
+#     :return:
+#     """
+#     secret_key = get_secret(secret_key, key_is_file, need_import)
+#     signer = PKCS1_v1_5.new(secret_key)
+#     digest = SHA256.new()
+#     digest.update(data_str.encode("utf8"))
+#     if signer.verify(digest, base64.decodebytes(sign.encode("utf8"))):
+#         return True
+#     return False
 
 
 # def get_secret(secret_key, key_is_file=False, need_import=False):
@@ -157,7 +160,6 @@ def ordered_dict(data: dict) -> []:
 #         return ''
 
 
-
 def sign_md5(msg: bytes) -> str:
     """
     将传递的字节数据签名
@@ -180,8 +182,6 @@ def sign_md5(msg: bytes) -> str:
 #     return xmltodict.unparse(dict_data, pretty=True, encoding='utf-8')
 
 
-
-
 class Dict(dict):
     """
     使字典可以属性方式访问值
@@ -200,11 +200,12 @@ def catch_error(func):
     :param func:
     :return:
     """
+
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            logging.error(f"{func.__qualname__} 发生异常 {e}", exc_info=1)
+            logging.error(f"{func.__qualname__} 发生异常 {e}")
             return dict(code=-1, msg='接口内部发生异常', data=None)
 
     return inner
@@ -226,6 +227,7 @@ def param_diff(param: [dict, list], _in: [dict, list]):
 
 
 def get_res(code=0, msg='success', data=None) -> dict:
+
     return dict(code=code, msg=msg, data=data)
 
 

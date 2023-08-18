@@ -1,13 +1,16 @@
 import time
 from datetime import datetime, timedelta
+import datetime as dt
 
-import pytz
+dateFullFmt = '%Y-%m-%d %H:%M:%S'
+dateFmt = '%Y-%m-%d'
 
 
 def get_now():
     return datetime.now()
 
-def utc_to_local(utc_time, fmt='%Y-%m-%d %H:%M:%S', tz=8):
+
+def utc_to_local(utc_time, fmt=dateFullFmt, tz=8):
     if not utc_time:
         return None
     if not isinstance(utc_time, datetime):
@@ -22,12 +25,11 @@ def get_days_later(days):
     # 计算30天后的日期
     after_days = now + timedelta(days=days)
     # 返回30天后的日期
-    return after_days.strftime('%Y-%m-%d %H:%M:%S')
+    return after_days.strftime(dateFullFmt)
 
 
-def str_to_dt(time_str, fmt='%Y-%m-%d %H:%M:%S'):
+def str_to_dt(time_str, fmt=dateFullFmt):
     """
-    自动识别时间字符串格式，并转换为 datetime 类型
     Args: time_str: 时间字符串，可以是各种格式
     Returns: datetime 对象
     """
@@ -37,30 +39,35 @@ def str_to_dt(time_str, fmt='%Y-%m-%d %H:%M:%S'):
         time_dt = datetime.strptime(time_str, fmt)
     except ValueError:
         try:
-            time_dt = datetime.strptime(time_str, '%Y-%m-%d')
+            time_dt = datetime.strptime(time_str, dateFmt)
         except ValueError:
             from dateutil import parser
             time_dt = parser.parse(time_str)
     return time_dt
 
 
-def dt_to_str(time_dt) -> str:
+def dt_to_str(time_dt, fmt=dateFullFmt) -> str:
+    """
+    :param time_dt:
+    :type fmt: object
+    """
     if isinstance(time_dt, datetime):
-        return time_dt.strftime('%Y-%m-%d %H:%M:%S')
+        return time_dt.strftime(fmt)
     else:
         return time_dt
 
-def format_time(dt) -> str:
-    if dt is None:
+
+def format_time(d_t) -> str:
+    if d_t is None:
         return None
-    if isinstance(dt, datetime):
-        return dt_to_str(dt)
+    if isinstance(d_t, datetime):
+        return dt_to_str(d_t)
     else:
-        return dt_to_str(str_to_dt(dt))
+        return dt_to_str(str_to_dt(d_t))
 
 
 def now_datetime() -> str:
-    return str(datetime.datetime.fromtimestamp(int(time.time())))
+    return str(dt.datetime.fromtimestamp(int(time.time())))
 
 
 def now_date() -> str:
@@ -79,4 +86,4 @@ if __name__ == "__main__":
     days = -30
     now = "Fri, 31 Mar 2023 00:00:51 +0800"
     print(type(utc_to_local(now)))
-    print(10 + days)
+    print(timestamp())

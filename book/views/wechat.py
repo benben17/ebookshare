@@ -1,5 +1,4 @@
-import json
-import logging
+# encoding:utf-8
 
 from flask import redirect, send_from_directory, request, Blueprint
 from sqlalchemy import or_
@@ -79,7 +78,8 @@ def wechat():
                             user.wx_openid = from_user
                             db.session.add(user)
                     else:
-                        user = User(name=content.split("@")[0], email=content, kindle_email=content, wx_openid=from_user, id=gen_userid())
+                        user = User(name=content.split("@")[0], email=content, kindle_email=content,
+                                    wx_openid=from_user, id=gen_userid())
                         db.session.add(user)
                     db.session.commit()
                     logging.info(user.kindle_email)
@@ -96,7 +96,7 @@ def wechat():
                 if content.startswith("upgrade") or content.startswith("refund"):
                     info = content.split(":")
                     if len(info) == 3:
-                        if upgradeUser.upgrade_user_thread(type=info[0],user_name=info[1], p_name=info[2]):
+                        if upgradeUser.upgrade_user_thread(type=info[0], user_name=info[1], p_name=info[2]):
                             return wx_reply_xml(from_user, to_user, f"{info[1]}:用户升级中.....")
                     return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
 
@@ -121,7 +121,7 @@ def wechat():
                     return wx_reply_xml(from_user, to_user,
                                         wx_reply_mail_msg(send_info[0], user.kindle_email) + download_url(user_log))
                 else:
-                    return wx_reply_xml(from_user, to_user, ''' 请重新搜索书籍 \n'''+reply_help_msg)
+                    return wx_reply_xml(from_user, to_user, ''' 请重新搜索书籍 \n''' + reply_help_msg)
             # 搜索 图书
             msg_content, books_cache = search_net_book(title=content, openid=from_user)
             if books_cache is not None:
@@ -130,6 +130,7 @@ def wechat():
 
         else:  # 其他未知消息
             return wx_reply_xml(from_user, to_user, reply_help_msg)
+
 
 @blueprint.route('/download/<path:filename>')
 def dl_file(filename):

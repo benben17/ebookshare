@@ -221,7 +221,6 @@ def model_to_dict(model, tz=0):
         value = getattr(model, attribute.key)
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
-
             value = utc_to_local(value, tz=tz) if value is not None else None
         elif isinstance(value, Enum):
             value = value.value
@@ -270,6 +269,6 @@ if __name__ == '__main__':
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)
     # print(filesize_format(100022000000000000000000000000))
-    # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
+    print(search_net_book("javascrip"))
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
     # download_net_book(ipfs_id,"平凡的世界.epub")

@@ -1,18 +1,15 @@
 # -*-coding: utf-8-*-
-import os
-import logging
-import time
-from importlib import import_module
-from logging.handlers import RotatingFileHandler
-from flask import Flask, jsonify
+
+from flask import Flask, jsonify, request
 from flask_caching import Cache
 from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderError, WrongTokenError
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, get_jwt_identity
 from .dateUtil import utc_to_local
+from .logger_config import init_logging
+from .schedule import init_scheduler
 from .utils import create_app_dir
-
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -24,29 +21,42 @@ jwt = JWTManager(app)
 
 create_app_dir()
 
-from book.models import *
 with app.app_context():
+    from book.models import *
+
     db.create_all()
 
-modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook', 'googleUser']
-for model_name in modules:
-    model = import_module(f"{app.name}.views.{model_name}")
-    app.register_blueprint(model.blueprint)
-
 from book.views import *
-from book.pay import paypal
-app.register_blueprint(paypal.blueprint)
 
-"""
-Initialize logging
-"""
-logfile = f"{os.path.dirname(app.root_path)}/logs/books.log"
-logging.basicConfig(level=logging.INFO)
-handler = RotatingFileHandler(logfile, maxBytes=1024 * 1024 * 100, backupCount=5)  # 最大100M
-"""Time, log level, log file, line number, message"""
-formatter = logging.Formatter('%(asctime)s-%(levelname)s-%(filename)s-%(funcName)s-%(lineno)s-%(message)s')
-handler.setFormatter(formatter)
-logging.getLogger().addHandler(handler)
+init_logging(app)
+#  初始化定时器
+init_scheduler(app)
+
+from book.logger_config import *
+
+
+# @app.after_request
+def after_request(response):
+    """ Logging all the requests in JSON Per Line Format. """
+    audit_logger = logging.getLogger('audit_log')
+    try:
+        user = get_jwt_identity()
+        username = user['name']
+    except Exception as e:
+        username = ""
+    audit_logger.info({
+        "datetime": datetime.now(),
+        "user_ip": request.remote_addr,
+        "user_name": username,
+        "method": request.method,
+        "request_url": request.path,
+        "response_status": response.status,
+        "request_referrer": request.referrer,
+        "request_user_agent": request.referrer,
+        # "request_body": request.json,
+        # "response_body": response.json
+    })
+    return response
 
 
 @app.errorhandler(404)

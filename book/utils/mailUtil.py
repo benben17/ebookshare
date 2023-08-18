@@ -1,11 +1,12 @@
 import logging
 from threading import Thread
 from flask_mail import Message
-from book import mail, app
+
 from book.utils.wxMsg import mail_body
 
 
 def send_async_email(app, msg):
+    from book import mail
     with app.app_context():
         try:
             mail.send(msg)

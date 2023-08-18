@@ -5,11 +5,11 @@ from enum import Enum
 
 # 发送邮件状态
 
-class SEND_STATUS:
+class SEND_STATUS(Enum):
     WAITING = 0  # 等待发送
     SUCCESS = 1  # 成功
     FAILED = 3  # 失败
-    UNKONOW = 4  # 晚上重新发送一次
+    UNKNOWN = 4  # 晚上重新发送一次
 
 
 class PaymentStatus(Enum):
@@ -64,10 +64,13 @@ class Product:
 
 
 if __name__ == "__main__":
-    days = -10
-    print(datetime.utcnow() + timedelta(days=int(days)))
-    day = 'Sunday'
-    p_dict = Product("hahha").get_product()
-    user = {"role": None}
-    user_role = user['role'] if user['role'] else 'default'
-    print(UserRole.get_send_interval(user_role))
+    print(UserRole.get_role())
+    new_list = UserRole.get_role()
+    match new_list:
+        case {'name': "default"}:
+            print("ok")
+        case 1:
+            print("1")
+        case _:
+            print("jajja")
+

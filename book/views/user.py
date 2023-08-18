@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, verify_jwt_in_request
 from sqlalchemy.sql.operators import or_
 from werkzeug.security import check_password_hash, generate_password_hash
-from book.utils.commUtil import CacheKey
+from book.utils.commUtil import cacheKey
 from book import cache
 from book.dicts import UserRole, PaymentStatus
 from book.models import db, User, UserPay, Advice
@@ -110,8 +110,8 @@ def forget_passwd():
     if not email or not code:
         return APIResponse.bad_request(msg="Email or Code is empty！")
     try:
-        cacheKey = CacheKey.resetKey.format(email)
-        sys_code = cache.get(cacheKey)
+        cache_key = cacheKey.get_key('reset_key', email)
+        sys_code = cache.get(cache_key)
         if sys_code is None or str(sys_code) != str(code):
             return APIResponse.bad_request(msg='验证码错误！')
         user = User.query.filter(User.email == email).first()
@@ -137,7 +137,7 @@ def email_forget_code():
     if check_email(email) is False:
         return APIResponse.bad_request(msg="Invalid email address！")
 
-    cacheKey = CacheKey.sendCount.format(email)
+    cache_key = cacheKey.get_key('send_count', email)
 
     send_count = 0 if not cache.get(cacheKey) else int(cache.get(cacheKey))
     if send_count >= 6:
@@ -147,8 +147,8 @@ def email_forget_code():
     if not user:
         return APIResponse.bad_request(msg="user not exists or error")
     verification_code = generate_code()
-    cache.set(CacheKey.resetKey.format(email), verification_code, timeout=600)
-    cache.set(cacheKey, send_count, timeout=600)
+    cache.set(cacheKey.get_key('reset_key', email), verification_code, timeout=600)
+    cache.set(cache_key, send_count, timeout=600)
     logging.info(f'code:{verification_code}')
     send_email("RSS2EBOOK Password reset code",
                f'RSS2EBOOK \n Account: {email} reset \n password reset Code： {verification_code}', email)
@@ -221,7 +221,7 @@ if __name__ == '__main__':
     "pbkdf2:sha256:260000$18OgiuayUI0qk0NZ$c0c08f9505e4d296146a9a4e25404f3ef075c16737f3efd1ddf979e19344b2de"
     hash_pass = "pbkdf2:sha256:260000$8aQWKgTw7XFUFVsq$9dfa2bc7ea608f1c1f4b1e1d5af1fca6ce970e3aac7dc6678aa2b9b34ef5913c"
     pa = "uJ4eA3s4"
-    print(check_password_hash(hash_pass, pa))
+    print(cacheKey.get_key("mybook",'aaa'))
     # with app.app_context():
     #     content = '892100089@qq.com'
     #
