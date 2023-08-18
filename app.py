@@ -7,4 +7,4 @@ from book.schedule import *
 
 if __name__ == '__main__':
     # print(app.url_map)
-    app.run(debug=True,threaded=True,use_reloader=False, port=8000)
+    app.run(debug=True, port=os.getenv("PORT", default=5000), host='0.0.0.0')
