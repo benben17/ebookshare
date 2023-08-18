@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import time
 from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
-from book.dateUtil import dt_to_str, str_to_dt
+from book.utils.date_util import dt_to_str, str_to_dt
 from book.dicts import RequestStatus, UserRole
 from book.models import User, db
 from book.utils import get_file_name

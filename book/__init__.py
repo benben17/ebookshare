@@ -2,11 +2,11 @@
 
 from flask import Flask, jsonify, request
 from flask_caching import Cache
+from flask_jwt_extended import JWTManager, get_jwt_identity
 from flask_jwt_extended.exceptions import NoAuthorizationError, InvalidHeaderError, WrongTokenError
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager, get_jwt_identity
-from .dateUtil import utc_to_local
+
 from .logger_config import init_logging
 from .schedule import init_scheduler
 from .utils import create_app_dir

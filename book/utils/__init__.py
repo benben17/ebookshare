@@ -12,7 +12,7 @@ from requests.exceptions import RequestException
 from sqlalchemy import inspect
 from enum import Enum
 import config
-from book.dateUtil import utc_to_local, get_now
+from book.utils.date_util import utc_to_local, get_now
 
 
 def gen_userid():

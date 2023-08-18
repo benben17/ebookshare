@@ -1,13 +1,9 @@
 import logging
-import uuid
 
 import feedparser
-import requests
 
 import config
-from book.dateUtil import dt_to_str, str_to_dt
-from book.utils import get_rss_host, gen_userid
-from book.utils.commUtil import new_passwd
+from book.utils.date_util import dt_to_str, str_to_dt
 
 
 def is_rss_feed(rss_url):

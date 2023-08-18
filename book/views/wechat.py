@@ -1,9 +1,8 @@
 # encoding:utf-8
 
 from flask import redirect, send_from_directory, request, Blueprint
-from sqlalchemy import or_
-from book import cache, db, upgradeUser, User
-from book.dateUtil import get_now
+
+from book import cache, db, upgradeUser
 from book.dicts import SEND_STATUS
 from book.utils import *
 from book.utils.wxMsg import *

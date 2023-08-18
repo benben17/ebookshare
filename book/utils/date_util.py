@@ -10,13 +10,15 @@ def get_now():
     return datetime.now()
 
 
-def utc_to_local(utc_time, fmt=dateFullFmt, tz=8):
-    if not utc_time:
-        return None
-    if not isinstance(utc_time, datetime):
-        utc_time = str_to_dt(utc_time)
-    # 将UTC时间转换为本地时间
-    return dt_to_str(utc_time + timedelta(hours=int(tz)))
+def utc_to_local(utc_time_str, utc_fmt=dateFullFmt, local_fmt=dateFullFmt, tz=8):
+    """
+    UTC时间转本地时间
+    :param utc_time_str: UTC时间字符串
+    :param utc_fmt: UTC时间格式
+    :param tz: 时区
+    :param local_fmt: 本地时间格式
+    :return: 本地时间字符串
+    """
 
 
 def get_days_later(days):
@@ -82,8 +84,39 @@ def long_timestamp() -> str:
     return str(time.time()).replace(".", "")
 
 
+def timestamp_to_date(timestamp: int) -> str:
+    """
+    timestamp to date
+    allow timestamp is int or string
+    convert failed return None
+    check convert date is correct
+    """
+    if isinstance(timestamp, str):
+        timestamp = int(timestamp)
+    if isinstance(timestamp, int):
+        try:
+            return time.strftime(dateFullFmt, time.localtime(timestamp))
+        except ValueError:
+            return None
+    return None
+
+
+def date_to_timestamp(time_dt) -> int:
+    """
+    date to timestamp
+    check date is string or datetime
+    allow all date format
+    convert failed return None
+    """
+    if isinstance(time_dt, str):
+        time_dt = str_to_dt(time_dt)
+    if isinstance(time_dt, datetime):
+        return int(time.mktime(time_dt.timetuple()))
+    return None
+
+
 if __name__ == "__main__":
     days = -30
     now = "Fri, 31 Mar 2023 00:00:51 +0800"
-    print(type(utc_to_local(now)))
-    print(timestamp())
+    # print(type(utc_to_local(now)))
+    print(timestamp_to_date("16801920511000"))
