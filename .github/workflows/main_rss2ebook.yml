@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'rss2ebook'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D36C76DFF7D44301930083933380773D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A52C8BBD156B4F36AB26C5DDB30E5F8A }}

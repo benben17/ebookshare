@@ -7,11 +7,18 @@ from datetime import datetime
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import random
-import isbnlib
 import requests
 from requests.exceptions import RequestException
 from sqlalchemy import inspect
+from enum import Enum
 import config
+from book.utils.date_util import utc_to_local, get_now
+
+
+def gen_userid():
+    ymd = int(time.time())
+    random_num = random.randint(100, 999)
+    return int(f'{ymd}{random_num}')
 
 
 def parse_xml(xml_str):
@@ -25,13 +32,28 @@ def parse_xml(xml_str):
     return msg_type, from_user, to_user, content, event
 
 
-def check_isbn(str):
-    if len(str) == 13:
-        return isbnlib.is_isbn13(str)
-    elif len(str) == 10:
-        return isbnlib.is_isbn10(str)
-    else:
+def is_isbn(isbn):
+    # ISBN 的长度为10或13
+    if len(isbn) not in [10, 13]:
         return False
+    if len(isbn) == 10:
+        if not isbn[:-1].isdigit():
+            return False
+        groups = [int(d) for d in isbn]
+        checksum = sum((i + 1) * x for i, x in enumerate(groups[:-1])) % 11
+        if checksum == 10 and isbn[-1] not in ['X', 'x']:
+            return False
+        if checksum != 10 and str(checksum) != isbn[-1]:
+            return False
+    # 13位ISBN必须由数字和短横线组成
+    if len(isbn) == 13:
+        if not isbn.isdigit():
+            return False
+        groups = [int(d) for d in isbn]
+        checksum = (10 - (sum(groups[::2]) + sum(groups[1::2]) * 3) % 10) % 10
+        if str(checksum) != str(isbn[-1]):
+            return False
+    return True
 
 
 def allowed_ebook_ext(filename):
@@ -115,7 +137,7 @@ def cache_book(books, wx_openid):
 
 
 def search_net_book(title=None, author=None, isbn=None, openid="", ):
-    search_url = 'https://zlib.knat.network/search?limit=15&query='
+    search_url = f'{config.BOOKSEARCH_URL}/search?limit=15&query='
     # print(search_url)
     if not any((title, author, isbn)):
         return None
@@ -144,8 +166,9 @@ def download_net_book(ipfs_cid, filename):
         'https://cloudflare-ipfs.com',
         'https://gateway.pinata.cloud',
         'https://gateway.ipfs.io',
-        'https://ipfs.jpu.jp',
-        'https://cf-ipfs.com'
+        'https://ipfs.joaoleitao.org',
+        'https://cf-ipfs.com',
+        'https://hardbin.com'
     ]
     for url in url_list:
         full_url = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
@@ -172,8 +195,8 @@ def is_file_24_hours(file_path):
     return current_time - ctime > 24 * 60 * 60
 
 
-def get_now_date():
-    return datetime.now().strftime('%Y-%m-%d 00:00:00')
+def get_ymd_dt():
+    return datetime.utcnow().strftime('%Y-%m-%d 00:00:00')
 
 
 def new_secret_key(length=8):
@@ -182,7 +205,7 @@ def new_secret_key(length=8):
     return ''.join([random.choice(allchars) for i in range(length)])
 
 
-def model_to_dict(model):
+def model_to_dict(model, tz=0):
     """
     Convert a SQLAlchemy model instance into a JSON-serializable dict.
     """
@@ -190,7 +213,7 @@ def model_to_dict(model):
         return None
     # get the attributes of the model instance
     attributes = inspect(model).attrs
-    filter_list = ["user_pay_log", "hash_pass"]
+    filter_list = ["user_pay_log", "hash_pass", "user"]
     data = {}
     for attribute in attributes:
         if attribute.key in filter_list:
@@ -198,7 +221,9 @@ def model_to_dict(model):
         value = getattr(model, attribute.key)
         # convert datetime objects to ISO format
         if isinstance(value, datetime):
-            value = value.isoformat() if value is not None else None
+            value = utc_to_local(value, tz=tz) if value is not None else None
+        elif isinstance(value, Enum):
+            value = value.value
         data[attribute.key] = value
     return data
 
@@ -226,13 +251,24 @@ def create_app_dir():
             os.mkdir(os.path.join(config.basedir, dir))
 
 
-if __name__ == '__main__':
-    print(get_file_name(__file__))
+def get_rss_host(user_id=1):
+    if user_id % 2 == 1:
+        return config.rss_host['primary']
+    else:
+        return config.rss_host['second']
 
+
+def utc_now():
+    return datetime.utcnow()
+
+
+if __name__ == '__main__':
+    print(is_isbn('1-63995-000-1'))
+    print(get_now())
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)
     # print(filesize_format(100022000000000000000000000000))
-    # print(search_net_book("平凡的世界", author="hhah" ,openid="openid"))
+    print(search_net_book("javascrip"))
     # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
     # download_net_book(ipfs_id,"平凡的世界.epub")

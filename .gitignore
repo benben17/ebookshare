@@ -21,7 +21,8 @@ __pycache__/
 # Translations
 *.mo
 *.pot
-
+*.vscode
+*.venv
 # PyBuilder
 target/
 *.bak

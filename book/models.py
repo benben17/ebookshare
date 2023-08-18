@@ -1,5 +1,7 @@
 # coding: utf-8
-from book import db
+from sqlalchemy import Enum
+
+from book import db, dicts, cache
 from datetime import datetime
 
 
@@ -7,7 +9,7 @@ class User(db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
-    email = db.Column(db.String(120))
+    email = db.Column(db.String(120), unique=True)
     role = db.Column(db.String(120))
     srole = db.Column(db.Integer, default=0)
     hash_pass = db.Column(db.String(240))
@@ -19,8 +21,10 @@ class User(db.Model):
     active = db.Column(db.Integer, default=0)
     expires = db.Column(db.DateTime)  # 超过了此日期后账号自动停止推送
     create_time = db.Column(db.DateTime, default=datetime.now())
+    timezone = db.Column(db.Integer, default=0)
     is_reg_rss = db.Column(db.Boolean, default=False)
-    user_pay_log = db.relationship("UserPay", uselist=True, backref="user", lazy='dynamic')
+    user_pay_log = db.relationship(
+        "UserPay", uselist=True, backref="user", lazy='dynamic')
 
     def is_authenticated(self):
         return False
@@ -36,6 +40,28 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % (self.name)
+
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
+
+    @classmethod
+    def get_tz(cls, id):
+        tz_key = str(id)+'timezone'
+        tz = cache.get(tz_key)
+        if tz is not None:
+            return int(tz)
+        u = cls.get_by_id(id)
+        cache.set(tz_key, u.timezone if u else 0)
+        return u.timezone if u else 0
+
+    @classmethod
+    def get_feed_count(cls, id):
+        return cls.get_by_id(id).feed_count if cls.get_by_id(id) else 0
+
+    @classmethod
+    def get_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
 
 
 class Books(db.Model):
@@ -53,7 +79,8 @@ class Books(db.Model):
     isbn = db.Column(db.String(30))
     tags = db.Column(db.String(128))
     db.UniqueConstraint('title', 'extension', name='idx_col1_col2')
-    bookext = db.relationship('Bookurl', backref=db.backref('books'), uselist=False)
+    bookext = db.relationship(
+        'Bookurl', backref=db.backref('books'), uselist=False)
 
 
 class Bookurl(db.Model):
@@ -80,18 +107,40 @@ class Userlog(db.Model):
 
 class UserPay(db.Model):
     __tablename__ = "user_pay"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    amount = db.Column(db.Float, nullable=False)
+    product_name = db.Column(db.String(100))  # 年费 月费
+    description = db.Column(db.String(255), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    name = db.Column(db.String(300))  # 年费 月费
     pay_type = db.Column(db.String(24))  # ali weixin
-    user_email = db.Column(db.String(120))
-    pay_time = db.Column(db.DateTime, default=datetime.now())
-    create_time = db.Column(db.DateTime, default=datetime.now())
-    status = db.Column(db.Integer)
+    user_name = db.Column(db.String(120))
+    pay_time = db.Column(db.DateTime)
+    pay_url = db.Column(db.String(500))  # 支付地址，未支付的时候直接调用
+    create_time = db.Column(db.DateTime, default=datetime.utcnow())
+    currency = db.Column(db.String(3), nullable=False)
+    status = db.Column(Enum(dicts.PaymentStatus),
+                       default=dicts.PaymentStatus.created)
+    payment_id = db.Column(db.String(255), nullable=True, index=True)
+    cancel_url = db.Column(db.String(255), nullable=True)
+    canceled_by = db.Column(db.String(255), nullable=True)
+    canceled_time = db.Column(db.DateTime, nullable=True)
+    refund_time = db.Column(db.DateTime, nullable=True)
+    refund_amount = db.Column(db.Float, nullable=True, default='0.00')
+
+    # refund_read_amount = db.Column(db.Float, nullable=False)
 
     def __repr__(self):
         return self.user_name
 
     @classmethod
-    def get_by_id(cls, user_id):
-        return cls.query.filter_by(id=user_id).first()
+    def get_payment_id(cls, payment_id):
+        return cls.query.filter_by(payment_id=payment_id).first()
+
+
+class Advice(db.Model):
+    __tablename__ = "advice"
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    user_name = db.Column(db.String(100))
+    user_email = db.Column(db.String(100))
+    content = db.Column(db.String(512))
+    create_time = db.Column(db.DateTime, default=datetime.utcnow())

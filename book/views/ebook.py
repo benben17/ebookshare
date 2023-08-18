@@ -1,8 +1,11 @@
 # -*-coding: utf-8-*-
 import logging
+
+import requests
 from flask import request, Blueprint
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
+import config
 from book.utils import get_file_name, model_to_dict
 from book.utils.ApiResponse import APIResponse
 from book.models import Userlog, db
@@ -44,4 +47,21 @@ def ebook_send_log():
     data = []
     for log in send_logs:
         data.append(model_to_dict(log))
-    APIResponse.success(data=data)
+    return APIResponse.success(data=data)
+
+
+@blueprint.route("/ebook/search", methods=["GET"])
+@jwt_required()
+def ebook_search():
+    search_url = f'{config.BOOKSEARCH_URL}/search?limit=60&query='
+    title = request.args.get("title")
+    param = ''
+    if title is not None:
+        param += f'title:"{title}"'
+    res = requests.get(url=search_url + param, timeout=30)
+    # print(res.status_code)
+    json_res = None
+    # print(res.text)
+    if int(res.status_code) == 200:
+        json_res = res.json()
+    return APIResponse.success(data=json_res)
