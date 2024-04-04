@@ -27,6 +27,7 @@ def kindle_no_att():
     return render_template("kindle_no_att.html")
 
 
+# 注册蓝图 路由
 modules = ['user', 'ebook', 'feed', 'wechat', 'rssbook', 'googleUser']
 for model_name in modules:
     model = import_module(f"{app.name}.views.{model_name}")

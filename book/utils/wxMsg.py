@@ -70,13 +70,13 @@ reply_subscribe = f'''欢迎关注sendtokindles，本书站收录图书超乎你
 建议先发送到自己邮箱，然后自己转发kindle设备
 '''
 
-wx_pic = 'https://rss2ebook.com/prod-api/static/sendtokindles.jpeg'
+wx_pic = 'https://127.0.0.1:8080/sendtokindles.jpeg'
 
 
-def mail_body(bookname):
+def mail_body(bookName):
     return f'''
     请查收附件！<br/>
-    《{bookname}》<br/>
+    《{bookName}》<br/>
     ---------------------------------------------------<br/>
     <img src="{wx_pic}"  width="300" height="300" ><br/>
     ---------------------------------------------------<br/>
@@ -84,9 +84,9 @@ def mail_body(bookname):
     '''
 
 
-def send_failed_body(bookname):
+def send_failed_body(bookName):
     return f'''
-        《{bookname}》---发送失败！<br/>
+        《{bookName}》---发送失败！<br/>
         <p style="color:red"> 书籍下载失败 </p>
         请重新传查询，选择其他格式的图书接收！<br/>
         ---------------------------------------------------<br/>
@@ -131,8 +131,7 @@ def wx_reply_xml(from_user, to_user, msg_content):
 
 
 def wx_reply_mail_msg(book_name, user_email):
-    donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn' \
-                 '=9afeff751c06737c6c3c5de0faddc6a1#rd'
+    donate_url = 'https://mp.weixin.qq.com/s?__biz=MzA4NjU5OTY1Ng==&mid=401023694&idx=1&sn=9afeff751c06737c6c3c5de0faddc6a1#rd'
 
     return f'''《{book_name}》
 已发送邮箱：{user_email} 

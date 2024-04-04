@@ -28,9 +28,9 @@ MAIL_DEBUG = False
 MAIL_PORT = 465
 # MAIL_USE_TLS = True
 MAIL_USE_SSL = True
-MAIL_USERNAME = 'librz.link@gmail.com'
-MAIL_PASSWORD = 'hyqycxwwiwcwiswi'
-MAIL_DEFAULT_SENDER = '"rss2ebook"<librz.link@gmail.com>'
+MAIL_USERNAME = os.getenv('MAIL_USERNAME','librz.link@gmail.com')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
 MAIL_ATT_MAX_SIZE = 20  # 设置附件大小 单位M
 
 # 下面五个参数是所有的类型共有的
@@ -63,15 +63,15 @@ rss_host = {    # rss 源后台主机
 }
 
 
-RSS2EBOOK_KEY = 'rss2Ebook.com.luck!'
+RSS2EBOOK_KEY = os.getenv('RSS2EBOOK_KEY')
 HEADERS = {'Content-Type': 'application/x-www-form-urlencoded'}
 
 
 # 在Google Cloud Platform 中创建 OAuth 2.0 客户端 ID 时指定的值
 OAUTH_CREDENTIALS = {
     'google': {
-        'id': '774931221812-vpnvivcrjosa9l7mcdbjjkdg1tsf19ca.apps.googleusercontent.com',
-        'secret': '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'
+        'id': os.getenv('GOOGLE_ID'),
+        'secret': os.getenv('GOOGLE_SECRET')
     }
 }
 
