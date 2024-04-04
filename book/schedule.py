@@ -46,7 +46,7 @@ def book_send(send_status):
                         send_email(userlog.book_name, mail_download_url_body(userlog.book_name),
                                    userlog.receive_email)
 
-                    userlog.status = SEND_STATUS.SUCCESS
+                    userlog.status = SEND_STATUS.SUCCESS.value
                     userlog.create_time = datetime.now()
                     db.session.add(userlog)
                     db.session.commit()
@@ -56,10 +56,10 @@ def book_send(send_status):
             elif file_path is None:
                 send_email(userlog.book_name + "-下载文件失败", send_failed_body(userlog.book_name),
                            userlog.receive_email)
-                if int(send_status) == SEND_STATUS.UNKNOWN:
-                    userlog.status = SEND_STATUS.FAILED
+                if int(send_status) == SEND_STATUS.UNKNOWN.value:
+                    userlog.status = SEND_STATUS.FAILED.value
                 else:
-                    userlog.status = SEND_STATUS.UNKNOWN
+                    userlog.status = SEND_STATUS.UNKNOWN.value
                 db.session.add(userlog)
                 db.session.commit()
 
@@ -77,9 +77,9 @@ def init_scheduler(appName):
 
     scheduler.add_job(id="delete_file", func=del_file_out_24h, trigger="cron", day="*", hour='02',
                       replace_existing=False)
-    scheduler.add_job(id="send_file", func=book_send, args=(str(SEND_STATUS.WAITING),), trigger="interval", seconds=180,
+    scheduler.add_job(id="send_file", func=book_send, args=(str(SEND_STATUS.WAITING.value),), trigger="interval", seconds=180,
                       replace_existing=False, max_instances=3)
-    scheduler.add_job(id="retry_send_file", func=book_send, args=(str(SEND_STATUS.UNKNOWN),), trigger="cron", day="*",
+    scheduler.add_job(id="retry_send_file", func=book_send, args=(str(SEND_STATUS.UNKNOWN.value),), trigger="cron", day="*",
                       hour="01",
                       replace_existing=False)
 

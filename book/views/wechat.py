@@ -91,13 +91,13 @@ def wechat():
                     cache.set_many(books_cache)  # 存缓存
                 return wx_reply_xml(from_user, to_user, msg_content)
 
-            if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s':
-                if content.startswith("upgrade") or content.startswith("refund"):
-                    info = content.split(":")
-                    if len(info) == 3:
-                        if upgradeUser.upgrade_user_thread(type=info[0], user_name=info[1], p_name=info[2]):
-                            return wx_reply_xml(from_user, to_user, f"{info[1]}:用户升级中.....")
-                    return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
+            # if from_user == 'o6MX5t3TLA6Un9Mw7mM3nHGdOI-s':
+            #     if content.startswith("upgrade") or content.startswith("refund"):
+            #         info = content.split(":")
+            #         if len(info) == 3:
+            #             if upgradeUser.upgrade_user_thread(type=info[0], user_name=info[1], p_name=info[2]):
+            #                 return wx_reply_xml(from_user, to_user, f"{info[1]}:用户升级中.....")
+            #         return wx_reply_xml(from_user, to_user, "未找到用户，或者信息错误")
 
             # 发送文件
             if re.match("[0-9]", content) and int(content) <= 16:
@@ -113,7 +113,7 @@ def wechat():
                     send_info = book_info.split(":")
                     user_log = Userlog(wx_openid=from_user, book_name=send_info[0],
                                        receive_email=user.kindle_email, user_id=user.id,
-                                       operation_type='download', status=SEND_STATUS.WAITING, ipfs_cid=send_info[1],
+                                       operation_type='download', status=SEND_STATUS.WAITING.value, ipfs_cid=send_info[1],
                                        filesize=send_info[2])
                     db.session.add(user_log)
                     db.session.commit()

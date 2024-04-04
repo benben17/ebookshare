@@ -64,6 +64,6 @@ class Product:
 
 
 if __name__ == "__main__":
-    print(UserRole.get_role())
+    print(SEND_STATUS.WAITING.name)
 
 

@@ -39,7 +39,7 @@ def user_setting():
             db.session.commit()
 
     res = sync_post(request.path, param, user)
-    if res.get("status").lower() == RequestStatus.OK:
+    if res.get("status").lower() == RequestStatus.OK.value:
         user_info_key = cacheKey.get_key('rss_user_info',user['name'])
         cacheUtil.set(user_info_key, res.get("data"), timeout=86400)
     return return_fun(res)
@@ -103,7 +103,7 @@ def my_feed_deliver():
 
     res = sync_post(request.path, param, user)
     # 如果发送成功，设置缓存的过期时间为发送间隔时间，返回成功信息和结果数据
-    if res['status'].lower() == RequestStatus.OK:
+    if res['status'].lower() == RequestStatus.OK.value:
         cacheUtil.set(deliver_key, dt_to_str(datetime.now()), timeout=send_interval)
         return APIResponse.success(msg='Add push task', data=res['data'])
     else:  # 如果发送失败，返回错误信息
@@ -122,7 +122,7 @@ def get_pub_rss():
             if pub_rss:
                 return APIResponse.success(data=pub_rss)
             res = sync_post(request.path, request.get_json(), user)
-            if res.get("status").lower() == RequestStatus.OK:
+            if res.get("status").lower() == RequestStatus.OK.value:
                 cacheUtil.set(cache_pub_rss_key, res.get('data'), timeout=86400)
             return return_fun(res)
     except Exception as e:
@@ -130,7 +130,7 @@ def get_pub_rss():
         if cacheUtil.get(cacheKey.get_key('pub_rss_key')):
             return APIResponse.success(data=cacheUtil.get(cacheKey.get_key('pub_rss_key')))
         res = sync_post(path=request.path, param=request.get_json(), user=None)
-        if res['status'] == RequestStatus.OK:
+        if res['status'] == RequestStatus.OK.value:
             cacheUtil.set(cacheKey.get_key('pub_rss_key'), res['data'], timeout=86400)
         return return_fun(res)
 
@@ -146,7 +146,7 @@ def my_rss():
         return APIResponse.success(data=my_rss_cache)
 
     res = sync_post(api_path, request.get_json(), user)
-    if res.get("status").lower() == RequestStatus.OK:
+    if res.get("status").lower() == RequestStatus.OK.value:
         cacheUtil.set(cache_key, res.get("data"), timeout=86400)
 
     return return_fun(res)
@@ -166,7 +166,7 @@ def my_rss_add():
     if user.feed_count >= feed_num:
         return APIResponse.bad_request(msg=f"已达到最大 {feed_num} 个订阅,不能在订阅,请升级成Plus会员！")
     res = sync_post(api_path, data, user_info)
-    if res['status'].lower() == RequestStatus.OK:
+    if res['status'].lower() == RequestStatus.OK.value:
         user.feed_count += 1
         db.session.add(user)
         db.session.commit()
@@ -186,7 +186,7 @@ def my_rss_del():
     user_info = get_jwt_identity()
     res = sync_post(api_path, request.get_json(), user_info)
 
-    if res['status'].lower() == RequestStatus.OK:
+    if res['status'].lower() == RequestStatus.OK.value:
         user = User.query.get(user_info['id'])
         user.feed_count = user.feed_count - 1 if user.feed_count == 0 else 0
         db.session.add(user)
