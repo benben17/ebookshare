@@ -104,9 +104,9 @@ def wechat():
                 # 每个用户每天最多下载5本书
                 if not user or not user.kindle_email:  # 必须绑定邮箱
                     return wx_reply_xml(from_user, to_user, no_bind_email_msg)
-                usersend = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
+                user_send_count = Userlog.query.filter(Userlog.wx_openid == from_user, Userlog.status == 1,
                                                 Userlog.create_time > get_now()).all()
-                if len(usersend) > 6:
+                if len(user_send_count) > 6:
                     wx_reply_xml(from_user, to_user, "今天已经下载5本书，请明天在进行发送！")
                 book_info = cache.get(f'{from_user}_{content}')
                 if book_info is not None:

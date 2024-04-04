@@ -157,22 +157,24 @@ def search_net_book(title=None, author=None, isbn=None, openid="", ):
 
 def download_net_book(ipfs_cid, filename):
     file_path = config.DOWNLOAD_DIR + filename
+
     # 当文件存在，不下载直接返回文件路径
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         return file_path
 
-    url_list = [
-        'https://dweb.link',
-        'https://cloudflare-ipfs.com',
-        'https://gateway.pinata.cloud',
-        'https://gateway.ipfs.io',
-        'https://ipfs.joaoleitao.org',
-        'https://cf-ipfs.com',
-        'https://hardbin.com'
-    ]
-    for url in url_list:
-        full_url = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
-        logging.info("start download:" + filename + ipfs_cid)
+    # url_list = [
+    #     'https://dweb.link',
+    #     'https://cloudflare-ipfs.com',
+    #     'https://gateway.pinata.cloud',
+    #     'https://gateway.ipfs.io',
+    #     'https://ipfs.joaoleitao.org',
+    #     'https://cf-ipfs.com',
+    #     'https://hardbin.com'
+    # ]
+    file_download_url = 'https://netfile.rss2ebook.com'
+    # for url in url_list:
+    full_url = f"{file_download_url}/ipfs/{ipfs_cid}?filename={filename}"
+    for attempt in range(3):
         try:
             response = requests.get(full_url, stream=True, timeout=30)
             response.raise_for_status()  # Raise exception if response status code is not 200
@@ -183,9 +185,12 @@ def download_net_book(ipfs_cid, filename):
             logging.info(f"{filename}:File downloaded successfully")
             return file_path
         except RequestException as e:
-            logging.error(f"Error downloading from {full_url}: {e}")
-    logging.error(f"{filename} Could not download file from any of the URLs provided")
-    return None
+            logging.error(f"Error downloading from {full_url} on attempt {attempt + 1}: {e}")
+            if attempt == 2:  # If this was the last attempt
+                return None
+            time.sleep(5)
+            # logging.error(f"{filename} Could not download file from any of the URLs provided")
+    # return None
 
 
 def is_file_24_hours(file_path):
@@ -263,12 +268,12 @@ def utc_now():
 
 
 if __name__ == '__main__':
-    print(is_isbn('1-63995-000-1'))
-    print(get_now())
+    # print(is_isbn('1-63995-000-1'))
+    # print(get_now())
     # author = "[]未知12213COMchenjin5.comePUBw.COM 12344"
     # author = str(author).translate(str.maketrans('', '', '[]未知COAY.COMchenjin5.comePUBw.COM'))
     # print(author)
     # print(filesize_format(100022000000000000000000000000))
-    print(search_net_book("javascrip"))
-    # ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
-    # download_net_book(ipfs_id,"平凡的世界.epub")
+    # print(search_net_book("javascrip"))
+    ipfs_id = 'bafykbzacedg535kz7z6imhntm5cuuknmutqmdktwt7di3l64cdi5vdepiohjk'
+    download_net_book(ipfs_id,"平凡的世界.epub")
