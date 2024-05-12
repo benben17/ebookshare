@@ -8,12 +8,12 @@ load_dotenv()
 DEBUG = os.getenv('DEBUG', False)
 APPID = os.getenv("APPID")
 APPSECRET = os.getenv("APPSECRET")
-wechat_token = "kindlebooks"
+wechat_token = os.getenv("WECHATTOKEN")
 
 
 
 # sqllite
-SECRET_KEY = os.getenv('SECRET_KEY', 'ae692a68e23d11ed91a60af4f90de0bb')
+SECRET_KEY = os.getenv('SECRET_KEY')
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'db/ebook.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_ECHO = False
@@ -28,7 +28,7 @@ MAIL_DEBUG = False
 MAIL_PORT = 465
 # MAIL_USE_TLS = True
 MAIL_USE_SSL = True
-MAIL_USERNAME = os.getenv('MAIL_USERNAME','librz.link@gmail.com')
+MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
 MAIL_ATT_MAX_SIZE = 20  # 设置附件大小 单位M
