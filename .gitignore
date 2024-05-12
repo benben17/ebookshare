@@ -39,6 +39,7 @@ target/
 *.db
 ebooks/*
 *.env
+.env
 
 # Folder to direct output to when testing command-line (will be ignored by git)
 /venv/
