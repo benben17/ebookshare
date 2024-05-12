@@ -25,6 +25,7 @@ __pycache__/
 *.venv
 # PyBuilder
 target/
+.github/
 *.bak
 *.dat
 *.data
