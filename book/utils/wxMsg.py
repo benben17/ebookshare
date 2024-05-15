@@ -7,7 +7,7 @@ import config
 def check_signature(token, signature, timestamp, nonce):
     """微信校验签名"""
     temp_arr = [token, timestamp, nonce]
-    if len(temp_arr) > 0:
+    if len(temp_arr) == 3:
         temp_arr.sort()
         temp_str = ''.join(temp_arr)
         hash_str = hashlib.sha1(temp_str.encode('utf-8')).hexdigest()
