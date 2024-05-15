@@ -7,10 +7,13 @@ import config
 def check_signature(token, signature, timestamp, nonce):
     """微信校验签名"""
     temp_arr = [token, timestamp, nonce]
-    temp_arr.sort()
-    temp_str = ''.join(temp_arr)
-    hash_str = hashlib.sha1(temp_str.encode('utf-8')).hexdigest()
-    return hash_str == signature
+    if len(temp_arr) > 0:
+        temp_arr.sort()
+        temp_str = ''.join(temp_arr)
+        hash_str = hashlib.sha1(temp_str.encode('utf-8')).hexdigest()
+        return hash_str == signature
+    else:
+        return ''
 
 
 create_time = str(int(time.time()))
