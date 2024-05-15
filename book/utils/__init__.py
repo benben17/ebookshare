@@ -162,35 +162,35 @@ def download_net_book(ipfs_cid, filename):
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         return file_path
 
-    # url_list = [
-    #     'https://dweb.link',
-    #     'https://cloudflare-ipfs.com',
-    #     'https://gateway.pinata.cloud',
-    #     'https://gateway.ipfs.io',
-    #     'https://ipfs.joaoleitao.org',
-    #     'https://cf-ipfs.com',
-    #     'https://hardbin.com'
-    # ]
-    file_download_url = 'https://netfile.rss2ebook.com'
-    # for url in url_list:
-    full_url = f"{file_download_url}/ipfs/{ipfs_cid}?filename={filename}"
-    for attempt in range(3):
-        try:
-            response = requests.get(full_url, stream=True, timeout=30)
-            response.raise_for_status()  # Raise exception if response status code is not 200
+    url_list = [
+        'https://dweb.link',
+        'https://cloudflare-ipfs.com',
+        'https://gateway.pinata.cloud',
+        'https://gateway.ipfs.io',
+        'https://ipfs.joaoleitao.org',
+        'https://cf-ipfs.com',
+        'https://hardbin.com'
+    ]
+    # file_download_url = 'https://netfile.rss2ebook.com'
+    for url in url_list:
+        full_url = f"{url}/ipfs/{ipfs_cid}?filename={filename}"
+        for attempt in range(3):
+            try:
+                response = requests.get(full_url, stream=True, timeout=30)
+                response.raise_for_status()  # Raise exception if response status code is not 200
 
-            with open(file_path, 'wb') as f:
-                for data in response.iter_content(chunk_size=2048):
-                    f.write(data)
-            logging.info(f"{filename}:File downloaded successfully")
-            return file_path
-        except RequestException as e:
-            logging.error(f"Error downloading from {full_url} on attempt {attempt + 1}: {e}")
-            if attempt == 2:  # If this was the last attempt
-                return None
-            time.sleep(5)
-            # logging.error(f"{filename} Could not download file from any of the URLs provided")
-    # return None
+                with open(file_path, 'wb') as f:
+                    for data in response.iter_content(chunk_size=2048):
+                        f.write(data)
+                logging.info(f"{filename}:File downloaded successfully")
+                return file_path
+            except RequestException as e:
+                logging.error(f"Error downloading from {full_url} on attempt {attempt + 1}: {e}")
+                if attempt == 2:  # If this was the last attempt
+                    return None
+                time.sleep(5)
+                # logging.error(f"{filename} Could not download file from any of the URLs provided")
+        # return None
 
 
 def is_file_24_hours(file_path):
